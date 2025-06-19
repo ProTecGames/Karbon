@@ -1,0 +1,4 @@
+pywebview
+tk
+meta-ai-api
+pyinstaller
