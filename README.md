@@ -111,7 +111,4 @@ GNU General Public License v3.0. See `LICENSE` file for details.
 
 ---
 
-## 🙏 Acknowledgments
 
-* [Tkinter](https://docs.python.org/3/library/tkinter.html)
-* [PyInstaller](https://www.pyinstaller.org/)
