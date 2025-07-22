@@ -11,6 +11,9 @@ class PromptView(tk.Frame):
         self.on_generate = on_generate
         self.is_generating = False
         self.setup_ui()
+        self.bind_all("<Control-g>", lambda event: self.handle_generate())
+        self.bind_all("<Control-e>", lambda event: self.export_project())
+        self.bind_all("<Control-Shift-c>", lambda event: self.clear_input())
 
     def setup_ui(self):
         # Hero section with animated gradient background
