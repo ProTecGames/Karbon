@@ -4,37 +4,112 @@ import threading
 from ui_items.prompt_view import PromptView
 from ui_items.editor_view import EditorView
 
+EXAMPLES = {
+    "Login Page": "Create a login page using HTML and Tailwind CSS",
+    "Personal Portfolio Page": "Build a personal portfolio page with sections for About, Projects, and Contact",
+    "Landing Page": "Design a landing page for a mobile app with a pricing section and testimonials",
+    "Blog Homepage": "Create a dark-themed blog homepage with a navbar and featured articles",
+    "Form": "Generate a simple form to collect name, email, and message with a submit button"
+}
+
+
 
 class KarbonUI:
+
+    def insert_example_prompt(self, choice: str):
+        print(f"Inserting: {choice}")
+        """Inserts selected example prompt into the prompt input field."""
+        example_text = EXAMPLES.get(choice.strip(), "")
+    
+        if example_text:
+            try:
+                self.prompt_view.text_input.configure(state="normal")  # Ensure editable
+                self.prompt_view.text_input.delete("1.0", "end")       # Clear previous
+                self.prompt_view.text_input.insert("1.0", example_text)  # Insert new
+                self.prompt_view.text_input.see("1.0")                 # Scroll to top
+                self.prompt_view.text_input.update_idletasks()       # Force update
+                self.prompt_view.placeholder_active = False
+                self.prompt_view.text_input.configure(fg='#f0f6fc')
+                current_text = self.prompt_view.text_input.get("1.0", "end-1c")
+                print("📦 Current Text in Box:", repr(current_text))
+
+                print("Prompt inserted successfully.")
+            except Exception as e:
+                print("❌ Error inserting text:", e)
+
+
     def __init__(self, root):
         self.root = root
         self.setup_window()
         self.setup_styles()
         self.code = ""
-        
-        # Create main container with gradient-like effect
+
+    # Main container
         self.main_container = tk.Frame(root, bg='#0d1117')
         self.main_container.pack(fill="both", expand=True)
-        
-        # Add animated title bar
+
+    # Animated title
         self.create_title_bar()
-        
-        # Content area
+
+    # Content area
         self.content_frame = tk.Frame(self.main_container, bg='#0d1117')
         self.content_frame.pack(fill="both", expand=True, padx=20, pady=(0, 20))
-        
-        # Initialize views
-        self.prompt_view = PromptView(self.content_frame, on_generate=self.handle_prompt_generated)
-        self.editor_view = EditorView(self.content_frame, get_code_callback=self.get_code, set_code_callback=self.set_code)
-        
-        # Show prompt view initially
+
+# === Step 3: Add Example Prompt Dropdown ===
+        self.example_var = tk.StringVar()
+        self.example_var.set("🔽 Choose Example Prompt")
+        PADDED_EXAMPLES = {
+            key.ljust(30): prompt for key, prompt in EXAMPLES.items()
+}
+        example_menu = tk.OptionMenu(
+        self.content_frame,
+        self.example_var,
+        *PADDED_EXAMPLES.keys(),
+        command=lambda key: self.insert_example_prompt(key.strip())
+        )
+
+# ✅ Style the visible OptionMenu button
+        example_menu.config(
+    font=("Segoe UI", 10),
+    bg="#21262d",
+    fg="white",
+    relief="flat",
+    highlightthickness=0,
+    width=24  # ✅ Set visible width here
+)
+
+# ✅ Style the dropdown list (menu part)
+        dropdown_menu = example_menu["menu"]
+        dropdown_menu.config(
+        font=("Segoe UI", 10),
+        bg="#21262d",
+        fg="white",
+        activebackground="#2ea043",
+        activeforeground="white",
+        tearoff=0
+        )
+        example_menu.pack(pady=(10, 0))
+
+
+
+    # ✅ Only one prompt view instance
+        self.prompt_view = PromptView(
+        self.content_frame,
+        on_generate=self.handle_prompt_generated
+    )
         self.prompt_view.pack(fill="both", expand=True)
-        
-        # Add status bar
+
+    # Editor view, initialized but not packed yet
+        self.editor_view = EditorView(
+        self.content_frame,
+        get_code_callback=self.get_code,
+        set_code_callback=self.set_code
+        )
+
+    # Add status bar and animation
         self.create_status_bar()
-        
-        # Start title animation
         self.animate_title()
+
 
     def setup_window(self):
         """Configure the main window with modern styling"""

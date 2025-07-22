@@ -279,21 +279,26 @@ class PromptView(tk.Frame):
 
     def setup_placeholder(self):
         """Setup placeholder functionality"""
+        self.placeholder_active = True
         self.text_input.insert("1.0", self.placeholder_text)
         self.text_input.configure(fg='#6e7681')
-        
+
         def on_focus_in(event):
-            if self.text_input.get("1.0", "end-1c") == self.placeholder_text:
+            if self.placeholder_active:
                 self.text_input.delete("1.0", "end")
                 self.text_input.configure(fg='#f0f6fc')
-        
+                self.placeholder_active = False
+
         def on_focus_out(event):
+            content = self.text_input.get("1.0", "end-1c").strip()
             if not self.text_input.get("1.0", "end-1c").strip():
                 self.text_input.insert("1.0", self.placeholder_text)
                 self.text_input.configure(fg='#6e7681')
-        
+                self.placeholder_active = True
+
         self.text_input.bind('<FocusIn>', on_focus_in)
         self.text_input.bind('<FocusOut>', on_focus_out)
+
 
     def typewriter_effect(self):
         """Animate subtitle with typewriter effect"""
@@ -331,10 +336,11 @@ class PromptView(tk.Frame):
     def set_example(self, example):
         """Set example text in input"""
         self.text_input.delete("1.0", "end")
-        # Remove emoji and clean up text
-        clean_example = " ".join(example.split()[1:])
+        clean_example = " ".join(example.split()[1:])  # Remove emoji
         self.text_input.insert("1.0", clean_example)
         self.text_input.configure(fg='#f0f6fc')
+        self.placeholder_active = False  # Move AFTER insert to prevent overwrite
+
 
     def clear_input(self):
         """Clear input field"""
