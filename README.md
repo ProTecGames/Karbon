@@ -102,29 +102,29 @@ Here are some example prompts you can try in Karbon, along with typical outputs:
 ### 🔹 Prompt: “Create a login page using HTML and Tailwind CSS”
 **Output:** Generates a login page which takes user's Username and Password as input for Login.
 
-![Login Page](assets/login page1.jpg)
+![Login Page](assets/login_page1.jpg)
 
 ---
 
 ### 🔹 Prompt: “Build a personal portfolio page with sections for About, Projects, and Contact”
 **Output:** Generates HTML/CSS with an About Me, My projects and Get in Touch.
 
-![Portfolio](assets/personal port 2.jpg)
+![Portfolio](assets/personal_port_2.jpg)
 
 ---
 
 ### 🔹 Prompt: “Design a landing page for a mobile app with a pricing section and testimonials”
 **Output:** Renders a landing page layout with Pricing Plans, and What Our Users Say.
 
-![Landing Page 1](assets/landing page mobile 3(i).jpg)
-![Landing Page 2](assets/landing page mobile 3(ii).jpg)
+![Landing Page 1](assets/landing_page_mobile_3(i).jpg)
+![Landing Page 2](assets/landing_page_mobile_3(ii).jpg)
 
 ---
 
 ### 🔹 Prompt: “Create a dark-themed blog homepage with a navbar and featured articles”
 **Output:** Creates a dark-themed homepage with navbar having Home, About, Contact and features articles with images.
 
-![Blog](assets/dark theme blog 4.jpg)
+![Blog](assets/dark_theme_blog_4.jpg)
 
 ---
 
@@ -132,7 +132,7 @@ Here are some example prompts you can try in Karbon, along with typical outputs:
 ### 🔹 Prompt: “Generate a simple form to collect name, email, and message with a submit button”
 **Output:** Creates a form with labeled input fields and a submit button, styled using CSS.
 
-![Form](assets/simple form 5.jpg)
+![Form](assets/simple_form_5.jpg)
 
 ---
 
