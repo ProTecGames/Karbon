@@ -15,3 +15,5 @@ Thumbs.db
 build/
 dist/
 *.egg-info/
+
+venv/
