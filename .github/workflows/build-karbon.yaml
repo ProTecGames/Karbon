@@ -27,7 +27,8 @@ jobs:
           - os: macos-latest
             icon: icon.icns
             extension: .app
-            pyinstaller-args: --onefile --noconsole --name Karbon --icon=icon.icns
+            pyinstaller-args: pyinstaller ui.py --onefile --noconsole --name Karbon
+
 
     runs-on: ${{ matrix.os }}
 
