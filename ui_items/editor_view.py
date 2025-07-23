@@ -125,7 +125,7 @@ class EditorView(tk.Frame):
         self.update_btn.pack(side="left")
 
         #Undo button
-        self.update_btn = tk.Button(
+        self.undo_btn = tk.Button(
             button_container,
             text="⏪ Undo",
             font=("Segoe UI", 11, "bold"),
@@ -138,12 +138,12 @@ class EditorView(tk.Frame):
             padx=25,
             pady=10,
             cursor='hand2',
-            command=self.handle_update
+            command=self.handle_undo
         )
-        self.update_btn.pack(side="left", padx=(10, 0))
+        self.undo_btn.pack(side="left", padx=(10, 0))
 
         #Redo button
-        self.update_btn = tk.Button(
+        self.redo_btn = tk.Button(
             button_container,
             text="Redo ⏩",
             font=("Segoe UI", 11, "bold"),
@@ -156,9 +156,9 @@ class EditorView(tk.Frame):
             padx=25,
             pady=10,
             cursor='hand2',
-            command=self.handle_update
+            command=self.handle_redo
         )
-        self.update_btn.pack(side="left", padx=(10, 0))
+        self.redo_btn.pack(side="left", padx=(10, 0))
         
         # Clear button
         clear_btn = tk.Button(
@@ -216,6 +216,9 @@ class EditorView(tk.Frame):
                 command=command
             )
             btn.pack(fill="x", padx=15, pady=2)
+    
+    def insert_text(self, words):
+        self.update_text.insert("1.0", words)
 
     def create_main_content(self):
         """Create the main content area"""
@@ -437,8 +440,52 @@ class EditorView(tk.Frame):
         if not prompt or prompt == self.update_placeholder:
             self.show_error("Please describe what changes you'd like to make! 🔄")
             return
+        else:
+            prompt_history.add(prompt)
         
         self.start_update(prompt)
+
+            # bg='#1f6feb',
+            # fg='white',
+            # activebackground='#2f81f7',
+            # activeforeground='white',
+
+    def handle_undo(self):
+        if (prompt_history.undo() == 0):
+            self.undo_btn.config(
+            bg="#1f6feb",
+            # fg="#88b8ff",
+            state="disabled",
+            disabledforeground="#88b8ff"
+        )
+        self.redo_btn.config(
+            bg="#1f6feb",
+            fg='white',
+            activebackground='#2f81f7',
+            activeforeground='white',
+            state="active"
+        )
+        self.update_text.delete("1.0", "end")
+        self.update_text.insert("1.0", prompt_history.get_current_prompt())
+    
+    def handle_redo(self):
+        if (prompt_history.redo() == prompt_history.number_of_prompts-1):
+            self.redo_btn.config(
+                bg="#1f6feb",
+                # fg="#88b8ff",
+                state="disabled",
+                disabledforeground="#88b8ff"
+            )
+        self.undo_btn.config(
+            bg="#1f6feb",
+            fg='white',
+            activebackground='#2f81f7',
+            activeforeground='white',
+            state="active"
+        )
+        self.update_text.delete("1.0", "end")
+        self.update_text.insert("1.0", prompt_history.get_current_prompt())
+
 
     def start_update(self, prompt):
         """Start update process with visual feedback"""

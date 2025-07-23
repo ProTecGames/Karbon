@@ -387,6 +387,8 @@ class PromptView(tk.Frame):
         if not prompt or prompt == self.placeholder_text:
             self.show_error("Please describe your website idea first! 💡")
             return
+        # else:
+            # prompt_history.add
         
         if len(prompt) < 10:
             self.show_error("Please provide more details about your website. The more specific you are, the better the result! 🎯")
