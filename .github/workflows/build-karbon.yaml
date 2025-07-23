@@ -12,7 +12,16 @@ permissions:
 
 jobs:
   build:
-    runs-on: windows-latest
+    strategy:
+      matrix:
+        os: [windows-latest, ubuntu-latest, macos-latest]
+        extension: [".exe", "", ""]
+        pyinstaller-args: [
+          "--onefile --noconsole --name Karbon --icon=icon.ico",
+          "--onefile --noconsole --name Karbon",
+          "--onefile --windowed --name Karbon"
+        ]
+    runs-on: ${{ matrix.os }}
 
     steps:
       - name: Checkout code
@@ -31,16 +40,16 @@ jobs:
 
       - name: Build executable with PyInstaller
         run: |
-          pyinstaller ui.py --onefile --noconsole --name Karbon --icon=icon.ico
+          pyinstaller ui.py ${{ matrix.pyinstaller-args }}
 
       - name: Rename binary for upload
         shell: bash
         run: |
           mkdir -p upload
-          if [[ "${{ runner.os }}" == "macOS" ]]; then
+          if [[ "${{ matrix.os }}" == "macos-latest" ]]; then
             cp -r "dist/Karbon.app" "upload/Karbon-${{ runner.os }}.app"
           else
-            cp "dist/Karbon.exe" "upload/Karbon-${{ runner.os }}.exe"
+            cp "dist/Karbon${{ matrix.extension }}" "upload/Karbon-${{ runner.os }}${{ matrix.extension }}"
           fi
 
       - name: Get short commit hash
