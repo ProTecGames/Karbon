@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - main
+      - fix/cross-platform-upload
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -22,7 +24,8 @@ jobs:
             pyinstaller-args: --onefile --noconsole --name Karbon
           - os: macos-latest
             extension: .app
-            pyinstaller-args: --onefile --noconsole --name Karbon
+            pyinstaller-args: --onedir --noconsole --name Karbon
+      fail-fast: false
 
     runs-on: ${{ matrix.os }}
 
@@ -31,26 +34,42 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+          cache: 'pip'
 
       - name: Install dependencies
+        shell: bash
         run: |
-          python -m ensurepip --upgrade
-          python -m pip install --upgrade pip setuptools wheel
-          python -m pip install --no-cache-dir pyinstaller
-          python -m pip install -r requirements.txt || true
+          unset PYTHONPATH PYTHONHOME
+          python3 -m pip install --upgrade pip setuptools wheel
+          python3 -m pip install --no-cache-dir --force-reinstall pyinstaller
+          python3 -m pip install -r requirements.txt || true
 
       - name: Debug PyInstaller installation
+        shell: bash
         run: |
-          python --version
-          pip --version
-          pip list | grep pyinstaller || echo "PyInstaller not listed in pip"
-          python -m pyinstaller --version || echo "PyInstaller module not found"
+          echo "Python path: $(which python3)"
+          python3 --version
+          echo "Pip path: $(which pip)"
+          python3 -m pip --version
+          python3 -m pip list | grep pyinstaller || echo "PyInstaller not listed in pip"
+          echo "Python sys.path:"
+          python3 -c "import sys; print('\n'.join(sys.path))"
+          echo "Site-packages contents:"
+          ls -l $(python3 -c 'import site; print(site.getsitepackages()[0])')
+          echo "Checking PyInstaller module files:"
+          ls -l $(python3 -c 'import site; print(site.getsitepackages()[0])')/PyInstaller || true
+          echo "Checking PyInstaller import:"
+          python3 -c "import pyinstaller; print(pyinstaller.__version__)" || { echo "Failed to import pyinstaller module"; exit 1; }
+          echo "Checking PyInstaller module:"
+          python3 -m pyinstaller --version || { echo "PyInstaller module not found"; exit 1; }
 
       - name: Build executable with PyInstaller
-        run: python -m pyinstaller ui.py ${{ matrix.pyinstaller-args }}
+        shell: bash
+        run: |
+          python3 -m pyinstaller ui.py ${{ matrix.pyinstaller-args }}
 
       - name: Rename binary for upload
         shell: bash
