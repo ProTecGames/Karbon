@@ -17,7 +17,7 @@ class ContributorsPage(tk.Frame):
         self.back_callback = back_callback
         self.cache_file = "contributors_cache.json"
         self.cache_duration = 3600  # Cache for 1 hour
-        self.owner = "Rachel602144"
+        self.owner = "ProTecGames"
         self.repo = "Karbon"
         self.contributors = []
 
