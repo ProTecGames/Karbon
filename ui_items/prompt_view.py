@@ -4,7 +4,7 @@ import threading
 from ai_engine import generate_code_from_prompt
 from preview import update_preview
 from ai_engine import ai_status
-
+from ai_engine import optimize_prompt
 MAX_PROMPT_LENGTH = 256
 
 
@@ -13,10 +13,12 @@ class PromptView(tk.Frame):
         super().__init__(master, bg='#0d1117')
         self.on_generate = on_generate
         self.is_generating = False
+        self.enhance_ui_var = tk.BooleanVar(value=True)  # default is checked
         self.setup_ui()
         self.bind_all("<Control-g>", lambda event: self.handle_generate())
         self.bind_all("<Control-e>", lambda event: self.export_project())
         self.bind_all("<Control-Shift-c>", lambda event: self.clear_input())
+        
 
     def setup_ui(self):
         # Hero section with animated gradient background
@@ -108,6 +110,17 @@ class PromptView(tk.Frame):
             wrap=tk.WORD
         )
         self.text_input.pack(fill="both", expand=True, pady=(10, 15))
+        self.enhance_checkbox = tk.Checkbutton(
+            input_frame,
+            text="Enhance prompt",
+            variable=self.enhance_ui_var,
+            bg="#1e1e1e",
+            fg="#ffffff",
+            selectcolor="#1e1e1e",
+            activebackground="#1e1e1e",
+            activeforeground="#00ffcc"
+    )
+        self.enhance_checkbox.pack(anchor="w", pady=(5, 0))
 
         # Character count label
         self.char_count_label = tk.Label(
@@ -128,7 +141,7 @@ class PromptView(tk.Frame):
         # Placeholder functionality
         self.placeholder_text = "Describe your dream website... \n\nExample: Create a modern portfolio website with dark theme, smooth animations, and minimilist Design"
         self.setup_placeholder()
-        
+
         # Button container
         button_frame = tk.Frame(input_card, bg='#161b22')
         button_frame.pack(fill="x", padx=25, pady=(0, 25))
@@ -432,7 +445,13 @@ class PromptView(tk.Frame):
         # Start generation in background thread
         def generate_in_background():
             try:
-                code = generate_code_from_prompt(prompt)
+                final_prompt = prompt
+                
+                if self.enhance_ui_var.get():
+            
+                    final_prompt = optimize_prompt(prompt)
+                    
+                code = generate_code_from_prompt(final_prompt)
                 update_preview(code)
                 
                 # Call completion on main thread
