@@ -40,12 +40,18 @@ jobs:
           cache: 'pip'
 
       - name: Install dependencies
-        shell: bash
-        run: |
-          unset PYTHONPATH PYTHONHOME
-          python3 -m pip install --upgrade pip setuptools wheel
-          python3 -m pip install --no-cache-dir --force-reinstall pyinstaller
-          python3 -m pip install -r requirements.txt || true
+          shell: bash
+          run: |
+            unset PYTHONPATH PYTHONHOME
+            export PATH="/Users/runner/hostedtoolcache/Python/3.11.9/arm64/bin:$PATH"  # Ensure correct Python on macOS
+            python3 -m pip install --upgrade pip
+            python3 -m pip install --no-cache-dir --force-reinstall "setuptools<70.0.0" pyinstaller pyinstaller-hooks-contrib
+            if [[ "${{ matrix.os }}" != "windows-latest" ]]; then
+              python3 -m pip install --no-cache-dir --no-deps pywebview Pillow || true
+            else
+              python3 -m pip install -r requirements.txt || true
+            fi
+
 
       - name: Debug PyInstaller installation
         shell: bash
