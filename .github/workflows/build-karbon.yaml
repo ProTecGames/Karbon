@@ -48,8 +48,13 @@ jobs:
       - name: Rename binary for upload
         shell: bash
         run: |
-          mkdir -p upload
-          cp dist/Karbon${{ matrix.extension }} upload/Karbon-${{ runner.os }}${{ matrix.extension }}
+            mkdir -p upload
+            if [[ "${{ matrix.os }}" == "macos-latest" ]]; then
+              cp -r "dist/Karbon.app" "upload/Karbon-${{ runner.os }}.app"
+            else
+              cp "dist/Karbon${{ matrix.extension }}" "upload/Karbon-${{ runner.os }}${{ matrix.extension }}"
+            fi
+
 
       - name: Get short commit hash
         id: vars
