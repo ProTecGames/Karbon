@@ -47,7 +47,6 @@ jobs:
           - os: macos-latest
 
             extension: .app
-
             pyinstaller-args: "--onefile --windowed --name Karbon"
 
     steps:
