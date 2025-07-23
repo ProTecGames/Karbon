@@ -3,6 +3,7 @@ from tkinter import ttk
 import threading
 from ui_items.prompt_view import PromptView
 from ui_items.editor_view import EditorView
+from ai_engine import ai_status
 
 EXAMPLES = {
     "Login Page": "Create a login page using HTML and Tailwind CSS",
@@ -110,6 +111,8 @@ class KarbonUI:
         self.create_status_bar()
         self.animate_title()
 
+        self.update_ai_status_indicator()
+
 
     def setup_window(self):
         """Configure the main window with modern styling"""
@@ -210,6 +213,16 @@ class KarbonUI:
         )
         version_label.pack(side="right", padx=(0, 10), pady=10)
 
+        self.ai_status_label = tk.Label(
+            self.title_frame,
+            text = "AI: Unknown",
+            font = ("Segoe UI", 10, "bold"),
+            bg = '#161b22',
+            fg = '#d29922',
+            anchor="e"
+        )
+        self.ai_status_label.pack(side="right", padx=(0, 20), pady=5)
+
     def create_status_bar(self):
         """Create a modern status bar"""
         self.status_frame = tk.Frame(self.main_container, bg='#161b22', height=30)
@@ -235,6 +248,23 @@ class KarbonUI:
             fg='#58a6ff'
         )
         self.progress_label.pack(side="right", padx=20, pady=5)
+
+        
+
+    def update_ai_status_indicator(self):
+        state = ai_status.get("state", "unknown")
+        message = ai_status.get("message", "")
+        color_map = {
+            "online": "#3fb950",
+            "offline": "#f85149",
+            "connecting": "#58a6ff",
+            "error": '#d29922',
+            "unknown": "#6e7681"
+        }
+        color = color_map.get(state, "#6e7681")
+        self.ai_status_label.config(text = f"AI: {state.capitalize()}", fg=color)
+        # poll every 2 seconds
+        self.root.after(2000, self.update_ai_status_indicator)
 
     def animate_title(self):
         """Animate the title with a subtle glow effect"""
