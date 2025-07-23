@@ -39,17 +39,15 @@ jobs:
         run: |
           python -m ensurepip --upgrade
           python -m pip install --upgrade pip setuptools wheel
-          python -m pip install pyinstaller
+          python -m pip install --no-cache-dir pyinstaller
           python -m pip install -r requirements.txt || true
 
-      - name: Add PyInstaller path to PATH
-        if: runner.os != 'Windows'
-        run: echo "$HOME/.local/bin" >> $GITHUB_PATH
-
-      - name: Debug PyInstaller availability
+      - name: Debug PyInstaller installation
         run: |
-          which pyinstaller || echo "pyinstaller not found in PATH"
-          python -m pyinstaller --version || echo "pyinstaller module not found"
+          python --version
+          pip --version
+          pip list | grep pyinstaller || echo "PyInstaller not listed in pip"
+          python -m pyinstaller --version || echo "PyInstaller module not found"
 
       - name: Build executable with PyInstaller
         run: python -m pyinstaller ui.py ${{ matrix.pyinstaller-args }}
