@@ -3,6 +3,7 @@ from tkinter import ttk, messagebox
 import threading
 from ai_engine import generate_code_from_prompt
 from preview import update_preview
+from ai_engine import ai_status
 
 MAX_PROMPT_LENGTH = 256
 
@@ -473,6 +474,17 @@ class PromptView(tk.Frame):
             bg='#238636'
         )
         
+        status = ai_status.get("state", "unknown")
+        message = ai_status.get("message", "")
+        if status != "online":
+            if status == "offline":
+                self.show_error("AI service is currently unavailable. Please check your internet connection or try again later.")
+            elif status == "error":
+                self.show_error(f"AI service error: {message}")
+            else:
+                self.show_error(f"Website could not be generated due to an AI service issue")
+            return
+        
         # Show success notification
         self.show_success("Website generated successfully! 🎉")
         
@@ -489,9 +501,15 @@ class PromptView(tk.Frame):
             state='normal',
             bg='#238636'
         )
-        
-        # Show error
-        self.show_error(f"Oops! Something went wrong: {error_msg}")
+
+        status = ai_status.get("state", "unknown")
+        message = ai_status.get("message", "")
+        if status == "offline":
+            self.show_error("AI service is currently unavailable. Please check you internet connection or try again later.")
+        elif status == "error":
+            self.show_error(f"AI service error: {message}")
+        else:
+            self.show_error(f"Oops! Something went wrong: {error_msg}")
 
     def show_error(self, message):
         """Show enhanced error dialog"""
