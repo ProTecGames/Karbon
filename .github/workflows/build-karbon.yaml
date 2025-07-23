@@ -25,9 +25,9 @@ jobs:
             extension: ""
             pyinstaller-args: --onefile --noconsole --name Karbon
           - os: macos-latest
-            icon: icon.icns
+            icon: ""
             extension: .app
-            pyinstaller-args: python -m pyinstaller ui.py --onefile --noconsole --name Karbon
+            pyinstaller-args: --onefile --noconsole --name Karbon
 
 
 
