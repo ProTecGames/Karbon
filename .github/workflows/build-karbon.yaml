@@ -4,13 +4,27 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:  # Manual trigger
 
 permissions:
   contents: write
 
 jobs:
   build:
-    runs-on: windows-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [windows-latest, ubuntu-latest, macos-latest]
+        include:
+          - os: windows-latest
+            extension: .exe
+            pyinstaller-args: --onefile --noconsole --name Karbon --icon=icon.ico
+          - os: ubuntu-latest
+            extension: ''
+            pyinstaller-args: --onefile --name Karbon
+          - os: macos-latest
+            extension: .app
+            pyinstaller-args: --onefile --windowed --name Karbon
 
     steps:
       - name: Checkout code
@@ -29,7 +43,13 @@ jobs:
 
       - name: Build executable with PyInstaller
         run: |
-          pyinstaller ui.py --onefile --noconsole --name Karbon --icon=icon.ico
+          pyinstaller ui.py ${{ matrix.pyinstaller-args }}
+
+      - name: Rename binary for upload
+        shell: bash
+        run: |
+          mkdir -p upload
+          cp dist/Karbon${{ matrix.extension }} upload/Karbon-${{ runner.os }}${{ matrix.extension }}
 
       - name: Get short commit hash
         id: vars
@@ -45,6 +65,6 @@ jobs:
           name: "Karbon Build ${{ env.SHORT_SHA }}"
           draft: false
           prerelease: false
-          files: dist/Karbon.exe
+          files: upload/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
