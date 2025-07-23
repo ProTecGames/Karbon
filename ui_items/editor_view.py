@@ -7,6 +7,7 @@ import os
 from ai_engine import generate_code_from_prompt
 from exporter import export_code
 from preview import update_preview
+import prompt_history
 
 
 class EditorView(tk.Frame):
@@ -122,6 +123,42 @@ class EditorView(tk.Frame):
             command=self.handle_update
         )
         self.update_btn.pack(side="left")
+
+        #Undo button
+        self.update_btn = tk.Button(
+            button_container,
+            text="⏪ Undo",
+            font=("Segoe UI", 11, "bold"),
+            bg='#1f6feb',
+            fg='white',
+            activebackground='#2f81f7',
+            activeforeground='white',
+            relief='flat',
+            bd=0,
+            padx=25,
+            pady=10,
+            cursor='hand2',
+            command=self.handle_update
+        )
+        self.update_btn.pack(side="left", padx=(10, 0))
+
+        #Redo button
+        self.update_btn = tk.Button(
+            button_container,
+            text="Redo ⏩",
+            font=("Segoe UI", 11, "bold"),
+            bg='#1f6feb',
+            fg='white',
+            activebackground='#2f81f7',
+            activeforeground='white',
+            relief='flat',
+            bd=0,
+            padx=25,
+            pady=10,
+            cursor='hand2',
+            command=self.handle_update
+        )
+        self.update_btn.pack(side="left", padx=(10, 0))
         
         # Clear button
         clear_btn = tk.Button(
