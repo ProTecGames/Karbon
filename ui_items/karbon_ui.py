@@ -108,9 +108,11 @@ class KarbonUI:
 
         # Prompt view
         self.prompt_view = PromptView(
+
             self.content_frame,
             on_generate=self.handle_prompt_generated
         )
+
         self.prompt_view.pack(fill="both", expand=True)
 
         # Editor view, initialized but not packed yet
