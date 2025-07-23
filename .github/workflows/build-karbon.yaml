@@ -40,9 +40,15 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt || true
           pip install pyinstaller
+        # ⬇️ Add PyInstaller path to environment manually
+      - name: Add PyInstaller path to PATH
+        if: runner.os != 'Windows'
+        run: echo "$HOME/.local/bin" >> $GITHUB_PATH
 
-      - name: Show installed packages (debug)
-        run: pip list
+      - name: Debug PyInstaller availability
+        run: |
+          which pyinstaller || echo "pyinstaller not found"
+          python -m pyinstaller --version || echo "pyinstaller module not found"
 
       - name: Build executable with PyInstaller
         run: python -m pyinstaller ui.py ${{ matrix.pyinstaller-args }}
