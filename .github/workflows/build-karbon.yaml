@@ -4,8 +4,6 @@ on:
   push:
     branches:
       - main
-      - feature/cross-platform-build
-  workflow_dispatch:  # Manual trigger
 
 permissions:
   contents: write
@@ -29,8 +27,6 @@ jobs:
             extension: .app
             pyinstaller-args: --onefile --noconsole --name Karbon
 
-
-
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -50,7 +46,7 @@ jobs:
 
       - name: Build executable with PyInstaller
         run: |
-          pyinstaller ui.py ${{ matrix.pyinstaller-args }}
+          python -m pyinstaller ui.py ${{ matrix.pyinstaller-args }}
 
       - name: Rename binary for upload
         if: matrix.os != 'ubuntu-latest'
