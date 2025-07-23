@@ -1,11 +1,7 @@
 name: Build Karbon and Release
 
 on:
-  push:
-    branches:
-      - main
-      - fix/cross-platform-upload
-  workflow_dispatch:  # Manual trigger
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -56,7 +52,7 @@ jobs:
             cp "dist/Karbon${{ matrix.extension }}" "upload/Karbon-${{ runner.os }}${{ matrix.extension }}"
           fi
 
-      - name: (Optional) Zip output for Linux/macOS
+      - name: Zip output for Linux/macOS
         if: matrix.os != 'windows-latest'
         run: |
           cd upload
@@ -84,3 +80,4 @@ jobs:
         with:
           name: karbon-${{ runner.os }}
           path: upload/*
+          
