@@ -7,6 +7,8 @@ on:
     branches:
 
       - main
+      - fix/cross-platform-upload
+  workflow_dispatch:  # Manual trigger
 
       - fix/cross-platform-upload
 
@@ -45,7 +47,6 @@ jobs:
           - os: macos-latest
 
             extension: .app
-
             pyinstaller-args: "--onefile --windowed --name Karbon"
 
     steps:
