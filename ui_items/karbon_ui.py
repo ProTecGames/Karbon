@@ -4,6 +4,7 @@ import threading
 from ui_items.prompt_view import PromptView
 from ui_items.editor_view import EditorView
 from ai_engine import ai_status
+from contributors_page import ContributorsPage
 
 EXAMPLES = {
     "Login Page": "Create a login page using HTML and Tailwind CSS",
@@ -13,10 +14,7 @@ EXAMPLES = {
     "Form": "Generate a simple form to collect name, email, and message with a submit button"
 }
 
-
-
 class KarbonUI:
-
     def insert_example_prompt(self, choice: str):
         print(f"Inserting: {choice}")
         """Inserts selected example prompt into the prompt input field."""
@@ -33,11 +31,9 @@ class KarbonUI:
                 self.prompt_view.text_input.configure(fg='#f0f6fc')
                 current_text = self.prompt_view.text_input.get("1.0", "end-1c")
                 print("📦 Current Text in Box:", repr(current_text))
-
                 print("Prompt inserted successfully.")
             except Exception as e:
                 print("❌ Error inserting text:", e)
-
 
     def __init__(self, root):
         self.root = root
@@ -45,74 +41,89 @@ class KarbonUI:
         self.setup_styles()
         self.code = ""
 
-    # Main container
+        # Create menu bar
+        self.menubar = tk.Menu(self.root)
+        self.root.config(menu=self.menubar)
+
+        # File menu
+        self.file_menu = tk.Menu(self.menubar, tearoff=0)
+        self.menubar.add_cascade(label="File", menu=self.file_menu)
+        self.file_menu.add_command(label="Export Code", command=self.export_code)
+        self.file_menu.add_separator()
+        self.file_menu.add_command(label="Exit", command=self.root.destroy)
+
+        # Main container
         self.main_container = tk.Frame(root, bg='#0d1117')
         self.main_container.pack(fill="both", expand=True)
 
-    # Animated title
+        # Animated title
         self.create_title_bar()
 
-    # Content area
+        # Content area
         self.content_frame = tk.Frame(self.main_container, bg='#0d1117')
         self.content_frame.pack(fill="both", expand=True, padx=20, pady=(0, 20))
 
-# === Step 3: Add Example Prompt Dropdown ===
+        # Example Prompt Dropdown
         self.example_var = tk.StringVar()
         self.example_var.set("🔽 Choose Example Prompt")
-        PADDED_EXAMPLES = {
-            key.ljust(30): prompt for key, prompt in EXAMPLES.items()
-}
-        example_menu = tk.OptionMenu(
-        self.content_frame,
-        self.example_var,
-        *PADDED_EXAMPLES.keys(),
-        command=lambda key: self.insert_example_prompt(key.strip())
+        PADDED_EXAMPLES = {key.ljust(30): prompt for key, prompt in EXAMPLES.items()}
+        self.example_menu = tk.OptionMenu(
+            self.content_frame,
+            self.example_var,
+            *PADDED_EXAMPLES.keys(),
+            command=lambda key: self.insert_example_prompt(key.strip())
         )
 
-# ✅ Style the visible OptionMenu button
-        example_menu.config(
-    font=("Segoe UI", 10),
-    bg="#21262d",
-    fg="white",
-    relief="flat",
-    highlightthickness=0,
-    width=24  # ✅ Set visible width here
-)
+        # Style the visible OptionMenu button
+        self.example_menu.config(
+            font=("Segoe UI", 10),
+            bg="#21262d",
+            fg="white",
+            relief="flat",
+            highlightthickness=0,
+            width=24
+        )
 
-# ✅ Style the dropdown list (menu part)
-        dropdown_menu = example_menu["menu"]
+        # Style the dropdown list (menu part)
+        dropdown_menu = self.example_menu["menu"]
         dropdown_menu.config(
-        font=("Segoe UI", 10),
-        bg="#21262d",
-        fg="white",
-        activebackground="#2ea043",
-        activeforeground="white",
-        tearoff=0
+            font=("Segoe UI", 10),
+            bg="#21262d",
+            fg="white",
+            activebackground="#2ea043",
+            activeforeground="white",
+            tearoff=0
         )
-        example_menu.pack(pady=(10, 0))
+        self.example_menu.pack(pady=(10, 0))
 
+        # Contributors button
+        self.contributors_page = ContributorsPage(self.content_frame, self.show_prompt_view)
+        self.contributors_button = ttk.Button(
+            self.content_frame,
+            text="Contributors",
+            command=self.show_contributors_page,
+            style="Modern.TButton"
+        )
+        self.contributors_button.pack(pady=10)
 
-
-    # ✅ Only one prompt view instance
+        # Prompt view
         self.prompt_view = PromptView(
-        self.content_frame,
-        on_generate=self.handle_prompt_generated
-    )
+            self.content_frame,
+            on_generate=self.handle_prompt_generated
+        )
         self.prompt_view.pack(fill="both", expand=True)
 
-    # Editor view, initialized but not packed yet
+        # Editor view, initialized but not packed yet
         self.editor_view = EditorView(
-        self.content_frame,
-        get_code_callback=self.get_code,
-        set_code_callback=self.set_code
+            self.content_frame,
+            get_code_callback=self.get_code,
+            set_code_callback=self.set_code
         )
 
-    # Add status bar and animation
+        # Add status bar and animation
         self.create_status_bar()
         self.animate_title()
-
         self.update_ai_status_indicator()
-
 
     def setup_window(self):
         """Configure the main window with modern styling"""
@@ -142,20 +153,22 @@ class KarbonUI:
         """Configure ttk styles for modern appearance"""
         style = ttk.Style()
         
-        # Configure modern button style
+        # Configure modern button style with darker text
         style.configure(
             "Modern.TButton",
             background='#238636',
-            foreground='white',
+            foreground='#0d1117',  # Changed to dark color for visibility
             borderwidth=0,
             focuscolor='none',
             relief='flat',
-            padding=(20, 10)
+            padding=(20, 10),
+            font=("Segoe UI", 10)
         )
         
         style.map(
             "Modern.TButton",
-            background=[('active', '#2ea043'), ('pressed', '#1a7f37')]
+            background=[('active', '#2ea043'), ('pressed', '#1a7f37')],
+            foreground=[('active', '#0d1117'), ('pressed', '#0d1117')]
         )
         
         # Configure modern entry style
@@ -215,10 +228,10 @@ class KarbonUI:
 
         self.ai_status_label = tk.Label(
             self.title_frame,
-            text = "AI: Unknown",
-            font = ("Segoe UI", 10, "bold"),
-            bg = '#161b22',
-            fg = '#d29922',
+            text="AI: Unknown",
+            font=("Segoe UI", 10, "bold"),
+            bg='#161b22',
+            fg='#d29922',
             anchor="e"
         )
         self.ai_status_label.pack(side="right", padx=(0, 20), pady=5)
@@ -249,8 +262,6 @@ class KarbonUI:
         )
         self.progress_label.pack(side="right", padx=20, pady=5)
 
-        
-
     def update_ai_status_indicator(self):
         state = ai_status.get("state", "unknown")
         message = ai_status.get("message", "")
@@ -262,8 +273,8 @@ class KarbonUI:
             "unknown": "#6e7681"
         }
         color = color_map.get(state, "#6e7681")
-        self.ai_status_label.config(text = f"AI: {state.capitalize()}", fg=color)
-        # poll every 2 seconds
+        self.ai_status_label.config(text=f"AI: {state.capitalize()}", fg=color)
+        # Poll every 2 seconds
         self.root.after(2000, self.update_ai_status_indicator)
 
     def animate_title(self):
@@ -341,6 +352,38 @@ class KarbonUI:
         self.code = code
         self.update_status("Code generated successfully!", "🎉")
         self.transition_to_editor()
+
+    def clear_content(self):
+        """Clear all content from the main content frame"""
+        for widget in self.content_frame.winfo_children():
+            widget.pack_forget()
+
+    def show_contributors_page(self):
+        """Show the ContributorsPage in content_frame"""
+        self.clear_content()
+        self.contributors_page.pack(fill='both', expand=True)
+        self.update_status("Viewing contributors", "👥")
+
+    def show_prompt_view(self):
+        """Show the PromptView in content_frame"""
+        self.clear_content()
+        self.example_var.set("🔽 Choose Example Prompt")  # Reset dropdown
+        self.example_menu.pack(pady=(10, 0))
+        self.contributors_button.pack(pady=10)
+        self.prompt_view.pack(fill='both', expand=True)
+        self.update_status("Ready to create amazing web experiences", "🚀")
+
+    def export_code(self):
+        """Export code using existing functionality"""
+        from ai_engine import generate_code_from_prompt
+        from exporter import export_code
+        prompt = self.prompt_view.text_input.get("1.0", tk.END).strip()
+        if not prompt:
+            self.show_notification("Please enter a description", "error")
+            return
+        code = generate_code_from_prompt(prompt)
+        export_code(code)
+        self.show_notification("Code exported successfully!", "success")
 
     def show_notification(self, message, type="info"):
         """Show a temporary notification"""
