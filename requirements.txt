@@ -2,4 +2,3 @@ pywebview
 tk
 meta-ai-api
 pyinstaller
-Pillow
