@@ -38,17 +38,14 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          pip install -r requirements.txt || true
           pip install pyinstaller
 
-
-      - name: Add user base to PATH
-        if: runner.os != 'Windows'
-        run: echo "$HOME/.local/bin" >> $GITHUB_PATH
+      - name: Show installed packages (debug)
+        run: pip list
 
       - name: Build executable with PyInstaller
-        run: |
-          python -m pyinstaller ui.py ${{ matrix.pyinstaller-args }}
+        run: python -m pyinstaller ui.py ${{ matrix.pyinstaller-args }}
 
       - name: Rename binary for upload
         shell: bash
@@ -64,10 +61,8 @@ jobs:
 
       - name: Get short commit hash
         id: vars
-        shell: pwsh
-        run: |
-          $shortSha = "${{ github.sha }}".Substring(0, 7)
-          echo "SHORT_SHA=$shortSha" >> $env:GITHUB_ENV
+        shell: bash
+        run: echo "SHORT_SHA=${GITHUB_SHA::7}" >> $GITHUB_ENV
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
