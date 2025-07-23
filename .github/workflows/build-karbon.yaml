@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - feature/cross-platform-build
   workflow_dispatch:  # Manual trigger
 
 permissions:
