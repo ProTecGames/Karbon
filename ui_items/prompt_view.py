@@ -3,7 +3,7 @@ from tkinter import ttk, messagebox
 import threading
 from ai_engine import generate_code_from_prompt
 from preview import update_preview
-
+import prompt_history
 
 class PromptView(tk.Frame):
     def __init__(self, master, on_generate):
@@ -415,6 +415,7 @@ class PromptView(tk.Frame):
             try:
                 code = generate_code_from_prompt(prompt)
                 update_preview(code)
+                prompt_history.code_of_prompts.append(code)
                 
                 # Call completion on main thread
                 self.after(0, lambda: self.generation_complete(code))

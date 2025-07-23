@@ -130,7 +130,9 @@ class EditorView(tk.Frame):
             text="⏪ Undo",
             font=("Segoe UI", 11, "bold"),
             bg='#1f6feb',
-            fg='white',
+            # fg='white',
+            state="disabled",
+            disabledforeground="white",
             activebackground='#2f81f7',
             activeforeground='white',
             relief='flat',
@@ -148,7 +150,9 @@ class EditorView(tk.Frame):
             text="Redo ⏩",
             font=("Segoe UI", 11, "bold"),
             bg='#1f6feb',
-            fg='white',
+            # fg='white',
+            state="disabled",
+            disabledforeground="white",
             activebackground='#2f81f7',
             activeforeground='white',
             relief='flat',
@@ -442,19 +446,14 @@ class EditorView(tk.Frame):
             return
         else:
             prompt_history.add(prompt)
+            self.update_btn.config(state="active")
         
         self.start_update(prompt)
 
-            # bg='#1f6feb',
-            # fg='white',
-            # activebackground='#2f81f7',
-            # activeforeground='white',
-
     def handle_undo(self):
-        if (prompt_history.undo() == 0):
+        if (prompt_history.undo() == 1):
             self.undo_btn.config(
             bg="#1f6feb",
-            # fg="#88b8ff",
             state="disabled",
             disabledforeground="#88b8ff"
         )
@@ -472,7 +471,6 @@ class EditorView(tk.Frame):
         if (prompt_history.redo() == prompt_history.number_of_prompts-1):
             self.redo_btn.config(
                 bg="#1f6feb",
-                # fg="#88b8ff",
                 state="disabled",
                 disabledforeground="#88b8ff"
             )
@@ -506,6 +504,7 @@ class EditorView(tk.Frame):
         def update_in_background():
             try:
                 code = generate_code_from_prompt(prompt)
+                prompt_history.code_of_prompts.append(code)
                 self.set_code(code)
                 update_preview(code)
                 
@@ -602,7 +601,8 @@ class EditorView(tk.Frame):
 
     def preview_in_browser(self):
         """Open preview in browser"""
-        code = self.get_code()
+        # code = self.get_code()
+        code = prompt_history.get_current_code()
         if not code:
             self.show_error("No code to preview!")
             return

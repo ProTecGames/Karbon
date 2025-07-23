@@ -3,6 +3,7 @@
 # from ui_items.editor_view import EditorView
 
 stack_of_prompts = [] #this list stores all prompts
+code_of_prompts = []
 number_of_prompts = 0
 stack_pointer = 0
 
@@ -32,5 +33,7 @@ def show_prompts():
     return stack_of_prompts
 
 def get_current_prompt():
-    global stack_pointer, stack_of_prompts
     return stack_of_prompts[stack_pointer]
+
+def get_current_code():
+    return code_of_prompts[stack_pointer]
