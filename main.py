@@ -1,7 +1,7 @@
 import tkinter as tk
 import threading
 from ui_items.karbon_ui import KarbonUI
-from web_server.server import webview_main
+from preview import webview_main
 import sys
 import os
 
