@@ -27,6 +27,7 @@ class KarbonUI:
         self.api_key = None
         self.model_source = None
 
+
         # Create main container
         self.main_container = tk.Frame(root, bg='#0d1117')
         self.main_container.pack(fill="both", expand=True)
@@ -39,16 +40,94 @@ class KarbonUI:
         self.paned_window.pack(fill="both", expand=True, padx=20, pady=(0, 20))
 
         # Initialize views (prompt and editor)
-        self.prompt_view = PromptView(self.paned_window, on_generate=self.handle_prompt_generated)
-        self.editor_view = EditorView(self.paned_window, get_code_callback=self.get_code, set_code_callback=self.set_code, get_api_key_callback=self.get_api_key, get_model_source_callback=self.get_model_source)
 
-        # Load settings and apply the layout
-        self.load_settings()
+        # Main container
+        self.main_container = tk.Frame(root, bg='#0d1117')
+        self.main_container.pack(fill="both", expand=True)
+
+        # Animated title
+        self.create_title_bar()
+
+        # Resizable PanedWindow layout
+        self.paned_window = ttk.PanedWindow(self.main_container, orient=tk.HORIZONTAL)
+        self.paned_window.pack(fill="both", expand=True, padx=20, pady=(0, 20))
+
+        # Prompt & Editor views (inside paned_window)
+
+        self.prompt_view = PromptView(self.paned_window, on_generate=self.handle_prompt_generated)
+        self.editor_view = EditorView(
+            self.paned_window,
+            get_code_callback=self.get_code,
+            set_code_callback=self.set_code,
+            get_api_key_callback=self.get_api_key,
+            get_model_source_callback=self.get_model_source
+        )
 
         # Add status bar at the bottom
         self.create_status_bar()
 
         # Start animations and status polling
+
+        # Add views to paned_window (not packed individually)
+        self.paned_window.add(self.prompt_view)
+        self.paned_window.add(self.editor_view)
+
+        # Layout from settings
+        self.load_settings()
+
+        # Menu bar
+        self.menubar = tk.Menu(self.root)
+        self.root.config(menu=self.menubar)
+
+        self.file_menu = tk.Menu(self.menubar, tearoff=0)
+        self.menubar.add_cascade(label="File", menu=self.file_menu)
+        self.file_menu.add_command(label="Export Code", command=self.export_code)
+        self.file_menu.add_separator()
+        self.file_menu.add_command(label="Exit", command=self.root.destroy)
+
+        # View controls
+        self.example_var = tk.StringVar(value="🔽 Choose Example Prompt")
+        PADDED_EXAMPLES = {key.ljust(30): prompt for key, prompt in EXAMPLES.items()}
+        self.example_menu = tk.OptionMenu(
+            self.main_container,
+            self.example_var,
+            *PADDED_EXAMPLES.keys(),
+            command=lambda key: self.insert_example_prompt(key.strip())
+        )
+        self.example_menu.config(
+            font=("Segoe UI", 10),
+            bg="#21262d",
+            fg="white",
+            relief="flat",
+            highlightthickness=0,
+            width=24
+        )
+        dropdown_menu = self.example_menu["menu"]
+        dropdown_menu.config(
+            font=("Segoe UI", 10),
+            bg="#21262d",
+            fg="white",
+            activebackground="#2ea043",
+            activeforeground="white",
+            tearoff=0
+        )
+        self.example_menu.pack(pady=(10, 0))
+
+        # Contributors button and page
+        self.contributors_page = ContributorsPage(self.main_container, self.show_prompt_view)
+        self.contributors_button = ttk.Button(
+            self.main_container,
+            text="Contributors",
+            command=self.show_contributors_page,
+            style="Modern.TButton"
+        )
+        self.contributors_button.pack(pady=10)
+
+        # Status bar
+        self.create_status_bar()
+
+        # Final UI polish
+
         self.animate_title()
         self.update_ai_status_indicator()
 
@@ -124,8 +203,79 @@ class KarbonUI:
         self.subtitle_label = tk.Label(self.title_frame, text="AI Web Builder", font=("Segoe UI", 12), bg='#0d1117', fg='#8b949e')
         self.subtitle_label.pack(side="left", padx=(10, 0), pady=10)
 
+
         # Right side: Controls and Status
         settings_btn = tk.Button(self.title_frame, text="⚙️", font=("Segoe UI", 16), bg='#21262d', fg='#8b949e', activebackground='#30363d', activeforeground='#f0f6fc', relief='flat', bd=0, cursor='hand2', command=self.open_settings)
+
+        # --- NEW: Add Swap Panels Button ---
+        swap_btn = tk.Button(
+            self.title_frame, text="🔄", font=("Segoe UI", 16), bg='#21262d', fg='#8b949e',
+            activebackground='#30363d', activeforeground='#f0f6fc', relief='flat', bd=0, cursor='hand2', command=self.swap_panels
+        )
+        swap_btn.pack(side="right", padx=(10, 0))
+        # --- END NEW ---
+
+        settings_btn = tk.Button(
+            self.title_frame, text="⚙️", font=("Segoe UI", 16), bg='#21262d', fg='#8b949e',
+            activebackground='#30363d', activeforeground='#f0f6fc', relief='flat', bd=0, cursor='hand2', command=self.open_settings
+        )
+        # Main title with gradient effect
+        self.title_label = tk.Label(
+            self.title_frame,
+            text="⚡ KARBON",
+            font=("Segoe UI", 28, "bold"),
+            bg='#0d1117',
+            fg='#58a6ff'
+        )
+        self.title_label.pack(side="left", pady=10)
+
+        # Subtitle
+        self.subtitle_label = tk.Label(
+            self.title_frame,
+            text="AI Web Builder",
+            font=("Segoe UI", 12),
+            bg='#0d1117',
+            fg='#8b949e'
+        )
+        self.subtitle_label.pack(side="left", padx=(10, 0), pady=10)
+        
+        # Settings button
+        settings_btn = tk.Button(
+            self.title_frame,
+            text="⚙️",
+            font=("Segoe UI", 16),
+            bg='#21262d',
+            fg='#8b949e',
+            activebackground='#30363d',
+            activeforeground='#f0f6fc',
+            relief='flat',
+            bd=0,
+            cursor='hand2',
+            command=self.open_settings
+        )
+        settings_btn.pack(side="right", padx=(10, 0))
+
+
+        # Status indicator
+        self.status_indicator = tk.Label(
+            self.title_frame,
+            text="●",
+            font=("Segoe UI", 20),
+            bg='#0d1117',
+            fg='#3fb950'
+        )
+        self.status_indicator.pack(side="right", pady=10)
+
+        # Version label
+        version_label = tk.Label(
+            self.title_frame,
+            text="v2.0",
+            font=("Segoe UI", 10),
+            bg='#0d1117',
+            fg='#6e7681'
+
+        )
+
         settings_btn.pack(side="right", padx=(10, 0))
         swap_btn = tk.Button(self.title_frame, text="🔄", font=("Segoe UI", 16), bg='#21262d', fg='#8b949e', activebackground='#30363d', activeforeground='#f0f6fc', relief='flat', bd=0, cursor='hand2', command=self.swap_panels)
         swap_btn.pack(side="right", padx=(10, 0))

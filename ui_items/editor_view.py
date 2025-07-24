@@ -7,6 +7,7 @@ import os
 from ai_engine import generate_code_from_prompt, ai_status
 from exporter import export_code
 from preview import update_preview
+import prompt_history
 
 
 class EditorView(tk.Frame):
@@ -17,6 +18,7 @@ class EditorView(tk.Frame):
         self.get_api_key = get_api_key_callback
         self.get_model_source = get_model_source_callback
         self.is_updating = False
+        self.export_as_zip_var = tk.BooleanVar(value=False)
         self.setup_ui()
 
     def setup_ui(self):
@@ -100,7 +102,8 @@ class EditorView(tk.Frame):
         self.update_text.pack(fill="both", expand=True)
 
         # Placeholder for update input
-        self.update_placeholder = "Describe what you'd like to change...\n\nExample: Make the header purple, add a contact form, or change the font to something more modern"
+        # self.update_placeholder = "Describe what you'd like to change...\n\nExample: Make the header purple, add a contact form, or change the font to something more modern"
+        self.update_placeholder = prompt_history.get_current_prompt()
         self.setup_update_placeholder()
 
         # Button container
@@ -124,6 +127,44 @@ class EditorView(tk.Frame):
             command=self.handle_update
         )
         self.update_btn.pack(side="left")
+
+        #Undo button
+        self.undo_btn = tk.Button(
+            button_container,
+            text="⏪ Undo",
+            font=("Segoe UI", 11, "bold"),
+            bg='#1f6feb',
+            state="disabled",
+            disabledforeground="#88b8ff",
+            activebackground='#2f81f7',
+            activeforeground='white',
+            relief='flat',
+            bd=0,
+            padx=25,
+            pady=10,
+            cursor='hand2',
+            command=self.handle_undo
+        )
+        self.undo_btn.pack(side="left", padx=(10, 0))
+
+        #Redo button
+        self.redo_btn = tk.Button(
+            button_container,
+            text="Redo ⏩",
+            font=("Segoe UI", 11, "bold"),
+            bg='#1f6feb',
+            state="disabled",
+            disabledforeground="#88b8ff",
+            activebackground='#2f81f7',
+            activeforeground='white',
+            relief='flat',
+            bd=0,
+            padx=25,
+            pady=10,
+            cursor='hand2',
+            command=self.handle_redo
+        )
+        self.redo_btn.pack(side="left", padx=(10, 0))
 
         # Clear button
         clear_btn = tk.Button(
@@ -165,6 +206,23 @@ class EditorView(tk.Frame):
         ]
 
         for text, color, command in actions:
+            if color == "#238636":
+                zip_checkbox = tk.Checkbutton(
+                    right_section,
+                    text="Export as ZIP",
+                    variable=self.export_as_zip_var,
+                    font=("Segoe UI", 8),
+                    bg='#21262d',
+                    fg='white',
+                    activebackground='#21262d',
+                    activeforeground='white',
+                    selectcolor='#21262d',
+                    anchor='w',
+                    padx=25,
+                    relief='flat'
+                )
+                zip_checkbox.pack(fill='x', padx=15, pady=2)
+
             btn = tk.Button(
                 right_section,
                 text=text,
@@ -181,6 +239,9 @@ class EditorView(tk.Frame):
                 command=command
             )
             btn.pack(fill="x", padx=15, pady=2)
+    
+    def insert_text(self, words):
+        self.update_text.insert("1.0", words)
 
     def create_main_content(self):
         """Create the main content area"""
@@ -402,8 +463,59 @@ class EditorView(tk.Frame):
         if not prompt or prompt == self.update_placeholder:
             self.show_error("Please describe what changes you'd like to make! 🔄")
             return
+        else:
+            prompt_history.pop_prompt()
+            prompt_history.pop_code()
+            prompt_history.push_prompt(prompt)
 
         self.start_update(prompt)
+        self.redo_btn.config(
+                bg="#1f6feb",
+                state="disabled",
+                disabledforeground="#88b8ff"
+        )
+        
+        self.undo_btn.config(
+                bg="#1f6feb",
+                activebackground='#2f81f7',
+                activeforeground='white',
+                state="active"
+        )
+
+    def handle_undo(self):
+        if (prompt_history.undo() == 0):
+            self.undo_btn.config(
+            bg="#1f6feb",
+            state="disabled",
+            disabledforeground="#88b8ff"
+        )
+        self.redo_btn.config(
+            bg="#1f6feb",
+            fg='white',
+            activebackground='#2f81f7',
+            activeforeground='white',
+            state="active"
+        )
+        self.update_text.delete("1.0", "end")
+        self.update_text.insert("1.0", prompt_history.get_current_prompt())
+    
+    def handle_redo(self):
+        if (prompt_history.redo() == prompt_history.number_of_prompts):
+            self.redo_btn.config(
+                bg="#1f6feb",
+                state="disabled",
+                disabledforeground="#88b8ff"
+            )
+        self.undo_btn.config(
+            bg="#1f6feb",
+            fg='white',
+            activebackground='#2f81f7',
+            activeforeground='white',
+            state="active"
+        )
+        self.update_text.delete("1.0", "end")
+        self.update_text.insert("1.0", prompt_history.get_current_prompt())
+
 
     def start_update(self, prompt):
         """Start update process with visual feedback"""
@@ -426,6 +538,9 @@ class EditorView(tk.Frame):
                 api_key = self.get_api_key()
                 model_source = self.get_model_source()
                 code = generate_code_from_prompt(prompt, api_key, model_source)
+                prompt_history.push_code(code)
+                prompt_history.push_prompt("Describe what you'd like to change...\n\nExample: Make the header purple, add a contact form, or change the font to something more modern")
+                prompt_history.push_code(code)
                 self.set_code(code)
                 update_preview(code)
 
@@ -500,18 +615,26 @@ class EditorView(tk.Frame):
             self.show_error(f"Update failed: {error_msg}")
 
     def handle_export(self):
-        """Enhanced export with options"""
+        """Enhanced export with zip option"""
         code = self.get_code()
         if not code:
             self.show_error("No code to export! Generate a website first.")
             return
 
+
+        export_as_zip = self.export_as_zip_var.get()
+
         try:
-            export_code(code)
-            self.show_success("Code exported successfully! 📁")
-            self.update_status("Code exported to file", "💾")
+            export_code(code, as_zip=export_as_zip)
+            if export_as_zip:
+                self.show_success("Code exported successfully as ZIP! 📦")
+                self.update_status("Exported ZIP file", "📦")
+            else:
+                self.show_success("Code exported successfully! 📁")
+                self.update_status("Code exported to file", "💾")
         except Exception as e:
             self.show_error(f"Export failed: {str(e)}")
+
 
     def save_file(self):
         """Save code to custom location"""
@@ -542,7 +665,8 @@ class EditorView(tk.Frame):
 
     def preview_in_browser(self):
         """Open preview in browser"""
-        code = self.get_code()
+        # code = self.get_code()
+        code = prompt_history.get_current_code()
         if not code:
             self.show_error("No code to preview!")
             return

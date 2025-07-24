@@ -12,9 +12,10 @@ import webbrowser
 from ai_engine import set_ai_status
 
 class ContributorsPage(tk.Frame):
-    def __init__(self, parent, back_callback):
+    def __init__(self, parent, back_callback, root=None):
         super().__init__(parent, bg='#0d1117')
         self.back_callback = back_callback
+        self.root = root or parent.winfo_toplevel()  # Get root window
         self.cache_file = "contributors_cache.json"
         self.cache_duration = 3600  # Cache for 1 hour
         self.owner = "ProTecGames"
@@ -118,17 +119,22 @@ class ContributorsPage(tk.Frame):
     def show_loading(self):
         """Display a simple loading animation"""
         self.spinner_label.config(text="Loading...")
-        threading.Thread(target=self.animate_spinner, daemon=True).start()
+        self.animate_spinner()
 
     def animate_spinner(self):
         """Simple text-based loading animation"""
         symbols = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏']
-        i = 0
-        while self.spinner_label.winfo_exists():
-            self.spinner_label.config(text=f"Loading {symbols[i % len(symbols)]}")
-            i += 1
-            time.sleep(0.1)
-        self.spinner_label.config(text="")
+        if not hasattr(self, 'spinner_index'):
+            self.spinner_index = 0
+        
+        try:
+            if self.spinner_label.winfo_exists() and self.spinner_label.cget('text').startswith('Loading'):
+                self.spinner_label.config(text=f"Loading {symbols[self.spinner_index % len(symbols)]}")
+                self.spinner_index += 1
+                self.root.after(100, self.animate_spinner)
+        except tk.TclError:
+            # Widget has been destroyed
+            pass
 
     def load_contributors(self):
         """Load contributors from cache or API"""
@@ -144,7 +150,7 @@ class ContributorsPage(tk.Frame):
                     cache = json.load(f)
                     if time.time() - cache.get('timestamp', 0) < self.cache_duration:
                         self.contributors = cache['data']
-                        self.update_ui()
+                        self.root.after(0, self.update_ui)
                         return
 
             set_ai_status("connecting", "Fetching contributors from GitHub...")
@@ -164,16 +170,16 @@ class ContributorsPage(tk.Frame):
                 json.dump({'timestamp': time.time(), 'data': self.contributors}, f)
 
             set_ai_status("online", "Successfully fetched contributors.")
-            self.update_ui()
+            self.root.after(0, self.update_ui)
 
         except requests.exceptions.RequestException as e:
             set_ai_status("error", f"Failed to fetch contributors: {e}")
-            self.total_label.config(text="Error: Could not fetch contributors.", fg='#f85149')
-            self.spinner_label.config(text="")
+            self.root.after(0, lambda: self.total_label.config(text="Error: Could not fetch contributors.", fg='#f85149'))
+            self.root.after(0, lambda: self.spinner_label.config(text=""))
         except Exception as e:
             set_ai_status("error", f"Unexpected error: {e}")
-            self.total_label.config(text="Error: An unexpected error occurred.", fg='#f85149')
-            self.spinner_label.config(text="")
+            self.root.after(0, lambda: self.total_label.config(text="Error: An unexpected error occurred.", fg='#f85149'))
+            self.root.after(0, lambda: self.spinner_label.config(text=""))
 
     def refresh_contributors(self):
         """Force refresh contributors from API"""
