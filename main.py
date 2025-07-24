@@ -20,7 +20,13 @@ if __name__ == "__main__":
     def start_ui():
         root = tk.Tk()
         app = KarbonUI(root)
-        root.protocol("WM_DELETE_WINDOW", app.on_closing)
+        # --- MODIFIED: Add protocol handler to save settings on close ---
+        def on_closing():
+            app.save_settings()
+            root.destroy()
+        
+        root.protocol("WM_DELETE_WINDOW", on_closing)
+        # --- END MODIFIED ---
         root.mainloop()
 
     # Run Tkinter in a separate thread
