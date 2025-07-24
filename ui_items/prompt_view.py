@@ -421,6 +421,7 @@ class PromptView(tk.Frame):
         if self.is_generating:
             return
 
+
         prompt = self.text_input.get("1.0", "end-1c").strip()
 
 
@@ -511,6 +512,7 @@ class PromptView(tk.Frame):
             bg='#238636'
         )
 
+
         status = ai_status.get("state", "unknown")
         message = ai_status.get("message", "")
         if status != "online":
@@ -552,6 +554,7 @@ class PromptView(tk.Frame):
             self.show_error(f"AI service error: {message}")
         else:
             self.show_error(f"Oops! Something went wrong: {error_msg}")
+
 
     def show_error(self, message):
         """Show enhanced error dialog"""
@@ -643,4 +646,3 @@ class PromptView(tk.Frame):
             content = self.text_input.get("1.0", "end-1c")
         remaining = 256 - len(content)
         self.char_count_label.config(text=f"{remaining} characters left")
-
