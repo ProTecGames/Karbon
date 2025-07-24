@@ -3,6 +3,9 @@ from tkinter import ttk, messagebox
 import threading
 from ai_engine import generate_code_from_prompt
 from preview import update_preview
+from ai_engine import ai_status
+from ai_engine import optimize_prompt
+MAX_PROMPT_LENGTH = 256
 
 
 class PromptView(tk.Frame):
@@ -10,10 +13,12 @@ class PromptView(tk.Frame):
         super().__init__(master, bg='#0d1117')
         self.on_generate = on_generate
         self.is_generating = False
+        self.enhance_ui_var = tk.BooleanVar(value=True)  # default is checked
         self.setup_ui()
         self.bind_all("<Control-g>", lambda event: self.handle_generate())
         self.bind_all("<Control-e>", lambda event: self.export_project())
         self.bind_all("<Control-Shift-c>", lambda event: self.clear_input())
+        
 
     def setup_ui(self):
         # Hero section with animated gradient background
@@ -42,7 +47,7 @@ class PromptView(tk.Frame):
             text="⚡ Welcome to Karbon",
             font=("Segoe UI", 32, "bold"),
             bg='#0d1117',
-            fg='#58a6ff'
+            fg="#0071f3"
         )
         self.welcome_label.pack(pady=(0, 10))
 
@@ -57,7 +62,7 @@ class PromptView(tk.Frame):
         self.subtitle_label.pack()
 
         # Start typewriter effect
-        self.typewriter_text = "Transform your ideas into stunning web experiences with AI"
+        self.typewriter_text = "   Transform your ideas into stunning web experiences with AI"
         self.typewriter_index = 0
         self.typewriter_effect()
 
@@ -106,8 +111,37 @@ class PromptView(tk.Frame):
         )
         self.text_input.pack(fill="both", expand=True, pady=(10, 15))
 
+        self.enhance_checkbox = tk.Checkbutton(
+            input_frame,
+            text="Enhance prompt",
+            variable=self.enhance_ui_var,
+            bg="#1e1e1e",
+            fg="#ffffff",
+            selectcolor="#1e1e1e",
+            activebackground="#1e1e1e",
+            activeforeground="#00ffcc"
+    )
+        self.enhance_checkbox.pack(anchor="w", pady=(5, 0))
+
+        # Character count label
+        self.char_count_label = tk.Label(
+            input_frame,
+            text="256 characters left",
+            font=("Segoe UI", 9),
+            bg='#161b22',
+            fg='#8b949e',
+            anchor='e'
+        )
+        self.char_count_label.pack(anchor="e", pady=(0, 5))
+
+        # Bind character limit enforcement
+        self.text_input.bind('<KeyRelease>', self.update_char_count)
+        self.text_input.bind('<Control-v>', self.update_char_count)
+        self.text_input.bind('<FocusOut>', self.update_char_count)
+        
+
         # Placeholder functionality
-        self.placeholder_text = "Describe your dream website... \n\nExample: Create a modern portfolio website with dark theme, smooth animations, and a contact form. Include sections for projects, skills, and about me."
+        self.placeholder_text = "Describe your dream website... \n\nExample: Create a modern portfolio website with dark theme, smooth animations, and minimilist Design"
         self.setup_placeholder()
 
         # Button container
@@ -282,21 +316,30 @@ class PromptView(tk.Frame):
 
     def setup_placeholder(self):
         """Setup placeholder functionality"""
+        self.placeholder_active = True
         self.text_input.insert("1.0", self.placeholder_text)
         self.text_input.configure(fg='#6e7681')
 
         def on_focus_in(event):
-            if self.text_input.get("1.0", "end-1c") == self.placeholder_text:
+            if self.placeholder_active:
                 self.text_input.delete("1.0", "end")
                 self.text_input.configure(fg='#f0f6fc')
 
+                self.placeholder_active = False
+
+
         def on_focus_out(event):
+            content = self.text_input.get("1.0", "end-1c").strip()
             if not self.text_input.get("1.0", "end-1c").strip():
                 self.text_input.insert("1.0", self.placeholder_text)
                 self.text_input.configure(fg='#6e7681')
 
+                self.placeholder_active = True
+
+
         self.text_input.bind('<FocusIn>', on_focus_in)
         self.text_input.bind('<FocusOut>', on_focus_out)
+
 
     def typewriter_effect(self):
         """Animate subtitle with typewriter effect"""
@@ -305,9 +348,9 @@ class PromptView(tk.Frame):
             self.subtitle_label.configure(text=current_text)
             self.typewriter_index += 1
             self.after(50, self.typewriter_effect)
-        else:
+        
             # Add blinking cursor effect
-            self.blink_cursor()
+            
 
     def blink_cursor(self):
         """Add blinking cursor effect"""
@@ -334,10 +377,12 @@ class PromptView(tk.Frame):
     def set_example(self, example):
         """Set example text in input"""
         self.text_input.delete("1.0", "end")
-        # Remove emoji and clean up text
-        clean_example = " ".join(example.split()[1:])
+        clean_example = " ".join(example.split()[1:])  # Remove emoji
         self.text_input.insert("1.0", clean_example)
         self.text_input.configure(fg='#f0f6fc')
+        self.placeholder_active = False  # Move AFTER insert to prevent overwrite
+        self.update_char_count()
+
 
     def clear_input(self):
         """Clear input field"""
@@ -378,6 +423,12 @@ class PromptView(tk.Frame):
 
         prompt = self.text_input.get("1.0", "end-1c").strip()
 
+
+        prompt = self.text_input.get("1.0", "end-1c")
+        # Sanitize input: strip whitespace and remove non-printable characters
+        prompt = ''.join(ch for ch in prompt if ch.isprintable()).strip()
+        
+
         if not prompt or prompt == self.placeholder_text:
             self.show_error("Please describe your website idea first! 💡")
             return
@@ -405,10 +456,20 @@ class PromptView(tk.Frame):
         # Start generation in background thread
         def generate_in_background():
             try:
+
                 # Get API key and model source from the main UI
                 api_key = self.master.master.master.get_api_key()
                 model_source = self.master.master.master.get_model_source()
                 code = generate_code_from_prompt(prompt, api_key, model_source)
+
+                final_prompt = prompt
+                
+                if self.enhance_ui_var.get():
+            
+                    final_prompt = optimize_prompt(prompt)
+                    
+                code = generate_code_from_prompt(final_prompt)
+
                 update_preview(code)
 
                 # Call completion on main thread
@@ -450,6 +511,18 @@ class PromptView(tk.Frame):
             bg='#238636'
         )
 
+        status = ai_status.get("state", "unknown")
+        message = ai_status.get("message", "")
+        if status != "online":
+            if status == "offline":
+                self.show_error("AI service is currently unavailable. Please check your internet connection or try again later.")
+            elif status == "error":
+                self.show_error(f"AI service error: {message}")
+            else:
+                self.show_error(f"Website could not be generated due to an AI service issue")
+            return
+        
+
         # Show success notification
         self.show_success("Website generated successfully! 🎉")
 
@@ -467,8 +540,18 @@ class PromptView(tk.Frame):
             bg='#238636'
         )
 
+
         # Show error
         self.show_error(f"Oops! Something went wrong: {error_msg}")
+
+        status = ai_status.get("state", "unknown")
+        message = ai_status.get("message", "")
+        if status == "offline":
+            self.show_error("AI service is currently unavailable. Please check you internet connection or try again later.")
+        elif status == "error":
+            self.show_error(f"AI service error: {message}")
+        else:
+            self.show_error(f"Oops! Something went wrong: {error_msg}")
 
     def show_error(self, message):
         """Show enhanced error dialog"""
@@ -550,3 +633,14 @@ class PromptView(tk.Frame):
 
         # Auto-close after 3 seconds
         success_window.after(3000, success_window.destroy)
+
+
+    def update_char_count(self, event=None):
+        """Update character count label and enforce max length"""
+        content = self.text_input.get("1.0", "end-1c")
+        if len(content) > 256:
+            self.text_input.delete(f"1.0+{256}c", "end")
+            content = self.text_input.get("1.0", "end-1c")
+        remaining = 256 - len(content)
+        self.char_count_label.config(text=f"{remaining} characters left")
+
