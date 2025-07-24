@@ -5,7 +5,6 @@ import requests
 from meta_ai_api import MetaAI
 
 
-
 logging.basicConfig(
     filename = "karbon_ai_errors.log",
     level = logging.INFO,
@@ -19,6 +18,7 @@ def set_ai_status(state: str, message: str):
     ai_status["message"] = message
     logging.info(f"AI Status Updated: {state} - {message}")
 
+
 def extract_json(response: str) -> dict:
     try:
         return json.loads(response)
@@ -31,7 +31,14 @@ def extract_json(response: str) -> dict:
                 return None
         return None
 
+
+def generate_code_from_prompt(prompt: str, api_key: str = None, model_source: str = None) -> str:
+    # Use the provided API key and model source, otherwise use defaults
+    meta = MetaAI(api_key=api_key, model_source=model_source)
+
+
 def generate_code_from_prompt(prompt: str, retries = 2) -> str:
+
     formatted = (
         f"You are a helpful assistant that writes complete frontend apps.\n"
         f"Given the task: \"{prompt}\"\n"
@@ -124,6 +131,13 @@ def rule_based_enhancement(prompt: str) -> str:
     ]
     return f"{prompt}\n\n" + "\n".join(modifiers)
 
+
+    final_code = html.replace("</head>", f"<style>{css}</style></head>").replace("</body>", f"<script>{js}</script></body>")
+    return final_code
+
+
+    final_code = html.replace("</head>", f"<style>{css}</style></head>").replace("</body>", f"<script>{js}</script></body>")
+    return final_code
 
 def is_generic(prompt: str) -> bool:
     generic_phrases = {

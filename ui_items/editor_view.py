@@ -10,10 +10,12 @@ from preview import update_preview
 
 
 class EditorView(tk.Frame):
-    def __init__(self, master, get_code_callback, set_code_callback):
+    def __init__(self, master, get_code_callback, set_code_callback, get_api_key_callback, get_model_source_callback):
         super().__init__(master, bg='#0d1117')
         self.get_code = get_code_callback
         self.set_code = set_code_callback
+        self.get_api_key = get_api_key_callback
+        self.get_model_source = get_model_source_callback
         self.is_updating = False
         self.export_as_zip_var = tk.BooleanVar(value=False)
         self.setup_ui()
@@ -29,11 +31,11 @@ class EditorView(tk.Frame):
         """Create the editor header with title and stats"""
         header_frame = tk.Frame(self, bg='#0d1117')
         header_frame.pack(fill="x", padx=20, pady=(15, 10))
-        
+
         # Title section
         title_frame = tk.Frame(header_frame, bg='#0d1117')
         title_frame.pack(side="left", fill="y")
-        
+
         tk.Label(
             title_frame,
             text="⚡ Code Editor",
@@ -41,7 +43,7 @@ class EditorView(tk.Frame):
             bg='#0d1117',
             fg='#58a6ff'
         ).pack(anchor="w")
-        
+
         tk.Label(
             title_frame,
             text="Edit, update, and export your generated website",
@@ -49,26 +51,26 @@ class EditorView(tk.Frame):
             bg='#0d1117',
             fg='#8b949e'
         ).pack(anchor="w", pady=(2, 0))
-        
+
         # Stats section
         self.stats_frame = tk.Frame(header_frame, bg='#0d1117')
         self.stats_frame.pack(side="right", fill="y")
-        
+
         self.update_stats()
 
     def create_toolbar(self):
         """Create modern toolbar with enhanced features"""
         toolbar_container = tk.Frame(self, bg='#0d1117')
         toolbar_container.pack(fill="x", padx=20, pady=(0, 15))
-        
+
         # Main toolbar with card design
         toolbar = tk.Frame(toolbar_container, bg='#161b22', relief='solid', bd=1)
         toolbar.pack(fill="x")
-        
+
         # Left section - Update controls
         left_section = tk.Frame(toolbar, bg='#161b22')
         left_section.pack(side="left", fill="both", expand=True, padx=15, pady=15)
-        
+
         tk.Label(
             left_section,
             text="🔄 Update Your Website",
@@ -76,11 +78,11 @@ class EditorView(tk.Frame):
             bg='#161b22',
             fg='#f0f6fc'
         ).pack(anchor="w", pady=(0, 8))
-        
+
         # Input container
         input_container = tk.Frame(left_section, bg='#161b22')
         input_container.pack(fill="x", pady=(0, 10))
-        
+
         # Modern text input for updates
         self.update_text = tk.Text(
             input_container,
@@ -97,15 +99,15 @@ class EditorView(tk.Frame):
             wrap=tk.WORD
         )
         self.update_text.pack(fill="both", expand=True)
-        
+
         # Placeholder for update input
         self.update_placeholder = "Describe what you'd like to change...\n\nExample: Make the header purple, add a contact form, or change the font to something more modern"
         self.setup_update_placeholder()
-        
+
         # Button container
         button_container = tk.Frame(left_section, bg='#161b22')
         button_container.pack(fill="x")
-        
+
         # Update button
         self.update_btn = tk.Button(
             button_container,
@@ -123,7 +125,7 @@ class EditorView(tk.Frame):
             command=self.handle_update
         )
         self.update_btn.pack(side="left")
-        
+
         # Clear button
         clear_btn = tk.Button(
             button_container,
@@ -141,12 +143,12 @@ class EditorView(tk.Frame):
             command=self.clear_update_input
         )
         clear_btn.pack(side="left", padx=(10, 0))
-        
+
         # Right section - Action buttons
         right_section = tk.Frame(toolbar, bg='#21262d', width=200)
         right_section.pack(side="right", fill="y", padx=1)
         right_section.pack_propagate(False)
-        
+
         tk.Label(
             right_section,
             text="⚙️ Actions",
@@ -154,7 +156,8 @@ class EditorView(tk.Frame):
             bg='#21262d',
             fg='#f0f6fc'
         ).pack(pady=(15, 10))
-        
+
+        # Action buttons
         actions = [
             ("🌐 Preview", "#6f42c1", self.preview_in_browser),
             ("💾 Export", "#238636", self.handle_export),
@@ -202,15 +205,15 @@ class EditorView(tk.Frame):
         """Create the main content area"""
         content_frame = tk.Frame(self, bg='#0d1117')
         content_frame.pack(fill="both", expand=True, padx=20, pady=(0, 15))
-        
+
         # Preview info card
         info_card = tk.Frame(content_frame, bg='#161b22', relief='solid', bd=1)
         info_card.pack(fill="both", expand=True)
-        
+
         # Card header
         header = tk.Frame(info_card, bg='#21262d')
         header.pack(fill="x")
-        
+
         tk.Label(
             header,
             text="👁️ Live Preview",
@@ -220,7 +223,7 @@ class EditorView(tk.Frame):
             padx=20,
             pady=12
         ).pack(side="left")
-        
+
         # Status indicator
         self.preview_status = tk.Label(
             header,
@@ -230,11 +233,11 @@ class EditorView(tk.Frame):
             fg='#3fb950'
         )
         self.preview_status.pack(side="right", padx=20)
-        
+
         # Content area
         content_area = tk.Frame(info_card, bg='#161b22')
         content_area.pack(fill="both", expand=True, padx=20, pady=20)
-        
+
         # Preview illustration
         preview_icon = tk.Label(
             content_area,
@@ -243,7 +246,7 @@ class EditorView(tk.Frame):
             bg='#161b22'
         )
         preview_icon.pack(pady=(40, 20))
-        
+
         tk.Label(
             content_area,
             text="Your website preview opens in a separate window",
@@ -251,7 +254,7 @@ class EditorView(tk.Frame):
             bg='#161b22',
             fg='#58a6ff'
         ).pack()
-        
+
         tk.Label(
             content_area,
             text="The preview updates automatically when you make changes",
@@ -259,7 +262,7 @@ class EditorView(tk.Frame):
             bg='#161b22',
             fg='#8b949e'
         ).pack(pady=(5, 20))
-        
+
         # Quick preview button
         quick_preview_btn = tk.Button(
             content_area,
@@ -277,7 +280,7 @@ class EditorView(tk.Frame):
             command=self.preview_in_browser
         )
         quick_preview_btn.pack(pady=(0, 40))
-        
+
         # Tips section
         self.create_tips_section(content_area)
 
@@ -285,7 +288,7 @@ class EditorView(tk.Frame):
         """Create tips section"""
         tips_frame = tk.Frame(parent, bg='#0d1117', relief='solid', bd=1)
         tips_frame.pack(fill="x", pady=(20, 0))
-        
+
         tk.Label(
             tips_frame,
             text="💡 Pro Tips",
@@ -293,14 +296,14 @@ class EditorView(tk.Frame):
             bg='#0d1117',
             fg='#f79c42'
         ).pack(anchor="w", padx=15, pady=(12, 8))
-        
+
         tips = [
             "• Be specific about colors, fonts, and layout changes",
             "• Use preview to see changes before exporting",
             "• Save your work frequently to avoid losing progress",
             "• Try different update prompts to fine-tune your design"
         ]
-        
+
         for tip in tips:
             tk.Label(
                 tips_frame,
@@ -310,7 +313,7 @@ class EditorView(tk.Frame):
                 fg='#8b949e',
                 anchor='w'
             ).pack(anchor="w", padx=15, pady=1)
-        
+
         tk.Label(tips_frame, text="", bg='#0d1117').pack(pady=8)
 
     def create_status_bar(self):
@@ -318,7 +321,7 @@ class EditorView(tk.Frame):
         self.status_frame = tk.Frame(self, bg='#161b22', height=35)
         self.status_frame.pack(fill="x", side="bottom")
         self.status_frame.pack_propagate(False)
-        
+
         self.status_label = tk.Label(
             self.status_frame,
             text="Ready to edit • Make changes and see them live",
@@ -327,7 +330,7 @@ class EditorView(tk.Frame):
             fg='#8b949e'
         )
         self.status_label.pack(side="left", padx=20, pady=8)
-        
+
         # Activity indicator
         self.activity_label = tk.Label(
             self.status_frame,
@@ -342,17 +345,17 @@ class EditorView(tk.Frame):
         """Setup placeholder for update input"""
         self.update_text.insert("1.0", self.update_placeholder)
         self.update_text.configure(fg='#6e7681')
-        
+
         def on_focus_in(event):
             if self.update_text.get("1.0", "end-1c") == self.update_placeholder:
                 self.update_text.delete("1.0", "end")
                 self.update_text.configure(fg='#f0f6fc')
-        
+
         def on_focus_out(event):
             if not self.update_text.get("1.0", "end-1c").strip():
                 self.update_text.insert("1.0", self.update_placeholder)
                 self.update_text.configure(fg='#6e7681')
-        
+
         self.update_text.bind('<FocusIn>', on_focus_in)
         self.update_text.bind('<FocusOut>', on_focus_out)
 
@@ -363,22 +366,22 @@ class EditorView(tk.Frame):
             if code:
                 lines = len(code.split('\n'))
                 chars = len(code)
-                
+
                 # Clear existing stats
                 for widget in self.stats_frame.winfo_children():
                     widget.destroy()
-                
+
                 # Create stats display
                 stats_data = [
                     ("Lines", str(lines)),
                     ("Characters", str(chars)),
                     ("Status", "Ready")
                 ]
-                
+
                 for i, (label, value) in enumerate(stats_data):
                     stat_frame = tk.Frame(self.stats_frame, bg='#161b22', relief='solid', bd=1)
                     stat_frame.grid(row=0, column=i, padx=2, pady=2)
-                    
+
                     tk.Label(
                         stat_frame,
                         text=value,
@@ -386,7 +389,7 @@ class EditorView(tk.Frame):
                         bg='#161b22',
                         fg='#58a6ff'
                     ).pack(padx=10, pady=(5, 0))
-                    
+
                     tk.Label(
                         stat_frame,
                         text=label,
@@ -412,62 +415,65 @@ class EditorView(tk.Frame):
         """Handle update with enhanced UX"""
         if self.is_updating:
             return
-            
+
         prompt = self.update_text.get("1.0", "end-1c").strip()
-        
+
         if not prompt or prompt == self.update_placeholder:
             self.show_error("Please describe what changes you'd like to make! 🔄")
             return
-        
+
         self.start_update(prompt)
 
     def start_update(self, prompt):
         """Start update process with visual feedback"""
         self.is_updating = True
-        
+
         # Update button state
         self.update_btn.configure(
             text="🔄 Updating...",
             state='disabled',
             bg='#6e7681'
         )
-        
+
         # Update status
         self.update_status("Applying your changes...", "🔄")
         self.preview_status.configure(text="● Updating", fg='#f79c42')
-        
+
         # Start update in background
         def update_in_background():
             try:
-                code = generate_code_from_prompt(prompt)
+                api_key = self.get_api_key()
+                model_source = self.get_model_source()
+                code = generate_code_from_prompt(prompt, api_key, model_source)
                 self.set_code(code)
                 update_preview(code)
-                
+
                 # Complete on main thread
                 self.after(0, lambda: self.update_complete())
-                
+
             except Exception as e:
                 self.after(0, lambda: self.update_error(str(e)))
-        
+
         threading.Thread(target=update_in_background, daemon=True).start()
 
     def update_complete(self):
         """Handle successful update"""
         self.is_updating = False
-        
+
         # Reset button
         self.update_btn.configure(
             text="🔄 Update Code",
             state='normal',
             bg='#1f6feb'
         )
-        
+
         # Update status
         self.update_status("Changes applied successfully!", "✅")
         self.preview_status.configure(text="● Live", fg='#3fb950')
-        
+
         # Update stats
         self.update_stats()
+
 
         # Check AI status before showing success
         status = ai_status.get("state", "unknown")
@@ -483,25 +489,25 @@ class EditorView(tk.Frame):
 
         # Show success notification
         self.show_success("Website updated successfully! 🎉")
-        
+
         # Clear input
         self.clear_update_input()
 
     def update_error(self, error_msg):
         """Handle update error"""
         self.is_updating = False
-        
+
         # Reset button
         self.update_btn.configure(
             text="🔄 Update Code",
             state='normal',
             bg='#1f6feb'
         )
-        
+
         # Update status
         self.update_status("Update failed", "❌")
         self.preview_status.configure(text="● Error", fg='#f85149')
-        
+
         # Show error
         status = ai_status.get("state", "unknown")
         message = ai_status.get("message", "")
@@ -518,6 +524,7 @@ class EditorView(tk.Frame):
         if not code:
             self.show_error("No code to export! Generate a website first.")
             return
+
 
         export_as_zip = self.export_as_zip_var.get()
 
@@ -539,7 +546,7 @@ class EditorView(tk.Frame):
         if not code:
             self.show_error("No code to save!")
             return
-        
+
         try:
             filename = filedialog.asksaveasfilename(
                 title="Save Website",
@@ -549,14 +556,14 @@ class EditorView(tk.Frame):
                     ("All files", "*.*")
                 ]
             )
-            
+
             if filename:
                 with open(filename, 'w', encoding='utf-8') as f:
                     f.write(code)
-                
+
                 self.show_success(f"Saved to {os.path.basename(filename)}! 💾")
                 self.update_status(f"Saved to {filename}", "💾")
-                
+
         except Exception as e:
             self.show_error(f"Save failed: {str(e)}")
 
@@ -566,18 +573,18 @@ class EditorView(tk.Frame):
         if not code:
             self.show_error("No code to preview!")
             return
-        
+
         try:
             # Create temporary file
             with tempfile.NamedTemporaryFile(mode='w', suffix='.html', delete=False) as f:
                 f.write(code)
                 temp_path = f.name
-            
+
             # Open in browser
             webbrowser.open(f'file://{temp_path}')
             self.show_success("Preview opened in browser! 🌐")
             self.update_status("Preview opened in browser", "🌐")
-            
+
         except Exception as e:
             self.show_error(f"Preview failed: {str(e)}")
 
@@ -588,7 +595,7 @@ class EditorView(tk.Frame):
             "Start a new project? This will clear your current work.",
             icon='question'
         )
-        
+
         if response:
             # This would need to be implemented in the main UI class
             self.update_status("Starting new project...", "🔄")
@@ -597,7 +604,7 @@ class EditorView(tk.Frame):
         """Lighten a hex color"""
         color_map = {
             "#6f42c1": "#8a63d2",
-            "#238636": "#2ea043", 
+            "#238636": "#2ea043",
             "#0969da": "#1f6feb",
             "#6e7681": "#8b949e"
         }
@@ -611,12 +618,12 @@ class EditorView(tk.Frame):
         error_window.configure(bg='#21262d')
         error_window.resizable(False, False)
         error_window.attributes('-topmost', True)
-        
+
         # Center the window
         x = self.winfo_toplevel().winfo_x() + (self.winfo_toplevel().winfo_width() // 2) - 200
         y = self.winfo_toplevel().winfo_y() + (self.winfo_toplevel().winfo_height() // 2) - 75
         error_window.geometry(f"400x150+{x}+{y}")
-        
+
         tk.Label(
             error_window,
             text="⚠️",
@@ -624,7 +631,7 @@ class EditorView(tk.Frame):
             bg='#21262d',
             fg='#f85149'
         ).pack(pady=(20, 10))
-        
+
         tk.Label(
             error_window,
             text=message,
@@ -634,7 +641,7 @@ class EditorView(tk.Frame):
             wraplength=350,
             justify=tk.CENTER
         ).pack(pady=(0, 20))
-        
+
         tk.Button(
             error_window,
             text="OK",
@@ -655,19 +662,19 @@ class EditorView(tk.Frame):
         success_window.configure(bg='#21262d')
         success_window.resizable(False, False)
         success_window.attributes('-topmost', True)
-        
+
         # Position in top-right
         x = self.winfo_toplevel().winfo_x() + self.winfo_toplevel().winfo_width() - 370
         y = self.winfo_toplevel().winfo_y() + 50
         success_window.geometry(f"350x120+{x}+{y}")
-        
+
         tk.Label(
             success_window,
             text="🎉",
             font=("Segoe UI", 20),
             bg='#21262d'
         ).pack(pady=(15, 5))
-        
+
         tk.Label(
             success_window,
             text=message,
@@ -675,6 +682,6 @@ class EditorView(tk.Frame):
             bg='#21262d',
             fg='#3fb950'
         ).pack()
-        
+
         # Auto-close after 3 seconds
         success_window.after(3000, success_window.destroy)
