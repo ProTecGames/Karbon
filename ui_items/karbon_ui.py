@@ -47,11 +47,6 @@ class KarbonUI:
         self.api_key = None
         self.model_source = None
 
-        # Note: load_settings() is called after UI elements are created to apply layout.
-
-        self.load_settings()
-
-
         # Create main container with gradient-like effect
         self.main_container = tk.Frame(root, bg='#0d1117')
         self.main_container.pack(fill="both", expand=True)
@@ -453,19 +448,6 @@ class KarbonUI:
         self.update_status("Transitioning to editor...", "🔄")
         self.animate_status_indicator()
 
-        # --- MODIFIED: Use new layout logic for transition ---
-        def fade_transition():
-            # Hide prompt view using new method
-            self.prompt_view_visible.set(False)
-            self.toggle_prompt_view()
-
-            loading_frame = tk.Frame(self.paned_window, bg='#0d1117')
-            self.paned_window.add(loading_frame, weight=1)
-
-            loading_label = tk.Label(loading_frame, text="✨ Preparing your code editor...", font=("Segoe UI", 16), bg='#0d1117', fg='#58a6ff')
-            loading_label.pack(expand=True)
-
-        # Fade out prompt view (simulate with pack/unpack)
         def fade_transition():
             self.prompt_view.pack_forget()
 
@@ -482,20 +464,14 @@ class KarbonUI:
             )
             loading_label.pack(expand=True)
 
-            # Show editor after brief delay
-
             def show_editor():
-                self.paned_window.forget(loading_frame)
-                loading_frame.destroy()
-                # Show editor view using new method
-                self.editor_view_visible.set(True)
-                self.toggle_editor_view()
+                loading_frame.pack_forget()
+                self.editor_view.pack(fill="both", expand=True)
                 self.update_status("Code editor ready - Start building!", "✅")
 
             self.root.after(1000, show_editor)
 
         self.root.after(500, fade_transition)
-        # --- END MODIFIED ---
 
     def get_code(self):
         return self.code
