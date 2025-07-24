@@ -132,7 +132,7 @@ class EditorView(tk.Frame):
             bg='#1f6feb',
             # fg='white',
             state="disabled",
-            disabledforeground="white",
+            disabledforeground="#88b8ff",
             activebackground='#2f81f7',
             activeforeground='white',
             relief='flat',
@@ -152,7 +152,7 @@ class EditorView(tk.Frame):
             bg='#1f6feb',
             # fg='white',
             state="disabled",
-            disabledforeground="white",
+            disabledforeground="#88b8ff",
             activebackground='#2f81f7',
             activeforeground='white',
             relief='flat',
@@ -445,13 +445,24 @@ class EditorView(tk.Frame):
             self.show_error("Please describe what changes you'd like to make! 🔄")
             return
         else:
-            prompt_history.add(prompt)
-            self.update_btn.config(state="active")
+            prompt_history.push_prompt(prompt)
         
         self.start_update(prompt)
+        self.redo_btn.config(
+                bg="#1f6feb",
+                state="disabled",
+                disabledforeground="#88b8ff"
+        )
+        
+        self.undo_btn.config(
+                bg="#1f6feb",
+                activebackground='#2f81f7',
+                activeforeground='white',
+                state="active"
+        )
 
     def handle_undo(self):
-        if (prompt_history.undo() == 1):
+        if (prompt_history.undo() == 0):
             self.undo_btn.config(
             bg="#1f6feb",
             state="disabled",
@@ -504,7 +515,7 @@ class EditorView(tk.Frame):
         def update_in_background():
             try:
                 code = generate_code_from_prompt(prompt)
-                prompt_history.code_of_prompts.append(code)
+                prompt_history.push_code(code)
                 self.set_code(code)
                 update_preview(code)
                 

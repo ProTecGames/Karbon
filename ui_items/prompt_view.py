@@ -415,7 +415,8 @@ class PromptView(tk.Frame):
             try:
                 code = generate_code_from_prompt(prompt)
                 update_preview(code)
-                prompt_history.code_of_prompts.append(code)
+                prompt_history.push_prompt(prompt)
+                prompt_history.push_code(code)
                 
                 # Call completion on main thread
                 self.after(0, lambda: self.generation_complete(code))
