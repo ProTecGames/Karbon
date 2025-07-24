@@ -3,10 +3,10 @@ from tkinter import ttk, messagebox
 import threading
 from ai_engine import generate_code_from_prompt
 from preview import update_preview
+import prompt_history
 from ai_engine import ai_status
 from ai_engine import optimize_prompt
 MAX_PROMPT_LENGTH = 256
-
 
 class PromptView(tk.Frame):
     def __init__(self, master, on_generate):
@@ -457,7 +457,6 @@ class PromptView(tk.Frame):
         # Start generation in background thread
         def generate_in_background():
             try:
-
                 # Get API key and model source from the main UI
                 api_key = self.master.master.master.get_api_key()
                 model_source = self.master.master.master.get_model_source()
@@ -470,8 +469,12 @@ class PromptView(tk.Frame):
                     final_prompt = optimize_prompt(prompt)
                     
                 code = generate_code_from_prompt(final_prompt)
-
                 update_preview(code)
+                prompt_history.pop_prompt()
+                prompt_history.push_prompt(final_prompt)
+                prompt_history.push_prompt("Describe what you'd like to change...\n\nExample: Make the header purple, add a contact form, or change the font to something more modern")
+                prompt_history.push_code(code)
+                prompt_history.push_code(code)
 
                 # Call completion on main thread
                 self.after(0, lambda: self.generation_complete(code))
