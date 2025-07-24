@@ -99,7 +99,8 @@ class EditorView(tk.Frame):
         self.update_text.pack(fill="both", expand=True)
         
         # Placeholder for update input
-        self.update_placeholder = "Describe what you'd like to change...\n\nExample: Make the header purple, add a contact form, or change the font to something more modern"
+        # self.update_placeholder = "Describe what you'd like to change...\n\nExample: Make the header purple, add a contact form, or change the font to something more modern"
+        self.update_placeholder = prompt_history.get_current_prompt()
         self.setup_update_placeholder()
         
         # Button container
@@ -130,7 +131,6 @@ class EditorView(tk.Frame):
             text="⏪ Undo",
             font=("Segoe UI", 11, "bold"),
             bg='#1f6feb',
-            # fg='white',
             state="disabled",
             disabledforeground="#88b8ff",
             activebackground='#2f81f7',
@@ -150,7 +150,6 @@ class EditorView(tk.Frame):
             text="Redo ⏩",
             font=("Segoe UI", 11, "bold"),
             bg='#1f6feb',
-            # fg='white',
             state="disabled",
             disabledforeground="#88b8ff",
             activebackground='#2f81f7',
@@ -445,6 +444,8 @@ class EditorView(tk.Frame):
             self.show_error("Please describe what changes you'd like to make! 🔄")
             return
         else:
+            prompt_history.pop_prompt()
+            prompt_history.pop_code()
             prompt_history.push_prompt(prompt)
         
         self.start_update(prompt)
@@ -479,7 +480,7 @@ class EditorView(tk.Frame):
         self.update_text.insert("1.0", prompt_history.get_current_prompt())
     
     def handle_redo(self):
-        if (prompt_history.redo() == prompt_history.number_of_prompts-1):
+        if (prompt_history.redo() == prompt_history.number_of_prompts):
             self.redo_btn.config(
                 bg="#1f6feb",
                 state="disabled",
@@ -516,6 +517,9 @@ class EditorView(tk.Frame):
             try:
                 code = generate_code_from_prompt(prompt)
                 prompt_history.push_code(code)
+                prompt_history.push_prompt("Describe what you'd like to change...\n\nExample: Make the header purple, add a contact form, or change the font to something more modern")
+                prompt_history.push_code(code)
+
                 self.set_code(code)
                 update_preview(code)
                 

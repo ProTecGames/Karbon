@@ -415,7 +415,10 @@ class PromptView(tk.Frame):
             try:
                 code = generate_code_from_prompt(prompt)
                 update_preview(code)
+                prompt_history.pop_prompt()
                 prompt_history.push_prompt(prompt)
+                prompt_history.push_prompt("Describe what you'd like to change...\n\nExample: Make the header purple, add a contact form, or change the font to something more modern")
+                prompt_history.push_code(code)
                 prompt_history.push_code(code)
                 
                 # Call completion on main thread
