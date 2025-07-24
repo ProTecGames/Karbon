@@ -421,14 +421,9 @@ class PromptView(tk.Frame):
         if self.is_generating:
             return
 
-
         prompt = self.text_input.get("1.0", "end-1c").strip()
-
-
-        prompt = self.text_input.get("1.0", "end-1c")
         # Sanitize input: strip whitespace and remove non-printable characters
         prompt = ''.join(ch for ch in prompt if ch.isprintable()).strip()
-        
 
         if not prompt or prompt == self.placeholder_text:
             self.show_error("Please describe your website idea first! 💡")
@@ -461,7 +456,6 @@ class PromptView(tk.Frame):
                 # Get API key and model source from the main UI
                 api_key = self.master.master.master.get_api_key()
                 model_source = self.master.master.master.get_model_source()
-                code = generate_code_from_prompt(prompt, api_key, model_source)
 
                 final_prompt = prompt
                 
@@ -469,7 +463,7 @@ class PromptView(tk.Frame):
             
                     final_prompt = optimize_prompt(prompt)
                     
-                code = generate_code_from_prompt(final_prompt)
+                code = generate_code_from_prompt(final_prompt, api_key, model_source)
 
                 update_preview(code)
 
@@ -544,8 +538,6 @@ class PromptView(tk.Frame):
 
 
         # Show error
-        self.show_error(f"Oops! Something went wrong: {error_msg}")
-
         status = ai_status.get("state", "unknown")
         message = ai_status.get("message", "")
         if status == "offline":
