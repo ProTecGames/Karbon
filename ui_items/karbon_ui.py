@@ -301,7 +301,7 @@ class KarbonUI:
         settings_btn = tk.Button(
             self.title_frame, text="⚙️", font=("Segoe UI", 16), bg='#21262d', fg='#8b949e',
             activebackground='#30363d', activeforeground='#f0f6fc', relief='flat', bd=0, cursor='hand2', command=self.open_settings
-
+        )
         # Main title with gradient effect
         self.title_label = tk.Label(
             self.title_frame,
