@@ -512,7 +512,7 @@ class PromptView(tk.Frame):
             bg='#238636'
         )
 
-        
+
         status = ai_status.get("state", "unknown")
         message = ai_status.get("message", "")
         if status != "online":
@@ -636,6 +636,7 @@ class PromptView(tk.Frame):
 
         # Auto-close after 3 seconds
         success_window.after(3000, success_window.destroy)
+
 
     def update_char_count(self, event=None):
         """Update character count label and enforce max length"""

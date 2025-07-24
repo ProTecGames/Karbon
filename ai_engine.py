@@ -132,6 +132,9 @@ def rule_based_enhancement(prompt: str) -> str:
     return f"{prompt}\n\n" + "\n".join(modifiers)
 
 
+    final_code = html.replace("</head>", f"<style>{css}</style></head>").replace("</body>", f"<script>{js}</script></body>")
+    return final_code
+
 
     final_code = html.replace("</head>", f"<style>{css}</style></head>").replace("</body>", f"<script>{js}</script></body>")
     return final_code
