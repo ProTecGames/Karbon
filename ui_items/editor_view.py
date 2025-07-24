@@ -206,6 +206,23 @@ class EditorView(tk.Frame):
         ]
 
         for text, color, command in actions:
+            if color == "#238636":
+                zip_checkbox = tk.Checkbutton(
+                    right_section,
+                    text="Export as ZIP",
+                    variable=self.export_as_zip_var,
+                    font=("Segoe UI", 8),
+                    bg='#21262d',
+                    fg='white',
+                    activebackground='#21262d',
+                    activeforeground='white',
+                    selectcolor='#21262d',
+                    anchor='w',
+                    padx=25,
+                    relief='flat'
+                )
+                zip_checkbox.pack(fill='x', padx=15, pady=2)
+
             btn = tk.Button(
                 right_section,
                 text=text,
@@ -225,24 +242,6 @@ class EditorView(tk.Frame):
     
     def insert_text(self, words):
         self.update_text.insert("1.0", words)
-
-            # Insert ZIP checkbox after Export button
-            if text == "💾 Export":
-                zip_checkbox = tk.Checkbutton(
-                    right_section,
-                    text="Export as ZIP",
-                    variable=self.export_as_zip_var,
-                    font=("Segoe UI", 8),
-                    bg='#21262d',
-                    fg='white',
-                    activebackground='#21262d',
-                    activeforeground='white',
-                    selectcolor='#21262d',
-                    anchor='w',
-                    padx=25,
-                    relief='flat'
-                )
-                zip_checkbox.pack(fill='x', padx=15, pady=(0, 6))
 
     def create_main_content(self):
         """Create the main content area"""
