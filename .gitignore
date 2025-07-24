@@ -16,4 +16,10 @@ build/
 dist/
 *.egg-info/
 
+# Log files
+karbon_ai_errors.log
+
+# Cache files
+contributors_cache.json
+
 venv/

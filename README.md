@@ -136,6 +136,13 @@ Here are some example prompts you can try in Karbon, along with typical outputs:
 
 ---
 
+## 📊 Architecture
+
+The following diagram illustrates Karbon's high-level architecture.  
+It shows how user input flows from the GUI to the AI engine and how the generated code is previewed and exported.  
+This structure makes the project modular, easier to maintain, and simple to extend.
+
+![Karbon Architecture](./assets/karbon_architecture.png)
 
 
 ## 🧑‍💻 Contributing
