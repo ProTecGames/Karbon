@@ -43,48 +43,8 @@ class KarbonUI:
         self.setup_window()
         self.setup_styles()
         self.code = ""
-
         self.api_key = None
         self.model_source = None
-
-        # Note: load_settings() is called after UI elements are created to apply layout.
-
-        self.load_settings()
-
-
-        # Create main container with gradient-like effect
-        self.main_container = tk.Frame(root, bg='#0d1117')
-        self.main_container.pack(fill="both", expand=True)
-
-        # Add animated title bar
-
-        self.create_title_bar()
-
-        # --- NEW: Replace content_frame with a PanedWindow for resizable layout ---
-        self.paned_window = ttk.PanedWindow(self.main_container, orient=tk.HORIZONTAL)
-        self.paned_window.pack(fill="both", expand=True, padx=20, pady=(0, 20))
-
-        # Initialize views with the paned_window as their parent
-        self.prompt_view = PromptView(self.paned_window, on_generate=self.handle_prompt_generated)
-        self.editor_view = EditorView(self.paned_window, get_code_callback=self.get_code, set_code_callback=self.set_code, get_api_key_callback=self.get_api_key, get_model_source_callback=self.get_model_source)
-
-        # Load settings and apply the layout
-        self.load_settings()
-
-        # Add status bar
-        self.create_status_bar()
-
-
-        # Create menu bar
-        self.menubar = tk.Menu(self.root)
-        self.root.config(menu=self.menubar)
-
-        # File menu
-        self.file_menu = tk.Menu(self.menubar, tearoff=0)
-        self.menubar.add_cascade(label="File", menu=self.file_menu)
-        self.file_menu.add_command(label="Export Code", command=self.export_code)
-        self.file_menu.add_separator()
-        self.file_menu.add_command(label="Exit", command=self.root.destroy)
 
         # Main container
         self.main_container = tk.Frame(root, bg='#0d1117')
@@ -93,35 +53,46 @@ class KarbonUI:
         # Animated title
         self.create_title_bar()
 
-        # Content area
-        self.content_frame = tk.Frame(self.main_container, bg='#0d1117')
-        self.content_frame.pack(fill="both", expand=True, padx=20, pady=(0, 20))
+        # Resizable PanedWindow layout
+        self.paned_window = ttk.PanedWindow(self.main_container, orient=tk.HORIZONTAL)
+        self.paned_window.pack(fill="both", expand=True, padx=20, pady=(0, 20))
 
+        # Prompt & Editor views (inside paned_window)
+        self.prompt_view = PromptView(self.paned_window, on_generate=self.handle_prompt_generated)
+        self.editor_view = EditorView(
+            self.paned_window,
+            get_code_callback=self.get_code,
+            set_code_callback=self.set_code,
+            get_api_key_callback=self.get_api_key,
+            get_model_source_callback=self.get_model_source
+        )
 
-        # Initialize views
-        self.prompt_view = PromptView(self.content_frame, on_generate=self.handle_prompt_generated)
-        self.editor_view = EditorView(self.content_frame, get_code_callback=self.get_code, set_code_callback=self.set_code, get_api_key_callback=self.get_api_key, get_model_source_callback=self.get_model_source)
+        # Add views to paned_window (not packed individually)
+        self.paned_window.add(self.prompt_view)
+        self.paned_window.add(self.editor_view)
 
-        # Show prompt view initially
-        self.prompt_view.pack(fill="both", expand=True)
+        # Layout from settings
+        self.load_settings()
 
-        # Add status bar
-        self.create_status_bar()
+        # Menu bar
+        self.menubar = tk.Menu(self.root)
+        self.root.config(menu=self.menubar)
 
-        # Start title animation
+        self.file_menu = tk.Menu(self.menubar, tearoff=0)
+        self.menubar.add_cascade(label="File", menu=self.file_menu)
+        self.file_menu.add_command(label="Export Code", command=self.export_code)
+        self.file_menu.add_separator()
+        self.file_menu.add_command(label="Exit", command=self.root.destroy)
 
-        # Example Prompt Dropdown
-        self.example_var = tk.StringVar()
-        self.example_var.set("🔽 Choose Example Prompt")
+        # View controls
+        self.example_var = tk.StringVar(value="🔽 Choose Example Prompt")
         PADDED_EXAMPLES = {key.ljust(30): prompt for key, prompt in EXAMPLES.items()}
         self.example_menu = tk.OptionMenu(
-            self.content_frame,
+            self.main_container,
             self.example_var,
             *PADDED_EXAMPLES.keys(),
             command=lambda key: self.insert_example_prompt(key.strip())
         )
-
-        # Style the visible OptionMenu button
         self.example_menu.config(
             font=("Segoe UI", 10),
             bg="#21262d",
@@ -130,8 +101,6 @@ class KarbonUI:
             highlightthickness=0,
             width=24
         )
-
-        # Style the dropdown list (menu part)
         dropdown_menu = self.example_menu["menu"]
         dropdown_menu.config(
             font=("Segoe UI", 10),
@@ -143,35 +112,20 @@ class KarbonUI:
         )
         self.example_menu.pack(pady=(10, 0))
 
-        # Contributors button
-        self.contributors_page = ContributorsPage(self.content_frame, self.show_prompt_view)
+        # Contributors button and page
+        self.contributors_page = ContributorsPage(self.main_container, self.show_prompt_view)
         self.contributors_button = ttk.Button(
-            self.content_frame,
+            self.main_container,
             text="Contributors",
             command=self.show_contributors_page,
             style="Modern.TButton"
         )
         self.contributors_button.pack(pady=10)
 
-        # Prompt view
-        self.prompt_view = PromptView(
-
-            self.content_frame,
-            on_generate=self.handle_prompt_generated
-        )
-
-        self.prompt_view.pack(fill="both", expand=True)
-
-        # Editor view, initialized but not packed yet
-        self.editor_view = EditorView(
-            self.content_frame,
-            get_code_callback=self.get_code,
-            set_code_callback=self.set_code
-        )
-
-        # Add status bar and animation
+        # Status bar
         self.create_status_bar()
 
+        # Final UI polish
         self.animate_title()
         self.update_ai_status_indicator()
 
