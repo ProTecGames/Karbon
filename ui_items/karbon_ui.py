@@ -216,15 +216,13 @@ class KarbonUI:
         return self.model_source
 
     # --- NEW AND UPDATED METHODS FOR CUSTOM LAYOUT ---
-
     def toggle_prompt_view(self):
-        """Adds or removes the prompt view from the paned window."""
-        is_present = self.prompt_view in self.paned_window.panes()
-        if self.prompt_view_visible.get() and not is_present:
-            self.paned_window.insert(0, self.prompt_view, weight=1)
-        elif not self.prompt_view_visible.get() and is_present:
-            self.paned_window.forget(self.prompt_view)
 
+       if not self.paned_window.panes():
+        self.paned_window.add(self.prompt_view, weight=1)
+       else:
+        self.paned_window.insert(0, self.prompt_view, weight=1)
+    
     def toggle_editor_view(self):
         """Adds or removes the editor view from the paned window."""
         is_present = self.editor_view in self.paned_window.panes()
