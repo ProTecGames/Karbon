@@ -17,6 +17,7 @@ class EditorView(tk.Frame):
         self.get_api_key = get_api_key_callback
         self.get_model_source = get_model_source_callback
         self.is_updating = False
+        self.export_as_zip_var = tk.BooleanVar(value=False)
         self.setup_ui()
 
     def setup_ui(self):
@@ -181,6 +182,24 @@ class EditorView(tk.Frame):
                 command=command
             )
             btn.pack(fill="x", padx=15, pady=2)
+
+            # Insert ZIP checkbox after Export button
+            if text == "💾 Export":
+                zip_checkbox = tk.Checkbutton(
+                    right_section,
+                    text="Export as ZIP",
+                    variable=self.export_as_zip_var,
+                    font=("Segoe UI", 8),
+                    bg='#21262d',
+                    fg='white',
+                    activebackground='#21262d',
+                    activeforeground='white',
+                    selectcolor='#21262d',
+                    anchor='w',
+                    padx=25,
+                    relief='flat'
+                )
+                zip_checkbox.pack(fill='x', padx=15, pady=(0, 6))
 
     def create_main_content(self):
         """Create the main content area"""
@@ -500,18 +519,26 @@ class EditorView(tk.Frame):
             self.show_error(f"Update failed: {error_msg}")
 
     def handle_export(self):
-        """Enhanced export with options"""
+        """Enhanced export with zip option"""
         code = self.get_code()
         if not code:
             self.show_error("No code to export! Generate a website first.")
             return
 
+
+        export_as_zip = self.export_as_zip_var.get()
+
         try:
-            export_code(code)
-            self.show_success("Code exported successfully! 📁")
-            self.update_status("Code exported to file", "💾")
+            export_code(code, as_zip=export_as_zip)
+            if export_as_zip:
+                self.show_success("Code exported successfully as ZIP! 📦")
+                self.update_status("Exported ZIP file", "📦")
+            else:
+                self.show_success("Code exported successfully! 📁")
+                self.update_status("Code exported to file", "💾")
         except Exception as e:
             self.show_error(f"Export failed: {str(e)}")
+
 
     def save_file(self):
         """Save code to custom location"""
