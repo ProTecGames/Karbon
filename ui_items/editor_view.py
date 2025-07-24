@@ -4,7 +4,7 @@ import threading
 import webbrowser
 import tempfile
 import os
-from ai_engine import generate_code_from_prompt
+from ai_engine import generate_code_from_prompt, ai_status
 from exporter import export_code
 from preview import update_preview
 
@@ -455,6 +455,19 @@ class EditorView(tk.Frame):
         # Update stats
         self.update_stats()
 
+
+        # Check AI status before showing success
+        status = ai_status.get("state", "unknown")
+        message = ai_status.get("message", "")
+        if status != "online":
+            if status == "offline":
+                self.show_error("AI service is currently unavailable. Please check your internet connection or try again later.")
+            elif status == "error":
+                self.show_error(f"AI service error: {message}")
+            else:
+                self.show_error(f"Website could not be updated due to an AI service issue.")
+            return
+
         # Show success notification
         self.show_success("Website updated successfully! 🎉")
 
@@ -477,7 +490,14 @@ class EditorView(tk.Frame):
         self.preview_status.configure(text="● Error", fg='#f85149')
 
         # Show error
-        self.show_error(f"Update failed: {error_msg}")
+        status = ai_status.get("state", "unknown")
+        message = ai_status.get("message", "")
+        if status == "offline":
+            self.show_error("AI service is currently unavailable. Please check your internet connection or try again later.")
+        elif status == "error":
+            self.show_error(f"AI service error: {message}")
+        else:
+            self.show_error(f"Update failed: {error_msg}")
 
     def handle_export(self):
         """Enhanced export with options"""
