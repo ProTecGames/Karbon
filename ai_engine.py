@@ -2,8 +2,6 @@ import json
 import re
 from meta_ai_api import MetaAI
 
-meta = MetaAI()
-
 def extract_json(response: str) -> dict:
     try:
         return json.loads(response)
@@ -16,7 +14,10 @@ def extract_json(response: str) -> dict:
                 return None
         return None
 
-def generate_code_from_prompt(prompt: str) -> str:
+def generate_code_from_prompt(prompt: str, api_key: str = None, model_source: str = None) -> str:
+    # Use the provided API key and model source, otherwise use defaults
+    meta = MetaAI(api_key=api_key, model_source=model_source)
+
     formatted = (
         f"You are a helpful assistant that writes complete frontend apps.\n"
         f"Given the task: \"{prompt}\"\n"
