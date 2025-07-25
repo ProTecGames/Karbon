@@ -1,10 +1,22 @@
 import tkinter as tk
 from tkinter import ttk
 import threading
+import os
+
+from pathlib import Path 
+
 from ui_items.prompt_view import PromptView
 from ui_items.editor_view import EditorView
-from ai_engine import ai_status
+from ui_items.token_manager_view import TokenManagerView
 from contributors_page import ContributorsPage
+from pathlib import Path
+
+from ai_engine import ai_status, generate_code_from_prompt
+
+from exporter import export_code, export_to_github
+from repo_pusher import push_to_github
+
+
 
 EXAMPLES = {
     "Login Page": "Create a login page using HTML and Tailwind CSS",
@@ -48,9 +60,14 @@ class KarbonUI:
         # File menu
         self.file_menu = tk.Menu(self.menubar, tearoff=0)
         self.menubar.add_cascade(label="File", menu=self.file_menu)
-        self.file_menu.add_command(label="Export Code", command=self.export_code)
+        self.file_menu.add_command(label="Export Code", command=self.handle_export)
         self.file_menu.add_separator()
         self.file_menu.add_command(label="Exit", command=self.root.destroy)
+        
+        # GitHub menu
+        self.github_menu = tk.Menu(self.menubar, tearoff=0)
+        self.menubar.add_cascade(label="GitHub", menu=self.github_menu)
+        self.github_menu.add_command(label="Manage Token", command=self.show_token_manager)
 
         # Main container
         self.main_container = tk.Frame(root, bg='#0d1117')
@@ -372,18 +389,52 @@ class KarbonUI:
         self.contributors_button.pack(pady=10)
         self.prompt_view.pack(fill='both', expand=True)
         self.update_status("Ready to create amazing web experiences", "🚀")
+        
+    def show_token_manager(self):
+        """Show the TokenManagerView in content_frame"""
+        self.clear_content()
+        token_manager = TokenManagerView(self.content_frame, self.show_prompt_view)
+        token_manager.pack(fill='both', expand=True)
+        self.update_status("GitHub Token Manager", "🔐")
 
-    def export_code(self):
-        """Export code using existing functionality"""
-        from ai_engine import generate_code_from_prompt
-        from exporter import export_code
-        prompt = self.prompt_view.text_input.get("1.0", tk.END).strip()
+    def handle_export(self):
+        from exporter import export_code, export_to_github, validate_github_token
+        from token_manager import decrypt_token
+        
+        prompt = self.prompt_view.text_input.get("1.0", "end-1c").strip()
         if not prompt:
-            self.show_notification("Please enter a description", "error")
-            return
+           self.show_notification("Please enter a description", "error")
+           return
+
+        print("⚙️ Generating code...")
         code = generate_code_from_prompt(prompt)
-        export_code(code)
-        self.show_notification("Code exported successfully!", "success")
+
+        # Local export
+        path = export_code(code)
+        if not path:
+            self.show_notification("Export cancelled", "info")
+            return
+            
+        # Check if GitHub token exists
+        token = decrypt_token()
+        if not token:
+            self.show_notification("No GitHub token found. Please set up your token in GitHub > Manage Token", "warning")
+            return
+
+        # Validate GitHub token before attempting to push
+        is_valid, username, error = validate_github_token()
+        if not is_valid:
+            self.show_notification(f"GitHub token is invalid: {error}. Please update your token in GitHub > Manage Token", "error")
+            return
+
+        print("📤 Attempting to push to GitHub...")
+        url = export_to_github(code)
+        if url:
+           self.show_notification(f"Pushed to GitHub: {url}", "success")
+        else:
+            self.show_notification("Failed to push to GitHub. Check console for details.", "error")
+
+
 
     def show_notification(self, message, type="info"):
         """Show a temporary notification"""
