@@ -6,6 +6,7 @@ from ui_items.prompt_view import PromptView
 from ui_items.editor_view import EditorView
 from ai_engine import ai_status
 from contributors_page import ContributorsPage
+import re
 
 
 EXAMPLES = {
@@ -665,6 +666,16 @@ class KarbonUI:
             self.font_family = self.font_family_var.get()
             self.font_size = int(self.font_size_var.get())
             self.theme = self.theme_var.get()
+            theme_colors = self.get_theme_colors(self.theme)
+            # Check contrast for label_fg/bg and input_fg/input_bg
+            label_contrast = self.contrast_ratio(theme_colors["label_fg"], theme_colors["bg"])
+            input_contrast = self.contrast_ratio(theme_colors["input_fg"], theme_colors["input_bg"])
+            if label_contrast < 4.5 or input_contrast < 4.5:
+                warning_label = tk.Label(settings_window, text="⚠️ Selected theme does not meet accessibility contrast standards (WCAG AA). Please choose another theme.", bg='#161b22', fg='#f85149', font=("Segoe UI", 10))
+                warning_label.pack(pady=(5,0))
+                return
+
+
             self.save_settings()
             self.apply_user_appearance()
             settings_window.destroy()
@@ -819,3 +830,20 @@ class KarbonUI:
         # Optionally update main window bg
         self.root.configure(bg=theme_colors["bg"])
         self.main_container.configure(bg=theme_colors["bg"])
+
+    def hex_to_rgb(self, hex_color):
+        hex_color = hex_color.lstrip('#')
+        lv = len(hex_color)
+        return tuple(int(hex_color[i:i + lv // 3], 16) for i in range(0, lv, lv // 3))
+
+    def luminance(self, rgb):
+        r, g, b = [x / 255.0 for x in rgb]
+        a = [v / 12.92 if v <= 0.03928 else ((v + 0.055) / 1.055) ** 2.4 for v in (r, g, b)]
+        return 0.2126 * a[0] + 0.7152 * a[1] + 0.0722 * a[2]
+
+    def contrast_ratio(self, color1, color2):
+        lum1 = self.luminance(self.hex_to_rgb(color1))
+        lum2 = self.luminance(self.hex_to_rgb(color2))
+        lighter = max(lum1, lum2)
+        darker = min(lum1, lum2)
+        return (lighter + 0.05) / (darker + 0.05)
