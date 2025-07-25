@@ -1,13 +1,19 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
+import threading
 import json
 import os
+import re
+from pathlib import Path
+
 from ui_items.prompt_view import PromptView
 from ui_items.editor_view import EditorView
-from ai_engine import ai_status
+from ui_items.token_manager_view import TokenManagerView
 from contributors_page import ContributorsPage
-import re
 
+from ai_engine import ai_status, generate_code_from_prompt
+from exporter import export_code, export_to_github
+from repo_pusher import push_to_github
 
 EXAMPLES = {
     "Login Page": "Create a login page using HTML and Tailwind CSS",
@@ -28,7 +34,20 @@ class KarbonUI:
         self.model_source = None
 
 
+        # File menu
+        self.file_menu = tk.Menu(self.menubar, tearoff=0)
+        self.menubar.add_cascade(label="File", menu=self.file_menu)
+        self.file_menu.add_command(label="Export Code", command=self.handle_export)
+        self.file_menu.add_separator()
+        self.file_menu.add_command(label="Exit", command=self.root.destroy)
+
+        # GitHub menu
+        self.github_menu = tk.Menu(self.menubar, tearoff=0)
+        self.menubar.add_cascade(label="GitHub", menu=self.github_menu)
+        self.github_menu.add_command(label="Manage Token", command=self.show_token_manager)
+
         # Create main container
+
         self.main_container = tk.Frame(root, bg='#0d1117')
         self.main_container.pack(fill="both", expand=True)
 
@@ -475,10 +494,8 @@ class KarbonUI:
         save_btn = ttk.Button(settings_window, text="Save & Close", command=save_and_close, style="Modern.TButton")
         save_btn.pack(pady=20)
 
-    def export_code(self):
-        """Exports the current code to HTML/CSS/JS files."""
-        # Assuming 'exporter' module and its 'export_code' function exist
-        # If not, you'll need to provide the actual implementation or import it
+    def export_code_basic(self):
+        """Exports the current code to HTML/CSS/JS files (basic local export only)."""
         try:
             from exporter import export_code
             if not self.code:
@@ -491,9 +508,91 @@ class KarbonUI:
         except Exception as e:
             self.show_notification(f"Failed to export code: {e}", "error")
 
-    def show_notification(self, message, n_type="info"):
-        """Shows a temporary notification pop-up."""
-        colors = {"info": "#58a6ff", "success": "#3fb950", "warning": "#d29922", "error": "#f85149"}
+    def show_contributors_page(self):
+        """Show the ContributorsPage in content_frame"""
+        self.clear_content()
+        self.contributors_page.pack(fill='both', expand=True)
+        self.update_status("Viewing contributors", "👥")
+
+    def show_prompt_view(self):
+        """Show the PromptView in content_frame"""
+        self.clear_content()
+        self.example_var.set("🔽 Choose Example Prompt")  # Reset dropdown
+        self.example_menu.pack(pady=(10, 0))
+        self.contributors_button.pack(pady=10)
+        self.prompt_view.pack(fill='both', expand=True)
+        self.update_status("Ready to create amazing web experiences", "🚀")
+
+    def show_token_manager(self):
+        """Show the TokenManagerView in content_frame"""
+        self.clear_content()
+        token_manager = TokenManagerView(self.content_frame, self.show_prompt_view)
+        token_manager.pack(fill='both', expand=True)
+        self.update_status("GitHub Token Manager", "🔐")
+
+    def handle_export(self):
+        from exporter import export_code, export_to_github, validate_github_token
+        from token_manager import decrypt_token
+
+        prompt = self.prompt_view.text_input.get("1.0", "end-1c").strip()
+        if not prompt:
+            self.show_notification("Please enter a description", "error")
+            return
+
+        print("⚙️ Generating code...")
+        code = generate_code_from_prompt(prompt)
+
+        # Local export
+        path = export_code(code)
+        if not path:
+            self.show_notification("Export cancelled", "info")
+            return
+
+        # Check if GitHub token exists
+        token = decrypt_token()
+        if not token:
+            self.show_notification("No GitHub token found. Please set up your token in GitHub > Manage Token", "warning")
+            return
+
+        # Validate GitHub token before attempting to push
+        is_valid, username, error = validate_github_token()
+        if not is_valid:
+            self.show_notification(f"GitHub token is invalid: {error}. Please update your token in GitHub > Manage Token", "error")
+            return
+
+        print("📤 Attempting to push to GitHub...")
+        url = export_to_github(code)
+        if url:
+            self.show_notification(f"Pushed to GitHub: {url}", "success")
+        else:
+            self.show_notification("Failed to push to GitHub. Check console for details.", "error")
+
+    def show_notification(self, message, type="info"):
+        """Show a temporary notification pop-up."""
+        colors = {
+            "info": "#58a6ff",
+            "success": "#3fb950",
+            "warning": "#d29922",
+            "error": "#f85149"
+        }
+
+        notification = tk.Toplevel(self.root)
+        notification.overrideredirect(True)
+        notification.attributes('-topmost', True)
+        notification.configure(bg='#21262d', relief="solid", borderwidth=1)
+
+        # Position notification in the top right corner of the main window
+        self.root.update_idletasks()  # Ensure window size is up-to-date
+        x = self.root.winfo_x() + self.root.winfo_width() - 320
+        y = self.root.winfo_y() + 50
+        notification.geometry(f"300x80+{x}+{y}")
+
+        tk.Label(notification, text=message, bg="#21262d", fg=colors.get(type, "#58a6ff"),
+                 font=("Segoe UI", 10, "bold")).pack(pady=(15, 5), padx=20)
+
+        # Auto-destroy notification after 3 seconds
+        notification.after(3000, notification.destroy)
+
         notification = tk.Toplevel(self.root)
         notification.overrideredirect(True)
         notification.attributes('-topmost', True)
