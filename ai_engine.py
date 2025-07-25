@@ -2,7 +2,7 @@ import json
 import re
 import logging
 import requests
-from meta_ai_api import MetaAI
+from meta_ai_api import MetaAI # from meta_ai_api import MetaAI
 
 
 logging.basicConfig(
