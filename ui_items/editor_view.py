@@ -782,3 +782,13 @@ class EditorView(tk.Frame):
 
         # Auto-close after 3 seconds
         success_window.after(3000, success_window.destroy)
+
+    def update_appearance(self, font_family, font_size, theme_colors):
+        for widget in self.winfo_children():
+            if isinstance(widget, tk.Label):
+                widget.config(font=(font_family, font_size), fg=theme_colors["label_fg"], bg=theme_colors["bg"])
+
+        if hasattr(self, 'update_text'):
+            self.update_text.config(font=("Consolas", font_size), bg=theme_colors["input_bg"], fg=theme_colors["input_fg"], insertbackground=theme_colors["accent"])
+
+        self.config(bg=theme_colors["bg"])

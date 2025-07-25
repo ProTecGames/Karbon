@@ -649,3 +649,16 @@ class PromptView(tk.Frame):
             content = self.text_input.get("1.0", "end-1c")
         remaining = 256 - len(content)
         self.char_count_label.config(text=f"{remaining} characters left")
+
+    def update_appearance(self, font_family, font_size, theme_colors):
+
+        self.welcome_label.config(font=(font_family, 32, "bold"), fg=theme_colors["accent"])
+        self.subtitle_label.config(font=(font_family, 14), fg=theme_colors["subtitle"])
+
+        self.text_input.config(font=("Consolas", font_size), bg=theme_colors["input_bg"], fg=theme_colors["input_fg"], insertbackground=theme_colors["accent"])
+
+        for widget in self.winfo_children():
+            if isinstance(widget, tk.Label):
+                widget.config(font=(font_family, font_size), fg=theme_colors["label_fg"], bg=theme_colors["bg"])
+
+        self.config(bg=theme_colors["bg"])

@@ -616,7 +616,7 @@ class KarbonUI:
     def open_settings(self):
         settings_window = tk.Toplevel(self.root)
         settings_window.title("Settings")
-        settings_window.geometry("400x250")
+        settings_window.geometry("400x400")
         settings_window.configure(bg='#161b22')
         settings_window.transient(self.root)
         settings_window.grab_set()
@@ -633,10 +633,39 @@ class KarbonUI:
         if self.model_source:
             model_source_entry.insert(0, self.model_source)
 
+        tk.Label(settings_window, text="Font Family:", bg='#161b22', fg='white', font=("Segoe UI", 10)).pack(pady=(15,0))
+        font_families = [
+            "Segoe UI", "Arial", "Helvetica", "Times New Roman", "Courier New", "Verdana", "Tahoma", "Trebuchet MS", "Georgia", "Lucida Console"
+        ]
+        self.font_family_var = tk.StringVar(value=getattr(self, 'font_family', 'Segoe UI'))
+        font_family_menu = ttk.Combobox(settings_window, textvariable=self.font_family_var, values=font_families, state="readonly")
+        font_family_menu.pack(pady=5, padx=20)
+
+
+        tk.Label(settings_window, text="Font Size:", bg='#161b22', fg='white', font=("Segoe UI", 10)).pack(pady=(10,0))
+        font_sizes = ["10", "11", "12", "14", "16", "18", "20", "22", "24"]
+        self.font_size_var = tk.StringVar(value=str(getattr(self, 'font_size', 12)))
+        font_size_menu = ttk.Combobox(settings_window, textvariable=self.font_size_var, values=font_sizes, state="readonly")
+        font_size_menu.pack(pady=5, padx=20)
+
+
+        tk.Label(settings_window, text="Theme:", bg='#161b22', fg='white', font=("Segoe UI", 10)).pack(pady=(10,0))
+        themes = [
+            "Dark", "Light", "High Contrast", "Pastel", "Monokai", "Solarized Dark", "Solarized Light"
+        ]
+        self.theme_var = tk.StringVar(value=getattr(self, 'theme', 'Dark'))
+        theme_menu = ttk.Combobox(settings_window, textvariable=self.theme_var, values=themes, state="readonly")
+        theme_menu.pack(pady=5, padx=20)
+
+
         def save_and_close():
             self.api_key = api_key_entry.get()
             self.model_source = model_source_entry.get()
+            self.font_family = self.font_family_var.get()
+            self.font_size = int(self.font_size_var.get())
+            self.theme = self.theme_var.get()
             self.save_settings()
+            self.apply_user_appearance()
             settings_window.destroy()
 
         save_btn = ttk.Button(settings_window, text="Save & Close", command=save_and_close, style="Modern.TButton")
@@ -714,3 +743,78 @@ class KarbonUI:
         # Auto-close after 3 seconds
 
         notification.after(3000, notification.destroy)
+
+    def get_theme_colors(self, theme_name):
+        # Define color palettes for each theme
+        themes = {
+            "Dark": {
+                "bg": "#0d1117",
+                "label_fg": "#f0f6fc",
+                "input_bg": "#161b22",
+                "input_fg": "#f0f6fc",
+                "accent": "#58a6ff",
+                "subtitle": "#8b949e"
+            },
+            "Light": {
+                "bg": "#f5f5f5",
+                "label_fg": "#222222",
+                "input_bg": "#ffffff",
+                "input_fg": "#222222",
+                "accent": "#0071f3",
+                "subtitle": "#555555"
+            },
+            "High Contrast": {
+                "bg": "#000000",
+                "label_fg": "#ffffff",
+                "input_bg": "#000000",
+                "input_fg": "#ffffff",
+                "accent": "#ffea00",
+                "subtitle": "#ffea00"
+            },
+            "Pastel": {
+                "bg": "#fdf6f0",
+                "label_fg": "#5d576b",
+                "input_bg": "#f7e7ce",
+                "input_fg": "#5d576b",
+                "accent": "#a3c9a8",
+                "subtitle": "#b8a1a1"
+            },
+            "Monokai": {
+                "bg": "#272822",
+                "label_fg": "#f8f8f2",
+                "input_bg": "#272822",
+                "input_fg": "#f8f8f2",
+                "accent": "#f92672",
+                "subtitle": "#a6e22e"
+            },
+            "Solarized Dark": {
+                "bg": "#002b36",
+                "label_fg": "#93a1a1",
+                "input_bg": "#073642",
+                "input_fg": "#eee8d5",
+                "accent": "#b58900",
+                "subtitle": "#268bd2"
+            },
+            "Solarized Light": {
+                "bg": "#fdf6e3",
+                "label_fg": "#657b83",
+                "input_bg": "#eee8d5",
+                "input_fg": "#657b83",
+                "accent": "#b58900",
+                "subtitle": "#268bd2"
+            }
+        }
+        return themes.get(theme_name, themes["Dark"])
+
+    def apply_user_appearance(self):
+        font_family = getattr(self, 'font_family', 'Segoe UI')
+        font_size = int(getattr(self, 'font_size', 12))
+        theme = getattr(self, 'theme', 'Dark')
+        theme_colors = self.get_theme_colors(theme)
+        if hasattr(self, 'prompt_view'):
+            self.prompt_view.update_appearance(font_family, font_size, theme_colors)
+        if hasattr(self, 'editor_view'):
+            self.editor_view.update_appearance(font_family, font_size, theme_colors)
+        # Optionally update main window bg
+        self.root.configure(bg=theme_colors["bg"])
+        self.main_container.configure(bg=theme_colors["bg"])
