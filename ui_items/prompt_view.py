@@ -13,7 +13,7 @@ class PromptView(tk.Frame):
         super().__init__(master, bg='#0d1117')
         self.on_generate = on_generate
         self.is_generating = False
-        self.enhance_ui_var = tk.BooleanVar(value=True)  # default is checked
+        self.enhance_ui_var = tk.BooleanVar(value=True)
         self.setup_ui()
         self.bind_all("<Control-g>", lambda event: self.handle_generate())
         self.bind_all("<Control-e>", lambda event: self.export_project())
@@ -21,27 +21,20 @@ class PromptView(tk.Frame):
         
 
     def setup_ui(self):
-        # Hero section with animated gradient background
         self.create_hero_section()
 
-        # Main input card
         self.create_input_section()
 
-        # Features showcase
         self.create_features_section()
 
-        # Quick examples
         self.create_examples_section()
 
-        # Start animations
         self.animate_elements()
 
     def create_hero_section(self):
-        """Create the hero section with animated elements"""
         hero_frame = tk.Frame(self, bg='#0d1117')
         hero_frame.pack(fill="x", pady=(30, 20))
 
-        # Animated welcome text
         self.welcome_label = tk.Label(
             hero_frame,
             text="⚡ Welcome to Karbon",
@@ -51,7 +44,6 @@ class PromptView(tk.Frame):
         )
         self.welcome_label.pack(pady=(0, 10))
 
-        # Subtitle with typewriter effect
         self.subtitle_label = tk.Label(
             hero_frame,
             text="",
@@ -61,22 +53,17 @@ class PromptView(tk.Frame):
         )
         self.subtitle_label.pack()
 
-        # Start typewriter effect
         self.typewriter_text = "   Transform your ideas into stunning web experiences with AI"
         self.typewriter_index = 0
         self.typewriter_effect()
 
     def create_input_section(self):
-        """Create the main input section with modern card design"""
-        # Main card container
         card_container = tk.Frame(self, bg='#0d1117')
         card_container.pack(fill="x", padx=50, pady=30)
 
-        # Card with subtle shadow effect
         input_card = tk.Frame(card_container, bg='#161b22', relief='solid', bd=1)
         input_card.pack(fill="x")
 
-        # Card header
         header_frame = tk.Frame(input_card, bg='#21262d')
         header_frame.pack(fill="x")
 
@@ -90,11 +77,9 @@ class PromptView(tk.Frame):
             pady=15
         ).pack(anchor="w")
 
-        # Input area
         input_frame = tk.Frame(input_card, bg='#161b22')
         input_frame.pack(fill="both", expand=True, padx=25, pady=(0, 20))
 
-        # Modern text input with placeholder
         self.text_input = tk.Text(
             input_frame,
             height=6,
@@ -123,7 +108,6 @@ class PromptView(tk.Frame):
     )
         self.enhance_checkbox.pack(anchor="w", pady=(5, 0))
 
-        # Character count label
         self.char_count_label = tk.Label(
             input_frame,
             text="256 characters left",
@@ -134,21 +118,16 @@ class PromptView(tk.Frame):
         )
         self.char_count_label.pack(anchor="e", pady=(0, 5))
 
-        # Bind character limit enforcement
         self.text_input.bind('<KeyRelease>', self.update_char_count)
         self.text_input.bind('<Control-v>', self.update_char_count)
         self.text_input.bind('<FocusOut>', self.update_char_count)
         
-
-        # Placeholder functionality
         self.placeholder_text = "Describe your dream website... \n\nExample: Create a modern portfolio website with dark theme, smooth animations, and minimilist Design"
         self.setup_placeholder()
 
-        # Button container
         button_frame = tk.Frame(input_card, bg='#161b22')
         button_frame.pack(fill="x", padx=25, pady=(0, 25))
 
-        # Generate button with loading animation
         self.generate_btn = tk.Button(
             button_frame,
             text="🚀 Generate My Website",
@@ -166,12 +145,9 @@ class PromptView(tk.Frame):
         )
         self.generate_btn.pack(side="right")
 
-        # Secondary actions
         self.create_secondary_buttons(button_frame)
 
     def create_secondary_buttons(self, parent):
-        """Create secondary action buttons"""
-        # Clear button
         clear_btn = tk.Button(
             parent,
             text="🗑️ Clear",
@@ -189,7 +165,6 @@ class PromptView(tk.Frame):
         )
         clear_btn.pack(side="right", padx=(0, 15))
 
-        # Random idea button
         random_btn = tk.Button(
             parent,
             text="🎲 Surprise Me",
@@ -208,7 +183,6 @@ class PromptView(tk.Frame):
         random_btn.pack(side="right", padx=(0, 10))
 
     def create_features_section(self):
-        """Create features showcase"""
         features_frame = tk.Frame(self, bg='#0d1117')
         features_frame.pack(fill="x", padx=50, pady=20)
 
@@ -220,7 +194,6 @@ class PromptView(tk.Frame):
             fg='#f0f6fc'
         ).pack(pady=(0, 20))
 
-        # Features grid
         features_container = tk.Frame(features_frame, bg='#0d1117')
         features_container.pack(fill="x")
 
@@ -235,7 +208,6 @@ class PromptView(tk.Frame):
             feature_card = tk.Frame(features_container, bg='#161b22', relief='solid', bd=1)
             feature_card.grid(row=i//2, column=i%2, padx=10, pady=10, sticky="ew")
 
-            # Configure grid weights
             features_container.grid_columnconfigure(0, weight=1)
             features_container.grid_columnconfigure(1, weight=1)
 
@@ -265,7 +237,6 @@ class PromptView(tk.Frame):
             ).pack(pady=(5, 15), padx=15)
 
     def create_examples_section(self):
-        """Create quick examples section"""
         examples_frame = tk.Frame(self, bg='#0d1117')
         examples_frame.pack(fill="x", padx=50, pady=20)
 
@@ -305,7 +276,6 @@ class PromptView(tk.Frame):
             )
             example_btn.pack(fill="x", pady=2)
 
-            # Hover effect
             def on_enter(e, btn=example_btn):
                 btn.configure(bg='#30363d', fg='#58a6ff')
             def on_leave(e, btn=example_btn):
@@ -315,7 +285,6 @@ class PromptView(tk.Frame):
             example_btn.bind("<Leave>", on_leave)
 
     def setup_placeholder(self):
-        """Setup placeholder functionality"""
         self.placeholder_active = True
         self.text_input.insert("1.0", self.placeholder_text)
         self.text_input.configure(fg='#6e7681')
@@ -327,7 +296,6 @@ class PromptView(tk.Frame):
 
                 self.placeholder_active = False
 
-
         def on_focus_out(event):
             content = self.text_input.get("1.0", "end-1c").strip()
             if not self.text_input.get("1.0", "end-1c").strip():
@@ -336,24 +304,17 @@ class PromptView(tk.Frame):
 
                 self.placeholder_active = True
 
-
         self.text_input.bind('<FocusIn>', on_focus_in)
         self.text_input.bind('<FocusOut>', on_focus_out)
 
-
     def typewriter_effect(self):
-        """Animate subtitle with typewriter effect"""
         if self.typewriter_index < len(self.typewriter_text):
             current_text = self.typewriter_text[:self.typewriter_index + 1]
             self.subtitle_label.configure(text=current_text)
             self.typewriter_index += 1
             self.after(50, self.typewriter_effect)
         
-            # Add blinking cursor effect
-            
-
     def blink_cursor(self):
-        """Add blinking cursor effect"""
         current_text = self.subtitle_label.cget("text")
         if current_text.endswith("_"):
             self.subtitle_label.configure(text=current_text[:-1])
@@ -362,8 +323,6 @@ class PromptView(tk.Frame):
         self.after(500, self.blink_cursor)
 
     def animate_elements(self):
-        """Animate UI elements"""
-        # Animate welcome text color
         colors = ['#58a6ff', '#79c0ff', '#a5d6ff', '#79c0ff']
         color_index = [0]
 
@@ -375,23 +334,19 @@ class PromptView(tk.Frame):
         animate_welcome()
 
     def set_example(self, example):
-        """Set example text in input"""
         self.text_input.delete("1.0", "end")
-        clean_example = " ".join(example.split()[1:])  # Remove emoji
+        clean_example = " ".join(example.split()[1:])
         self.text_input.insert("1.0", clean_example)
         self.text_input.configure(fg='#f0f6fc')
-        self.placeholder_active = False  # Move AFTER insert to prevent overwrite
+        self.placeholder_active = False
         self.update_char_count()
 
-
     def clear_input(self):
-        """Clear input field"""
         self.text_input.delete("1.0", "end")
         self.text_input.insert("1.0", self.placeholder_text)
         self.text_input.configure(fg='#6e7681')
 
     def random_idea(self):
-        """Generate a random project idea"""
         import random
 
         templates = [
@@ -417,12 +372,10 @@ class PromptView(tk.Frame):
         self.text_input.configure(fg='#f0f6fc')
 
     def handle_generate(self):
-        """Handle generate button click with enhanced UX"""
         if self.is_generating:
             return
 
         prompt = self.text_input.get("1.0", "end-1c").strip()
-        # Sanitize input: strip whitespace and remove non-printable characters
         prompt = ''.join(ch for ch in prompt if ch.isprintable()).strip()
 
         if not prompt or prompt == self.placeholder_text:
@@ -436,23 +389,18 @@ class PromptView(tk.Frame):
         self.start_generation(prompt)
 
     def start_generation(self, prompt):
-        """Start the generation process with visual feedback"""
         self.is_generating = True
 
-        # Update button to loading state
         self.generate_btn.configure(
             text="🔄 Creating Magic...",
             state='disabled',
             bg='#6e7681'
         )
 
-        # Show progress indicator
         self.show_progress()
 
-        # Start generation in background thread
         def generate_in_background():
             try:
-                # Get API key and model source from the main UI
                 api_key = self.master.master.master.get_api_key()
                 model_source = self.master.master.master.get_model_source()
 
@@ -462,11 +410,7 @@ class PromptView(tk.Frame):
             
                     final_prompt = optimize_prompt(prompt)
                     
-
                 code = generate_code_from_prompt(final_prompt, api_key, model_source)
-
-
-                code = generate_code_from_prompt(final_prompt)
 
                 update_preview(code)
                 prompt_history.pop_prompt()
@@ -475,16 +419,14 @@ class PromptView(tk.Frame):
                 prompt_history.push_code(code)
                 prompt_history.push_code(code)
 
-                # Call completion on main thread
                 self.after(0, lambda: self.generation_complete(code))
 
             except Exception as e:
-                self.after(0, lambda: self.generation_error(str(e)))
+                self.after(0, lambda exc=e: self.generation_error(str(exc)))
 
         threading.Thread(target=generate_in_background, daemon=True).start()
 
     def show_progress(self):
-        """Show animated progress indicator"""
         progress_texts = [
             "🔄 Analyzing your idea...",
             "🎨 Designing the layout...",
@@ -504,16 +446,13 @@ class PromptView(tk.Frame):
         update_progress()
 
     def generation_complete(self, code):
-        """Handle successful generation"""
         self.is_generating = False
 
-        # Reset button
         self.generate_btn.configure(
             text="🚀 Generate My Website",
             state='normal',
             bg='#238636'
         )
-
 
         status = ai_status.get("state", "unknown")
         message = ai_status.get("message", "")
@@ -526,26 +465,19 @@ class PromptView(tk.Frame):
                 self.show_error(f"Website could not be generated due to an AI service issue")
             return
         
-
-        # Show success notification
         self.show_success("Website generated successfully! 🎉")
 
-        # Call the callback
         self.on_generate(code)
 
     def generation_error(self, error_msg):
-        """Handle generation error"""
         self.is_generating = False
 
-        # Reset button
         self.generate_btn.configure(
             text="🚀 Generate My Website",
             state='normal',
             bg='#238636'
         )
 
-
-        # Show error
         status = ai_status.get("state", "unknown")
         message = ai_status.get("message", "")
         if status == "offline":
@@ -555,25 +487,20 @@ class PromptView(tk.Frame):
         else:
             self.show_error(f"Oops! Something went wrong: {error_msg}")
 
-
     def show_error(self, message):
-        """Show enhanced error dialog"""
         error_window = tk.Toplevel(self)
         error_window.title("Oops!")
         error_window.geometry("450x200")
         error_window.configure(bg='#21262d')
         error_window.resizable(False, False)
 
-        # Center the window
         error_window.transient(self.winfo_toplevel())
         error_window.grab_set()
 
-        # Center position
         x = self.winfo_toplevel().winfo_x() + (self.winfo_toplevel().winfo_width() // 2) - 225
         y = self.winfo_toplevel().winfo_y() + (self.winfo_toplevel().winfo_height() // 2) - 100
         error_window.geometry(f"450x200+{x}+{y}")
 
-        # Error icon and title
         tk.Label(
             error_window,
             text="⚠️",
@@ -592,7 +519,6 @@ class PromptView(tk.Frame):
             justify=tk.CENTER
         ).pack(pady=10, padx=20)
 
-        # OK button
         tk.Button(
             error_window,
             text="Got it! 👍",
@@ -606,7 +532,6 @@ class PromptView(tk.Frame):
         ).pack(pady=20)
 
     def show_success(self, message):
-        """Show success notification"""
         success_window = tk.Toplevel(self)
         success_window.title("Success!")
         success_window.geometry("400x150")
@@ -614,7 +539,6 @@ class PromptView(tk.Frame):
         success_window.resizable(False, False)
         success_window.attributes('-topmost', True)
 
-        # Auto-position in top-right
         x = self.winfo_toplevel().winfo_x() + self.winfo_toplevel().winfo_width() - 420
         y = self.winfo_toplevel().winfo_y() + 50
         success_window.geometry(f"400x150+{x}+{y}")
@@ -634,12 +558,9 @@ class PromptView(tk.Frame):
             fg='#3fb950'
         ).pack(pady=5)
 
-        # Auto-close after 3 seconds
         success_window.after(3000, success_window.destroy)
 
-
     def update_char_count(self, event=None):
-        """Update character count label and enforce max length"""
         content = self.text_input.get("1.0", "end-1c")
         if len(content) > 256:
             self.text_input.delete(f"1.0+{256}c", "end")
@@ -648,7 +569,6 @@ class PromptView(tk.Frame):
         self.char_count_label.config(text=f"{remaining} characters left")
 
     def update_appearance(self, font_family, font_size, theme_colors):
-
         self.welcome_label.config(font=(font_family, 32, "bold"), fg=theme_colors["accent"])
         self.subtitle_label.config(font=(font_family, 14), fg=theme_colors["subtitle"])
 
