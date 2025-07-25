@@ -1,0 +1,12 @@
+{
+    "api_key": "",
+    "model_source": "",
+    "layout": {
+        "prompt_view_visible": true,
+        "editor_view_visible": false,
+        "sash_position": 914
+    },
+    "font_family": "Segoe UI",
+    "font_size": 12,
+    "theme": "Monokai"
+}

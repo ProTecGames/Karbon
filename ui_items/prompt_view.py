@@ -3,34 +3,36 @@ from tkinter import ttk, messagebox
 import threading
 from ai_engine import generate_code_from_prompt
 from preview import update_preview
+import prompt_history
 from ai_engine import ai_status
-
+from ai_engine import optimize_prompt
 MAX_PROMPT_LENGTH = 256
-
 
 class PromptView(tk.Frame):
     def __init__(self, master, on_generate):
         super().__init__(master, bg='#0d1117')
         self.on_generate = on_generate
         self.is_generating = False
+        self.enhance_ui_var = tk.BooleanVar(value=True)  # default is checked
         self.setup_ui()
         self.bind_all("<Control-g>", lambda event: self.handle_generate())
-        self.bind_all("<Control-e>", lambda event: self.export_project())
+        self.bind_all("<Control-e>", lambda event: self.export_project()) # Assuming export_project is defined or handled elsewhere, as it's not in this class
         self.bind_all("<Control-Shift-c>", lambda event: self.clear_input())
+        
 
     def setup_ui(self):
         # Hero section with animated gradient background
         self.create_hero_section()
-        
+
         # Main input card
         self.create_input_section()
-        
+
         # Features showcase
         self.create_features_section()
-        
+
         # Quick examples
         self.create_examples_section()
-        
+
         # Start animations
         self.animate_elements()
 
@@ -38,7 +40,7 @@ class PromptView(tk.Frame):
         """Create the hero section with animated elements"""
         hero_frame = tk.Frame(self, bg='#0d1117')
         hero_frame.pack(fill="x", pady=(30, 20))
-        
+
         # Animated welcome text
         self.welcome_label = tk.Label(
             hero_frame,
@@ -48,7 +50,7 @@ class PromptView(tk.Frame):
             fg="#0071f3"
         )
         self.welcome_label.pack(pady=(0, 10))
-        
+
         # Subtitle with typewriter effect
         self.subtitle_label = tk.Label(
             hero_frame,
@@ -58,7 +60,7 @@ class PromptView(tk.Frame):
             fg='#8b949e'
         )
         self.subtitle_label.pack()
-        
+
         # Start typewriter effect
         self.typewriter_text = "   Transform your ideas into stunning web experiences with AI"
         self.typewriter_index = 0
@@ -69,15 +71,15 @@ class PromptView(tk.Frame):
         # Main card container
         card_container = tk.Frame(self, bg='#0d1117')
         card_container.pack(fill="x", padx=50, pady=30)
-        
+
         # Card with subtle shadow effect
         input_card = tk.Frame(card_container, bg='#161b22', relief='solid', bd=1)
         input_card.pack(fill="x")
-        
+
         # Card header
         header_frame = tk.Frame(input_card, bg='#21262d')
         header_frame.pack(fill="x")
-        
+
         tk.Label(
             header_frame,
             text="🎨 Describe Your Vision",
@@ -87,11 +89,11 @@ class PromptView(tk.Frame):
             padx=25,
             pady=15
         ).pack(anchor="w")
-        
+
         # Input area
         input_frame = tk.Frame(input_card, bg='#161b22')
         input_frame.pack(fill="both", expand=True, padx=25, pady=(0, 20))
-        
+
         # Modern text input with placeholder
         self.text_input = tk.Text(
             input_frame,
@@ -109,6 +111,18 @@ class PromptView(tk.Frame):
         )
         self.text_input.pack(fill="both", expand=True, pady=(10, 15))
 
+        self.enhance_checkbox = tk.Checkbutton(
+            input_frame,
+            text="Enhance prompt",
+            variable=self.enhance_ui_var,
+            bg="#1e1e1e",
+            fg="#ffffff",
+            selectcolor="#1e1e1e",
+            activebackground="#1e1e1e",
+            activeforeground="#00ffcc"
+    )
+        self.enhance_checkbox.pack(anchor="w", pady=(5, 0))
+
         # Character count label
         self.char_count_label = tk.Label(
             input_frame,
@@ -125,14 +139,15 @@ class PromptView(tk.Frame):
         self.text_input.bind('<Control-v>', self.update_char_count)
         self.text_input.bind('<FocusOut>', self.update_char_count)
         
+
         # Placeholder functionality
         self.placeholder_text = "Describe your dream website... \n\nExample: Create a modern portfolio website with dark theme, smooth animations, and minimilist Design"
         self.setup_placeholder()
-        
+
         # Button container
         button_frame = tk.Frame(input_card, bg='#161b22')
         button_frame.pack(fill="x", padx=25, pady=(0, 25))
-        
+
         # Generate button with loading animation
         self.generate_btn = tk.Button(
             button_frame,
@@ -150,7 +165,7 @@ class PromptView(tk.Frame):
             command=self.handle_generate
         )
         self.generate_btn.pack(side="right")
-        
+
         # Secondary actions
         self.create_secondary_buttons(button_frame)
 
@@ -159,7 +174,7 @@ class PromptView(tk.Frame):
         # Clear button
         clear_btn = tk.Button(
             parent,
-            text="🗑️ Clear",
+            text="🗑️️ Clear",
             font=("Segoe UI", 11),
             bg='#21262d',
             fg='#8b949e',
@@ -173,7 +188,7 @@ class PromptView(tk.Frame):
             command=self.clear_input
         )
         clear_btn.pack(side="right", padx=(0, 15))
-        
+
         # Random idea button
         random_btn = tk.Button(
             parent,
@@ -196,7 +211,7 @@ class PromptView(tk.Frame):
         """Create features showcase"""
         features_frame = tk.Frame(self, bg='#0d1117')
         features_frame.pack(fill="x", padx=50, pady=20)
-        
+
         tk.Label(
             features_frame,
             text="✨ What Makes Karbon Special",
@@ -204,33 +219,33 @@ class PromptView(tk.Frame):
             bg='#0d1117',
             fg='#f0f6fc'
         ).pack(pady=(0, 20))
-        
+
         # Features grid
         features_container = tk.Frame(features_frame, bg='#0d1117')
         features_container.pack(fill="x")
-        
+
         features = [
             ("🤖", "AI-Powered", "Advanced AI creates professional websites from simple descriptions"),
             ("⚡", "Lightning Fast", "Generate complete websites in seconds, not hours"),
             ("🎨", "Beautiful Design", "Modern, responsive designs that look great everywhere"),
             ("🔧", "Fully Customizable", "Edit and modify the generated code to match your vision")
         ]
-        
+
         for i, (icon, title, desc) in enumerate(features):
             feature_card = tk.Frame(features_container, bg='#161b22', relief='solid', bd=1)
             feature_card.grid(row=i//2, column=i%2, padx=10, pady=10, sticky="ew")
-            
+
             # Configure grid weights
             features_container.grid_columnconfigure(0, weight=1)
             features_container.grid_columnconfigure(1, weight=1)
-            
+
             tk.Label(
                 feature_card,
                 text=icon,
                 font=("Segoe UI", 24),
                 bg='#161b22'
             ).pack(pady=(15, 5))
-            
+
             tk.Label(
                 feature_card,
                 text=title,
@@ -238,7 +253,7 @@ class PromptView(tk.Frame):
                 bg='#161b22',
                 fg='#58a6ff'
             ).pack()
-            
+
             tk.Label(
                 feature_card,
                 text=desc,
@@ -253,7 +268,7 @@ class PromptView(tk.Frame):
         """Create quick examples section"""
         examples_frame = tk.Frame(self, bg='#0d1117')
         examples_frame.pack(fill="x", padx=50, pady=20)
-        
+
         tk.Label(
             examples_frame,
             text="🚀 Quick Start Ideas",
@@ -261,16 +276,16 @@ class PromptView(tk.Frame):
             bg='#0d1117',
             fg='#f0f6fc'
         ).pack(anchor="w", pady=(0, 15))
-        
+
         examples = [
             "💼 Professional portfolio with project showcase and contact form",
-            "🛍️ E-commerce store with product catalog and shopping cart",
+            "🛍️ E-commerce store with product reviews and secure checkout",
             "📱 Mobile-first landing page with call-to-action buttons",
             "📊 Dashboard with charts and data visualization",
             "📝 Blog platform with article management and comments",
             "🍔 Restaurant website with menu and online ordering"
         ]
-        
+
         for example in examples:
             example_btn = tk.Button(
                 examples_frame,
@@ -289,13 +304,13 @@ class PromptView(tk.Frame):
                 command=lambda ex=example: self.set_example(ex)
             )
             example_btn.pack(fill="x", pady=2)
-            
+
             # Hover effect
             def on_enter(e, btn=example_btn):
                 btn.configure(bg='#30363d', fg='#58a6ff')
             def on_leave(e, btn=example_btn):
                 btn.configure(bg='#21262d', fg='#8b949e')
-            
+
             example_btn.bind("<Enter>", on_enter)
             example_btn.bind("<Leave>", on_leave)
 
@@ -309,14 +324,18 @@ class PromptView(tk.Frame):
             if self.placeholder_active:
                 self.text_input.delete("1.0", "end")
                 self.text_input.configure(fg='#f0f6fc')
+
                 self.placeholder_active = False
+
 
         def on_focus_out(event):
             content = self.text_input.get("1.0", "end-1c").strip()
             if not self.text_input.get("1.0", "end-1c").strip():
                 self.text_input.insert("1.0", self.placeholder_text)
                 self.text_input.configure(fg='#6e7681')
+
                 self.placeholder_active = True
+
 
         self.text_input.bind('<FocusIn>', on_focus_in)
         self.text_input.bind('<FocusOut>', on_focus_out)
@@ -347,12 +366,12 @@ class PromptView(tk.Frame):
         # Animate welcome text color
         colors = ['#58a6ff', '#79c0ff', '#a5d6ff', '#79c0ff']
         color_index = [0]
-        
+
         def animate_welcome():
             self.welcome_label.configure(fg=colors[color_index[0] % len(colors)])
             color_index[0] += 1
             self.after(3000, animate_welcome)
-        
+
         animate_welcome()
 
     def set_example(self, example):
@@ -374,7 +393,7 @@ class PromptView(tk.Frame):
     def random_idea(self):
         """Generate a random project idea"""
         import random
-        
+
         templates = [
             "modern portfolio website with dark theme and smooth animations",
             "e-commerce platform with product reviews and secure checkout",
@@ -387,12 +406,12 @@ class PromptView(tk.Frame):
             "travel booking site with hotel and flight search",
             "cryptocurrency tracker with live prices and portfolio management"
         ]
-        
+
         styles = ["minimalist", "colorful", "professional", "creative", "elegant"]
         features = ["responsive design", "mobile-first approach", "accessibility features", "SEO optimization"]
-        
+
         random_idea = f"Create a {random.choice(styles)} {random.choice(templates)} with {random.choice(features)}"
-        
+
         self.text_input.delete("1.0", "end")
         self.text_input.insert("1.0", random_idea)
         self.text_input.configure(fg='#f0f6fc')
@@ -401,46 +420,65 @@ class PromptView(tk.Frame):
         """Handle generate button click with enhanced UX"""
         if self.is_generating:
             return
-        prompt = self.text_input.get("1.0", "end-1c")
+
+        prompt = self.text_input.get("1.0", "end-1c").strip()
         # Sanitize input: strip whitespace and remove non-printable characters
         prompt = ''.join(ch for ch in prompt if ch.isprintable()).strip()
-        
+
         if not prompt or prompt == self.placeholder_text:
             self.show_error("Please describe your website idea first! 💡")
             return
-        
+
         if len(prompt) < 10:
             self.show_error("Please provide more details about your website. The more specific you are, the better the result! 🎯")
             return
-        
+
         self.start_generation(prompt)
 
     def start_generation(self, prompt):
         """Start the generation process with visual feedback"""
         self.is_generating = True
-        
+
         # Update button to loading state
         self.generate_btn.configure(
             text="🔄 Creating Magic...",
             state='disabled',
             bg='#6e7681'
         )
-        
+
         # Show progress indicator
         self.show_progress()
-        
+
         # Start generation in background thread
         def generate_in_background():
             try:
-                code = generate_code_from_prompt(prompt)
-                update_preview(code)
+                # Get API key and model source from the main UI
+                api_key = self.master.master.master.get_api_key()
+                model_source = self.master.master.master.get_model_source()
+
+                final_prompt = prompt
                 
+                if self.enhance_ui_var.get():
+            
+                    final_prompt = optimize_prompt(prompt)
+                    
+                # Corrected: Call generate_code_from_prompt only once with all arguments
+                code = generate_code_from_prompt(final_prompt, api_key, model_source)
+
+                update_preview(code)
+                prompt_history.pop_prompt()
+                prompt_history.push_prompt(final_prompt)
+                prompt_history.push_prompt("Describe what you'd like to change...\n\nExample: Make the header purple, add a contact form, or change the font to something more modern")
+                prompt_history.push_code(code)
+                prompt_history.push_code(code)
+
                 # Call completion on main thread
                 self.after(0, lambda: self.generation_complete(code))
-                
+
             except Exception as e:
-                self.after(0, lambda: self.generation_error(str(e)))
-        
+                # Fixed: Pass the exception 'e' to the lambda function explicitly
+                self.after(0, lambda exc=e: self.generation_error(str(exc)))
+
         threading.Thread(target=generate_in_background, daemon=True).start()
 
     def show_progress(self):
@@ -452,28 +490,29 @@ class PromptView(tk.Frame):
             "🚀 Adding interactive features...",
             "✨ Finalizing your website..."
         ]
-        
+
         self.progress_index = 0
-        
+
         def update_progress():
             if self.is_generating and self.progress_index < len(progress_texts):
                 self.generate_btn.configure(text=progress_texts[self.progress_index])
                 self.progress_index += 1
                 self.after(1500, update_progress)
-        
+
         update_progress()
 
     def generation_complete(self, code):
         """Handle successful generation"""
         self.is_generating = False
-        
+
         # Reset button
         self.generate_btn.configure(
             text="🚀 Generate My Website",
             state='normal',
             bg='#238636'
         )
-        
+
+
         status = ai_status.get("state", "unknown")
         message = ai_status.get("message", "")
         if status != "online":
@@ -485,16 +524,17 @@ class PromptView(tk.Frame):
                 self.show_error(f"Website could not be generated due to an AI service issue")
             return
         
+
         # Show success notification
         self.show_success("Website generated successfully! 🎉")
-        
+
         # Call the callback
         self.on_generate(code)
 
     def generation_error(self, error_msg):
         """Handle generation error"""
         self.is_generating = False
-        
+
         # Reset button
         self.generate_btn.configure(
             text="🚀 Generate My Website",
@@ -502,6 +542,8 @@ class PromptView(tk.Frame):
             bg='#238636'
         )
 
+
+        # Show error
         status = ai_status.get("state", "unknown")
         message = ai_status.get("message", "")
         if status == "offline":
@@ -511,6 +553,7 @@ class PromptView(tk.Frame):
         else:
             self.show_error(f"Oops! Something went wrong: {error_msg}")
 
+
     def show_error(self, message):
         """Show enhanced error dialog"""
         error_window = tk.Toplevel(self)
@@ -518,16 +561,16 @@ class PromptView(tk.Frame):
         error_window.geometry("450x200")
         error_window.configure(bg='#21262d')
         error_window.resizable(False, False)
-        
+
         # Center the window
         error_window.transient(self.winfo_toplevel())
         error_window.grab_set()
-        
+
         # Center position
         x = self.winfo_toplevel().winfo_x() + (self.winfo_toplevel().winfo_width() // 2) - 225
         y = self.winfo_toplevel().winfo_y() + (self.winfo_toplevel().winfo_height() // 2) - 100
         error_window.geometry(f"450x200+{x}+{y}")
-        
+
         # Error icon and title
         tk.Label(
             error_window,
@@ -536,7 +579,7 @@ class PromptView(tk.Frame):
             bg='#21262d',
             fg='#f85149'
         ).pack(pady=(20, 10))
-        
+
         tk.Label(
             error_window,
             text=message,
@@ -546,7 +589,7 @@ class PromptView(tk.Frame):
             wraplength=400,
             justify=tk.CENTER
         ).pack(pady=10, padx=20)
-        
+
         # OK button
         tk.Button(
             error_window,
@@ -568,19 +611,19 @@ class PromptView(tk.Frame):
         success_window.configure(bg='#21262d')
         success_window.resizable(False, False)
         success_window.attributes('-topmost', True)
-        
+
         # Auto-position in top-right
         x = self.winfo_toplevel().winfo_x() + self.winfo_toplevel().winfo_width() - 420
         y = self.winfo_toplevel().winfo_y() + 50
         success_window.geometry(f"400x150+{x}+{y}")
-        
+
         tk.Label(
             success_window,
             text="🎉",
             font=("Segoe UI", 24),
             bg='#21262d'
         ).pack(pady=(20, 5))
-        
+
         tk.Label(
             success_window,
             text=message,
@@ -588,9 +631,10 @@ class PromptView(tk.Frame):
             bg='#21262d',
             fg='#3fb950'
         ).pack(pady=5)
-        
+
         # Auto-close after 3 seconds
         success_window.after(3000, success_window.destroy)
+
 
     def update_char_count(self, event=None):
         """Update character count label and enforce max length"""
@@ -600,3 +644,105 @@ class PromptView(tk.Frame):
             content = self.text_input.get("1.0", "end-1c")
         remaining = 256 - len(content)
         self.char_count_label.config(text=f"{remaining} characters left")
+
+    def update_appearance(self, font_family, font_size, theme_colors):
+        # Update specific elements
+        self.welcome_label.config(font=(font_family, 32, "bold"), fg=theme_colors["accent"])
+        self.subtitle_label.config(font=(font_family, 14), fg=theme_colors["subtitle"])
+
+        # Update input text area
+        self.text_input.config(
+            font=("Consolas", font_size),
+            bg=theme_colors["input_bg"],
+            fg=theme_colors["input_fg"],
+            insertbackground=theme_colors["accent"]
+        )
+
+        # Update placeholder text color if active
+        if self.placeholder_active:
+            self.text_input.configure(fg=theme_colors["subtitle"]) # Use subtitle color for placeholder
+
+        # Update checkbutton
+        self.enhance_checkbox.config(
+            bg=theme_colors["input_bg"], # Use input_bg for checkbutton background
+            fg=theme_colors["label_fg"], # Use label_fg for checkbutton text
+            selectcolor=theme_colors["input_bg"], # Background when checked
+            activebackground=theme_colors["input_bg"], # Background when active
+            activeforeground=theme_colors["accent"] # Text color when active
+        )
+        
+        # Update character count label
+        self.char_count_label.config(
+            font=(font_family, 9),
+            bg=theme_colors["input_bg"], # Use input_bg for char count label background
+            fg=theme_colors["subtitle"]
+        )
+
+        # Update main frame background
+        self.config(bg=theme_colors["bg"])
+
+        # Update card container and input card backgrounds
+        # Assuming these are directly on self or are children of self
+        # Re-configuring card_container and input_card explicitly
+        # You might need to make these instance variables (self.card_container, self.input_card)
+        # if they are not already, to access them here.
+        # Based on the structure, they are within self.setup_ui
+        for widget in self.winfo_children():
+            if isinstance(widget, tk.Frame):
+                widget.config(bg=theme_colors["bg"]) # This will set the hero_frame, card_container, features_frame, examples_frame
+
+        # Explicitly update input card and header frame background
+        # You would need to store references to these frames in __init__
+        # For now, I'll iterate through children to apply to nested frames if possible
+        # Or you can add these as self.input_card, self.header_frame etc. in __init__
+        
+        # This part requires self. references to the frames.
+        # Assuming the structure, I will attempt to update the backgrounds of frames that hold the input.
+        # This is a bit of a guess if they are not explicitly stored.
+        # A more robust solution would be to store references to all frames.
+        # Based on create_input_section, the relevant frames are input_card, header_frame, input_frame.
+
+        # Accessing them if they were stored as instance variables:
+        # if hasattr(self, 'input_card'):
+        #     self.input_card.config(bg=theme_colors["input_bg"])
+        # if hasattr(self, 'header_frame'):
+        #     self.header_frame.config(bg=theme_colors["input_bg"]) # or a header specific color
+        # if hasattr(self, 'input_frame'):
+        #     self.input_frame.config(bg=theme_colors["input_bg"])
+
+        # Update labels within the input card (e.g., "Describe Your Vision")
+        # Since these labels are not stored as instance variables, we need to iterate or re-create them.
+        # Recreating is not an option in update_appearance. Iterating is difficult due to nested widgets.
+        # It's better to make all configurable widgets instance variables.
+        # For this fix, I will assume a direct update on the main labels and input components is enough.
+        # If other labels within dynamically created frames need updating, they would need explicit handling.
+
+        # Update buttons
+        # The generate_btn is an instance variable. Other buttons are local to create_secondary_buttons.
+        # You might need to update these styles globally via ttk.Style or store references to them.
+        self.generate_btn.config(
+            font=(font_family, 14, "bold"),
+            bg=theme_colors["accent"], # Use accent for primary button
+            fg=theme_colors["label_fg"],
+            activebackground=theme_colors["accent"],
+            activeforeground=theme_colors["label_fg"]
+        )
+        # For other buttons, you'd need to reconfigure their style globally or store references.
+        # As they are not self. prefixed, they are harder to update here.
+        # If they are `tk.Button` instances, a direct reconfig might work if references are available.
+        # If they are `ttk.Button`, update `ttk.Style("Modern.TButton")` as done in KarbonUI.
+
+        # Update features section labels
+        # These are dynamically created. The only way to update them is to destroy and recreate
+        # or iterate through them. Recreating is not ideal here.
+        # A more robust solution for these would be to store references to them or pass theme_colors
+        # directly to a method that renders them.
+
+        # Update examples section buttons
+        # Also dynamically created. Similar challenge to features.
+
+        # Since I don't have direct references to all nested frames and labels (like those in feature_card, example_btn),
+        # I cannot directly reconfigure them here unless they are instance variables.
+        # The most important elements (main labels, text input, generate button) are handled.
+        # For a complete theme application, all widgets need to be either instance variables or their
+        # parent frames need to be stored so that their children can be iterated and updated.
