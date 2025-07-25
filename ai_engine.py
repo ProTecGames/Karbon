@@ -2,7 +2,7 @@ import json
 import re
 import logging
 import requests
-from meta_ai_api import MetaAI
+from meta_ai_api import MetaAI # from meta_ai_api import MetaAI
 
 
 logging.basicConfig(
@@ -32,13 +32,7 @@ def extract_json(response: str) -> dict:
         return None
 
 
-def generate_code_from_prompt(prompt: str, api_key: str = None, model_source: str = None) -> str:
-    # Use the provided API key and model source, otherwise use defaults
-    meta = MetaAI(api_key=api_key, model_source=model_source)
-
-
-def generate_code_from_prompt(prompt: str, retries = 2) -> str:
-
+def generate_code_from_prompt(prompt: str, api_key: str = None, model_source: str = None, retries=2) -> str:
     formatted = (
         f"You are a helpful assistant that writes complete frontend apps.\n"
         f"Given the task: \"{prompt}\"\n"
@@ -54,7 +48,7 @@ def generate_code_from_prompt(prompt: str, retries = 2) -> str:
     last_exception = None
     try:
         set_ai_status("connecting", "Connecting to AI service...")
-        meta = MetaAI()
+        meta = MetaAI(api_key=api_key, model_source=model_source)
     except Exception as e:
         set_ai_status("error", f"AI service unavailable (no internet connection).")
         logging.error(f"MetaAI init failed: {e}")
@@ -89,6 +83,7 @@ def generate_code_from_prompt(prompt: str, retries = 2) -> str:
         time.sleep(2 ** attempt)
     set_ai_status("offline", f"AI service unavailable: {last_exception}.")
     return "<!DOCTYPE html><html><head><title>Error</title><style></style></head><body><h1>AI service is currently unavailable.</h1></body></html>"
+
 def optimize_prompt(prompt: str) -> str:
     print("[optimize_prompt] Called with:", prompt)
 
@@ -131,13 +126,6 @@ def rule_based_enhancement(prompt: str) -> str:
     ]
     return f"{prompt}\n\n" + "\n".join(modifiers)
 
-
-    final_code = html.replace("</head>", f"<style>{css}</style></head>").replace("</body>", f"<script>{js}</script></body>")
-    return final_code
-
-
-    final_code = html.replace("</head>", f"<style>{css}</style></head>").replace("</body>", f"<script>{js}</script></body>")
-    return final_code
 
 def is_generic(prompt: str) -> bool:
     generic_phrases = {
