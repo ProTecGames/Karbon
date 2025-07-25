@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Karbon Code Editor</title>
+
+  <!-- CodeMirror Core CSS -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/theme/material-darker.min.css">
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      height: 100vh;
+      background-color: #121212;
+      color: white;
+      font-family: monospace;
+      display: flex;
+    }
+    #editor-container {
+      width: 50%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+    #editor {
+      flex: 1;
+    }
+    .CodeMirror {
+      height: 100%;
+      font-size: 16px;
+    }
+    #preview {
+      width: 50%;
+      height: 100%;
+      border: none;
+      background: white;
+    }
+  </style>
+</head>
+<body>
+  <div id="editor-container">
+    <textarea id="editor"></textarea>
+  </div>
+  <iframe id="preview"></iframe>
+
+  <!-- CodeMirror JS -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/mode/javascript/javascript.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/mode/css/css.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/mode/xml/xml.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/mode/htmlmixed/htmlmixed.min.js"></script>
+
+  <script>
+    const editor = CodeMirror.fromTextArea(document.getElementById("editor"), {
+      lineNumbers: true,
+      mode: "htmlmixed",
+      theme: "material-darker",
+      tabSize: 2,
+      autoCloseTags: true,
+    });
+
+    const previewFrame = document.getElementById('preview');
+
+    function updatePreview() {
+      const code = editor.getValue();
+      const previewDoc = previewFrame.contentDocument || previewFrame.contentWindow.document;
+      previewDoc.open();
+      previewDoc.write(code);
+      previewDoc.close();
+    }
+
+    editor.on('change', updatePreview);
+    updatePreview(); // initial empty state
+  </script>
+</body>
+</html>
