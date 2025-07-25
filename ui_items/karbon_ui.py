@@ -576,7 +576,14 @@ class KarbonUI:
             "editor_view_visible": self.editor_view_visible.get(),
             "sash_position": sash_position
         }
-        settings = {"api_key": self.api_key, "model_source": self.model_source, "layout": layout_settings}
+        settings = {
+            "api_key": self.api_key,
+            "model_source": self.model_source,
+            "layout": layout_settings,
+            "font_family": getattr(self, 'font_family', 'Segoe UI'),
+            "font_size": int(getattr(self, 'font_size', 12)),
+            "theme": getattr(self, 'theme', 'Dark')
+        }
         with open("settings.json", "w") as f:
             json.dump(settings, f, indent=4)
         print("Settings saved.")
@@ -593,25 +600,19 @@ class KarbonUI:
                     if layout_settings:
                         self.prompt_view_visible.set(layout_settings.get("prompt_view_visible", True))
                         self.editor_view_visible.set(layout_settings.get("editor_view_visible", False))
-                        sash_position = layout_settings.get("sash_position")
-
-                        self.toggle_prompt_view()
-                        self.toggle_editor_view()
-
-                        def apply_sash():
-                            if sash_position is not None and len(self.paned_window.panes()) > 1:
-                                try:
-                                    self.paned_window.sash_place(0, sash_position, 0)
-                                except tk.TclError:
-                                    pass # Fails silently if sash is not ready
-                        self.root.after(100, apply_sash)
-                        return # Exit after applying saved layout
-            except (json.JSONDecodeError, KeyError):
-                print("Error reading settings.json, using default layout.")
-        # Apply default layout if no settings file or if it's invalid
-        self.layout_default()
-
-    # --- END NEW AND UPDATED METHODS ---
+                    # Load font and theme settings
+                    self.font_family = settings.get("font_family", 'Segoe UI')
+                    self.font_size = int(settings.get("font_size", 12))
+                    self.theme = settings.get("theme", 'Dark')
+                    # Apply appearance after loading
+                    self.apply_user_appearance()
+            except Exception as e:
+                print("Error reading settings.json, using default layout.", e)
+                # Apply default appearance
+                self.font_family = 'Segoe UI'
+                self.font_size = 12
+                self.theme = 'Dark'
+                self.apply_user_appearance()
 
     def open_settings(self):
         settings_window = tk.Toplevel(self.root)
