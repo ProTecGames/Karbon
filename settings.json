@@ -1,12 +1,12 @@
 {
-    "api_key": "",
+    "api_key": "AIzaSyC2ntm02B-5LSyWnfAb5SD7eYavrky1XiM",
     "model_source": "",
     "layout": {
         "prompt_view_visible": true,
         "editor_view_visible": false,
-        "sash_position": 914
+        "sash_position": null
     },
-    "font_family": "Segoe UI",
+    "font_family": "Verdana",
     "font_size": 12,
-    "theme": "Monokai"
+    "theme": "Dark"
 }

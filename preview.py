@@ -6,7 +6,8 @@ window = None
 
 def webview_main():
     global window
-    window = webview.create_window("Live Preview", html="<h1>Waiting for AI...</h1>", width=900, height=500)
+    # MODIFIED: Added debug=True to enable developer tools for the webview
+    window = webview.create_window("Live Preview", html="<h1>Waiting for AI...</h1>", width=900, height=500, debug=True)
     webview.start(func=process_updates)
 
 def process_updates():
