@@ -5,3 +5,5 @@ pyinstaller
 PyGithub
 GitPython
 meta-ai-api
+tkhtmlview
+webview

@@ -1,7 +1,6 @@
 import tkinter as tk
 import threading
 from ui_items.karbon_ui import KarbonUI
-from preview import webview_main
 import sys
 import os
 
@@ -29,10 +28,5 @@ if __name__ == "__main__":
         # --- END MODIFIED ---
         root.mainloop()
 
-    # Run Tkinter in a separate thread
-    ui_thread = threading.Thread(target=start_ui)
-    ui_thread.daemon = True
-    ui_thread.start()
-
-    # Run Flask and webview in the main thread
-    webview_main()
+    # Run the UI
+    start_ui()

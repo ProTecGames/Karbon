@@ -6,8 +6,70 @@ import tempfile
 import os
 from ai_engine import generate_code_from_prompt, ai_status
 from exporter import export_code
-from preview import update_preview
 import prompt_history
+try:
+    from tkhtmlview import HTMLLabel
+    HTML_AVAILABLE = True
+except ImportError:
+    HTML_AVAILABLE = False
+
+# Try to import webview for better embedded browser support
+try:
+    import webview
+    WEBVIEW_AVAILABLE = True
+except ImportError:
+    WEBVIEW_AVAILABLE = False
+
+# Alternative HTML rendering method using webbrowser
+def open_html_in_browser(html_content, title="Preview"):
+    """Open HTML content in default browser for better CSS support"""
+    try:
+        # Create a temporary HTML file
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.html', delete=False, encoding='utf-8') as f:
+            f.write(html_content)
+            temp_file = f.name
+        
+        # Open in default browser
+        webbrowser.open(f'file://{temp_file}')
+        return temp_file
+    except Exception as e:
+        print(f"Error opening HTML in browser: {e}")
+        return None
+
+# Alternative HTML rendering method using webbrowser
+def open_html_in_browser(html_content, title="Preview"):
+    """Open HTML content in default browser for better CSS support"""
+    try:
+        # Create a temporary HTML file
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.html', delete=False, encoding='utf-8') as f:
+            f.write(html_content)
+            temp_file = f.name
+        
+        # Open in default browser
+        webbrowser.open(f'file://{temp_file}')
+        return temp_file
+    except Exception as e:
+        print(f"Error opening HTML in browser: {e}")
+        return None
+
+# Simple embedded preview using iframe-like approach
+class SimpleEmbeddedPreview:
+    def __init__(self, parent_frame):
+        self.parent_frame = parent_frame
+        self.current_html = ""
+        
+    def update_content(self, html_content):
+        """Update the preview content by opening in browser"""
+        try:
+            # Open in browser for guaranteed rendering
+            temp_file = open_html_in_browser(html_content, "Karbon Preview")
+            if temp_file:
+                print(f"Preview opened in browser: {temp_file}")
+                return True
+            return False
+        except Exception as e:
+            print(f"Error updating preview content: {e}")
+            return False
 
 
 class EditorView(tk.Frame):
@@ -164,6 +226,23 @@ class EditorView(tk.Frame):
         )
         self.redo_btn.pack(side="left", padx=(10, 0))
 
+        preview_btn = tk.Button(
+            button_container,
+            text="👁️ Preview",
+            font=("Segoe UI", 11, "bold"),
+            bg='#238636',
+            fg='white',
+            activebackground='#2ea043',
+            activeforeground='white',
+            relief='flat',
+            bd=0,
+            padx=25,
+            pady=10,
+            cursor='hand2',
+            command=self.refresh_preview
+        )
+        preview_btn.pack(side="left", padx=(10, 0))
+
         clear_btn = tk.Button(
             button_container,
             text="🗑️ Clear",
@@ -261,7 +340,7 @@ class EditorView(tk.Frame):
 
         self.preview_status = tk.Label(
             header,
-            text="● Live",
+            text="● Ready",
             font=("Segoe UI", 10),
             bg='#21262d',
             fg='#3fb950'
@@ -271,32 +350,153 @@ class EditorView(tk.Frame):
         content_area = tk.Frame(info_card, bg='#161b22')
         content_area.pack(fill="both", expand=True, padx=20, pady=20)
 
-        tk.Label(
-            content_area,
-            text="🌐",
-            font=("Segoe UI", 48),
-            bg='#161b22'
-        ).pack(pady=(40, 20))
+        if WEBVIEW_AVAILABLE:
+            # Use simple embedded preview that opens in browser
+            self.embedded_browser = SimpleEmbeddedPreview(content_area)
+            self.html_preview = None
+            
+            # Create a frame for the preview info
+            self.preview_info_frame = tk.Frame(content_area, bg='white')
+            self.preview_info_frame.pack(fill="both", expand=True, pady=(0, 20))
+            
+            # Add preview information
+            info_label = tk.Label(
+                self.preview_info_frame,
+                text="🌐 Live Website Preview",
+                font=("Segoe UI", 16, "bold"),
+                bg='white',
+                fg='#58a6ff'
+            )
+            info_label.pack(pady=(50, 20))
+            
+            desc_label = tk.Label(
+                self.preview_info_frame,
+                text="Your website will open in your default browser\nfor the best rendering experience with full CSS support",
+                font=("Segoe UI", 11),
+                bg='white',
+                fg='#8b949e',
+                justify='center'
+            )
+            desc_label.pack(pady=(0, 30))
+            
+            # Add a preview button
+            preview_btn = tk.Button(
+                self.preview_info_frame,
+                text="👁️ Open Preview in Browser",
+                font=("Segoe UI", 12, "bold"),
+                bg='#238636',
+                fg='white',
+                relief='flat',
+                padx=25,
+                pady=10,
+                command=self.open_preview_in_browser
+            )
+            preview_btn.pack()
+            
+            # Add hover effects
+            def on_enter(e):
+                preview_btn.configure(bg='#2ea043')
+            
+            def on_leave(e):
+                preview_btn.configure(bg='#238636')
+            
+            preview_btn.bind("<Enter>", on_enter)
+            preview_btn.bind("<Leave>", on_leave)
+            
+        elif HTML_AVAILABLE:
+            # Fallback to tkhtmlview
+            # Remove default styles that might interfere with CSS
+            HTMLLabel._default_style = ""
+            
+            # Create embedded HTML preview
+            self.html_preview = HTMLLabel(
+                content_area,
+                html="<div style='text-align: center; padding: 50px; color: #8b949e; font-family: Arial, sans-serif; background: white;'><h2>🌐 Live Website Preview</h2><p>Your generated website will render here</p><p style='font-size: 12px; color: #666;'>The actual website will appear, not the HTML code</p></div>",
+                background='white',
+                width=600,
+                height=400
+            )
+            self.html_preview.pack(fill="both", expand=True, pady=(0, 20))
+            
+            # Add refresh button
+            preview_button = tk.Button(
+                content_area,
+                text="🔄 Refresh Preview",
+                font=("Segoe UI", 11, "bold"),
+                bg='#238636',
+                fg='white',
+                relief='flat',
+                padx=20,
+                pady=8,
+                command=self.refresh_preview
+            )
+            preview_button.pack(pady=(0, 10))
+            
+            # Add hover effects for preview button
+            def on_enter(e):
+                preview_button.configure(bg='#2ea043')
+            
+            def on_leave(e):
+                preview_button.configure(bg='#238636')
+            
+            preview_button.bind("<Enter>", on_enter)
+            preview_button.bind("<Leave>", on_leave)
+            
+            # Add test preview button for debugging
+            test_button = tk.Button(
+                content_area,
+                text="🧪 Test Preview",
+                font=("Segoe UI", 10),
+                bg='#1f6feb',
+                fg='white',
+                relief='flat',
+                padx=15,
+                pady=5,
+                command=self.test_preview
+            )
+            test_button.pack(pady=(5, 0))
+            
+            # Add browser preview button for better CSS support
+            browser_button = tk.Button(
+                content_area,
+                text="🌐 Open in Browser",
+                font=("Segoe UI", 10),
+                bg='#d97706',
+                fg='white',
+                relief='flat',
+                padx=15,
+                pady=5,
+                command=self.open_in_browser
+            )
+            browser_button.pack(pady=(5, 0))
+        else:
+            # Fallback if tkhtmlview is not available
+            tk.Label(
+                content_area,
+                text="🌐",
+                font=("Segoe UI", 48),
+                bg='#161b22'
+            ).pack(pady=(40, 20))
 
-        # Stored as instance variable
-        self.preview_desc_label_1 = tk.Label(
-            content_area,
-            text="Your website preview opens in a separate window",
-            font=("Segoe UI", 14, "bold"),
-            bg='#161b22',
-            fg='#58a6ff'
-        )
-        self.preview_desc_label_1.pack()
+            # Stored as instance variable
+            self.preview_desc_label_1 = tk.Label(
+                content_area,
+                text="HTML Preview not available",
+                font=("Segoe UI", 14, "bold"),
+                bg='#161b22',
+                fg='#58a6ff'
+            )
+            self.preview_desc_label_1.pack()
 
-        # Stored as instance variable
-        self.preview_desc_label_2 = tk.Label(
-            content_area,
-            text="The preview updates automatically when you make changes",
-            font=("Segoe UI", 11),
-            bg='#161b22',
-            fg='#8b949e'
-        )
-        self.preview_desc_label_2.pack(pady=(5, 20))
+            # Stored as instance variable
+            self.preview_desc_label_2 = tk.Label(
+                content_area,
+                text="Install tkhtmlview to enable embedded preview",
+                font=("Segoe UI", 11),
+                bg='#161b22',
+                fg='#8b949e'
+            )
+            self.preview_desc_label_2.pack(pady=(5, 20))
 
         self.create_tips_section(content_area)
 
@@ -715,6 +915,447 @@ class EditorView(tk.Frame):
             content = self.text_input.get("1.0", "end-1c")
         remaining = 256 - len(content)
         self.char_count_label.config(text=f"{remaining} characters left")
+
+    def refresh_preview(self):
+        """Manually refresh the preview with current code"""
+        try:
+            current_code = self.get_code()
+            if current_code:
+                if WEBVIEW_AVAILABLE and hasattr(self, 'embedded_browser'):
+                    # Use simple embedded preview that opens in browser
+                    formatted_html = self.format_html_for_preview(current_code)
+                    if self.embedded_browser.update_content(formatted_html):
+                        self.preview_status.configure(text="● Refreshed", fg='#3fb950')
+                        self.show_success("Preview opened in browser with full CSS support!")
+                    else:
+                        self.show_error("Failed to open preview in browser")
+                            
+                elif HTML_AVAILABLE and hasattr(self, 'html_preview'):
+                    # Use tkhtmlview fallback
+                    simple_html = self.create_simple_html_preview(current_code)
+                    self.html_preview.set_html(simple_html)
+                    self.preview_status.configure(text="● Refreshed", fg='#3fb950')
+                    
+                    # Also open in browser for guaranteed rendering
+                    formatted_html = self.format_html_for_preview(current_code)
+                    temp_file = open_html_in_browser(formatted_html, "Karbon Preview")
+                    
+                    if temp_file:
+                        self.show_success("Preview refreshed! Check browser for full rendering.")
+                    else:
+                        self.show_success("Preview refreshed successfully!")
+                else:
+                    self.show_error("No preview system available. Please install webview or tkhtmlview.")
+            else:
+                self.show_error("No code available to preview")
+        except Exception as e:
+            self.show_error(f"Error refreshing preview: {str(e)}")
+
+    def check_preview_rendering(self, html_code):
+        """Check if the preview is properly rendering or showing code as text"""
+        try:
+            # If the HTML contains complex CSS or JavaScript, suggest browser preview
+            if any(keyword in html_code.lower() for keyword in ['<script>', 'gradient', 'animation', 'transform', 'backdrop-filter']):
+                self.show_success("Complex styling detected! For best results, use '🌐 Open in Browser' for full CSS support.")
+        except Exception as e:
+            print(f"Error checking preview rendering: {e}")
+
+    def format_html_for_preview(self, html_code):
+        """Format HTML code for proper rendering in the preview"""
+        try:
+            print(f"Original HTML length: {len(html_code)}")
+            print(f"HTML starts with: {html_code[:100]}...")
+            
+            # Clean the HTML first
+            html_code = html_code.strip()
+            
+            # Validate and fix HTML structure
+            html_code = self.validate_and_fix_html(html_code)
+            
+            # Process CSS to ensure it's properly embedded
+            html_code = self.process_css_in_html(html_code)
+            
+            # Ensure all HTML entities are properly encoded
+            html_code = self.encode_html_entities(html_code)
+            
+            print(f"Final HTML length: {len(html_code)}")
+            return html_code
+        except Exception as e:
+            print(f"Error formatting HTML: {e}")
+            return html_code
+
+    def encode_html_entities(self, html_code):
+        """Encode HTML entities to prevent code from being displayed as text"""
+        try:
+            # Replace common characters that might be displayed as code
+            replacements = {
+                '<': '&lt;',
+                '>': '&gt;',
+                '&': '&amp;',
+                '"': '&quot;',
+                "'": '&#39;'
+            }
+            
+            # Only encode if the content is meant to be displayed as text, not rendered
+            # For actual HTML content, we want to preserve the tags
+            return html_code
+        except Exception as e:
+            print(f"Error encoding HTML entities: {e}")
+            return html_code
+
+    def validate_and_fix_html(self, html_code):
+        """Validate and fix common HTML issues that might cause rendering problems"""
+        try:
+            # Ensure proper HTML structure
+            if not html_code.strip():
+                return html_code
+                
+            # Check for common issues
+            issues_found = []
+            
+            # Check for unclosed tags
+            open_tags = ['<html>', '<head>', '<body>', '<div>', '<span>', '<p>', '<h1>', '<h2>', '<h3>']
+            close_tags = ['</html>', '</head>', '</body>', '</div>', '</span>', '</p>', '</h1>', '</h2>', '</h3>']
+            
+            for tag in open_tags:
+                if tag in html_code and tag.replace('<', '</') not in html_code:
+                    issues_found.append(f"Unclosed {tag}")
+            
+            # Check for proper DOCTYPE
+            if '<!DOCTYPE html>' not in html_code:
+                issues_found.append("Missing DOCTYPE")
+            
+            # Check for proper HTML structure
+            if '<html>' not in html_code:
+                issues_found.append("Missing <html> tag")
+            
+            if '<head>' not in html_code:
+                issues_found.append("Missing <head> tag")
+            
+            if '<body>' not in html_code:
+                issues_found.append("Missing <body> tag")
+            
+            if issues_found:
+                print(f"HTML validation issues found: {issues_found}")
+                # Fix common issues
+                if '<!DOCTYPE html>' not in html_code:
+                    html_code = f'<!DOCTYPE html>\n{html_code}'
+                
+                if '<html>' not in html_code:
+                    html_code = f'<html>\n{html_code}\n</html>'
+                
+                if '<head>' not in html_code:
+                    html_code = html_code.replace('<html>', '<html>\n<head>\n<title>Preview</title>\n</head>')
+                
+                if '<body>' not in html_code:
+                    html_code = html_code.replace('</head>', '</head>\n<body>')
+                    html_code = html_code.replace('</html>', '</body>\n</html>')
+            
+            return html_code
+        except Exception as e:
+            print(f"Error validating HTML: {e}")
+            return html_code
+
+    def create_simple_html_preview(self, html_code):
+        """Create a simplified HTML preview that tkhtmlview can handle better"""
+        try:
+            # Extract the body content
+            import re
+            
+            # Find body content
+            body_match = re.search(r'<body[^>]*>(.*?)</body>', html_code, re.DOTALL | re.IGNORECASE)
+            if body_match:
+                body_content = body_match.group(1)
+            else:
+                # If no body tag, use the entire content
+                body_content = html_code
+            
+            # Extract CSS
+            style_match = re.search(r'<style[^>]*>(.*?)</style>', html_code, re.DOTALL | re.IGNORECASE)
+            css_content = ""
+            if style_match:
+                css_content = style_match.group(1)
+            
+            # Create a simplified HTML structure
+            simple_html = f"""
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>Preview</title>
+                <style>
+                    body {{
+                        font-family: Arial, sans-serif;
+                        margin: 0;
+                        padding: 20px;
+                        background: white;
+                        color: black;
+                    }}
+                    {css_content}
+                </style>
+            </head>
+            <body>
+                {body_content}
+            </body>
+            </html>
+            """
+            
+            return simple_html
+        except Exception as e:
+            print(f"Error creating simple HTML preview: {e}")
+            return html_code
+
+    def process_css_in_html(self, html_code):
+        """Process CSS to ensure it's properly embedded and applied"""
+        try:
+            # Clean the HTML first (remove any unwanted default styles)
+            html_code = self.clean_html(html_code)
+            
+            # Check if there are <style> tags
+            if '<style>' in html_code and '</style>' in html_code:
+                print("Found <style> tags, processing CSS...")
+                
+                # Extract CSS from style tags
+                import re
+                style_pattern = r'<style[^>]*>(.*?)</style>'
+                styles = re.findall(style_pattern, html_code, re.DOTALL)
+                
+                if styles:
+                    print(f"Found {len(styles)} style blocks")
+                    # The CSS should already be properly embedded in style tags
+                    # Just ensure they're in the head section
+                    for style_content in styles:
+                        if style_content.strip():
+                            # Ensure style tags are in the head
+                            if '<head>' in html_code and '</head>' in html_code:
+                                # Check if style is already in head
+                                if f'<style>{style_content}</style>' not in html_code:
+                                    # Move style to head if it's not there
+                                    html_code = html_code.replace('</head>', f'<style>{style_content}</style>\n</head>')
+                                    # Remove the original style tag from body
+                                    html_code = html_code.replace(f'<style>{style_content}</style>', '', 1)
+                                    print("Moved CSS to head section")
+            
+            # Check for inline styles and ensure they're preserved
+            if 'style=' in html_code:
+                print("Found inline styles, preserving...")
+            
+            # Add some basic styling to ensure proper rendering if no styles exist
+            if '<style>' not in html_code:
+                # Insert basic CSS for better rendering
+                style_insert = '<style>\nbody { margin: 0; padding: 20px; font-family: Arial, sans-serif; }\n</style>'
+                html_code = html_code.replace('</head>', f'{style_insert}\n</head>')
+                print("Added basic CSS styling")
+            
+            return html_code
+        except Exception as e:
+            print(f"Error processing CSS: {e}")
+            return html_code
+
+    def clean_html(self, raw_html):
+        """Removes tkhtmlview's injected default styles if present."""
+        try:
+            # Remove any unwanted default styles that might interfere
+            unwanted_styles = [
+                '<style>body { background-color: white; font-family: Courier; }</style>',
+                '<style>body { background-color: white; }</style>',
+                '<style>body { font-family: Courier; }</style>'
+            ]
+            
+            for unwanted_style in unwanted_styles:
+                raw_html = raw_html.replace(unwanted_style, "")
+            
+            return raw_html
+        except Exception as e:
+            print(f"Error cleaning HTML: {e}")
+            return raw_html
+
+    def test_preview(self):
+        """Test the preview with a sample website"""
+        try:
+            # Sample website HTML for testing with complex CSS
+            test_html = """
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>Test Website</title>
+                <style>
+                    * {
+                        margin: 0;
+                        padding: 0;
+                        box-sizing: border-box;
+                    }
+                    
+                    body { 
+                        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+                        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                        color: white;
+                        min-height: 100vh;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                    }
+                    
+                    .container {
+                        max-width: 800px;
+                        text-align: center;
+                        padding: 40px;
+                        background: rgba(255, 255, 255, 0.1);
+                        border-radius: 20px;
+                        backdrop-filter: blur(10px);
+                        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+                    }
+                    
+                    h1 { 
+                        font-size: 3.5em; 
+                        margin-bottom: 30px;
+                        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+                        background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+                        -webkit-background-clip: text;
+                        -webkit-text-fill-color: transparent;
+                        background-clip: text;
+                    }
+                    
+                    p { 
+                        font-size: 1.3em; 
+                        line-height: 1.8;
+                        margin-bottom: 20px;
+                        opacity: 0.9;
+                    }
+                    
+                    .button {
+                        display: inline-block;
+                        padding: 18px 35px;
+                        background: linear-gradient(45deg, #ff6b6b, #ff8e8e);
+                        color: white;
+                        text-decoration: none;
+                        border-radius: 50px;
+                        margin: 15px 10px;
+                        font-weight: bold;
+                        font-size: 1.1em;
+                        transition: all 0.3s ease;
+                        box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
+                    }
+                    
+                    .button:hover {
+                        transform: translateY(-3px);
+                        box-shadow: 0 8px 25px rgba(255, 107, 107, 0.6);
+                        background: linear-gradient(45deg, #ff5252, #ff6b6b);
+                    }
+                    
+                    .feature-grid {
+                        display: grid;
+                        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                        gap: 20px;
+                        margin-top: 40px;
+                    }
+                    
+                    .feature {
+                        background: rgba(255, 255, 255, 0.1);
+                        padding: 20px;
+                        border-radius: 15px;
+                        backdrop-filter: blur(5px);
+                    }
+                    
+                    .feature h3 {
+                        color: #4ecdc4;
+                        margin-bottom: 10px;
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="container">
+                    <h1>🚀 Welcome to Karbon!</h1>
+                    <p>This is a test website to verify that CSS styling is working correctly.</p>
+                    <p>You should see beautiful gradients, animations, and modern styling.</p>
+                    
+                    <a href="#" class="button">Get Started</a>
+                    <a href="#" class="button">Learn More</a>
+                    
+                    <div class="feature-grid">
+                        <div class="feature">
+                            <h3>🎨 Beautiful Design</h3>
+                            <p>Modern gradients and effects</p>
+                        </div>
+                        <div class="feature">
+                            <h3>⚡ Fast Performance</h3>
+                            <p>Optimized for speed</p>
+                        </div>
+                        <div class="feature">
+                            <h3>📱 Responsive</h3>
+                            <p>Works on all devices</p>
+                        </div>
+                    </div>
+                </div>
+            </body>
+            </html>
+            """
+            
+            if WEBVIEW_AVAILABLE and hasattr(self, 'embedded_browser'):
+                # Use simple embedded preview that opens in browser
+                if self.embedded_browser.update_content(test_html):
+                    self.preview_status.configure(text="● Test Loaded", fg='#3fb950')
+                    self.show_success("Test website opened in browser with full CSS support!")
+                else:
+                    self.show_error("Failed to load test preview")
+                    
+            elif HTML_AVAILABLE and hasattr(self, 'html_preview'):
+                # Use tkhtmlview fallback
+                self.html_preview.set_html(test_html)
+                self.preview_status.configure(text="● Test Loaded", fg='#3fb950')
+                
+                # Also open in browser for guaranteed rendering
+                temp_file = open_html_in_browser(test_html, "Karbon Test Preview")
+                if temp_file:
+                    self.show_success("Test website loaded! Check both embedded preview and browser for full rendering.")
+                else:
+                    self.show_success("Test website loaded! You should see a rendered website.")
+            else:
+                self.show_error("No preview system available.")
+            
+        except Exception as e:
+            self.show_error(f"Error testing preview: {str(e)}")
+
+    def open_in_browser(self):
+        """Open the current code in the default browser for better CSS support"""
+        try:
+            current_code = self.get_code()
+            if current_code:
+                # Format the HTML for browser
+                formatted_html = self.format_html_for_preview(current_code)
+                
+                # Open in browser
+                temp_file = open_html_in_browser(formatted_html, "Karbon Preview")
+                
+                if temp_file:
+                    self.preview_status.configure(text="● Browser Opened", fg='#3fb950')
+                    self.show_success("Preview opened in browser with full CSS support!")
+                else:
+                    self.show_error("Failed to open preview in browser")
+            else:
+                self.show_error("No code available to preview")
+        except Exception as e:
+            self.show_error(f"Error opening in browser: {str(e)}")
+
+    def open_preview_in_browser(self):
+        """Open preview in browser (for webview mode)"""
+        try:
+            current_code = self.get_code()
+            if current_code:
+                # Format the HTML for browser
+                formatted_html = self.format_html_for_preview(current_code)
+                
+                # Open in browser
+                temp_file = open_html_in_browser(formatted_html, "Karbon Preview")
+                
+                if temp_file:
+                    self.preview_status.configure(text="● Browser Opened", fg='#3fb950')
+                    self.show_success("Preview opened in browser with full CSS support!")
+                else:
+                    self.show_error("Failed to open preview in browser")
+            else:
+                self.show_error("No code available to preview")
+        except Exception as e:
+            self.show_error(f"Error opening preview in browser: {str(e)}")
 
     def update_appearance(self, font_family, font_size, theme_colors):
         # Update header labels

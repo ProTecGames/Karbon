@@ -7,7 +7,7 @@ import re
 from pathlib import Path
 
 from ui_items.prompt_view import PromptView
-from ui_items.editor_view import EditorView
+from ui_items.editor_view import EditorView, open_html_in_browser
 from ui_items.token_manager_view import TokenManagerView
 from contributors_page import ContributorsPage
 
@@ -268,11 +268,61 @@ class KarbonUI:
     def set_code(self, new_code):
         self.code = new_code
         self.update_status(f"Code updated - {len(new_code)} characters", "📝")
+        
+        # Update embedded preview if available
+        try:
+            if hasattr(self.editor_view, 'embedded_browser'):
+                # Use simple embedded preview that opens in browser
+                formatted_html = self.editor_view.format_html_for_preview(new_code)
+                if self.editor_view.embedded_browser.update_content(formatted_html):
+                    self.editor_view.preview_status.configure(text="● Updated", fg='#3fb950')
+                    print("Preview opened in browser with full CSS support")
+                else:
+                    print("Failed to open preview in browser")
+                        
+            elif hasattr(self.editor_view, 'html_preview') and hasattr(self.editor_view.html_preview, 'set_html'):
+                # Use tkhtmlview fallback
+                simple_html = self.editor_view.create_simple_html_preview(new_code)
+                self.editor_view.html_preview.set_html(simple_html)
+                self.editor_view.preview_status.configure(text="● Updated", fg='#3fb950')
+                
+                # Also open in browser for guaranteed rendering
+                formatted_html = self.editor_view.format_html_for_preview(new_code)
+                temp_file = open_html_in_browser(formatted_html, "Karbon Preview")
+                if temp_file:
+                    print("Preview opened in browser for full rendering")
+        except Exception as e:
+            print(f"Error updating embedded preview: {e}")
 
     def handle_prompt_generated(self, code):
         self.code = code
         self.update_status("Code generated successfully!", "🎉")
         self.layout_preview_focus()
+        
+        # Update embedded preview if available
+        try:
+            if hasattr(self.editor_view, 'embedded_browser'):
+                # Use simple embedded preview that opens in browser
+                formatted_html = self.editor_view.format_html_for_preview(code)
+                if self.editor_view.embedded_browser.update_content(formatted_html):
+                    self.editor_view.preview_status.configure(text="● Updated", fg='#3fb950')
+                    print("Preview opened in browser with full CSS support")
+                else:
+                    print("Failed to open preview in browser")
+                        
+            elif hasattr(self.editor_view, 'html_preview') and hasattr(self.editor_view.html_preview, 'set_html'):
+                # Use tkhtmlview fallback
+                simple_html = self.editor_view.create_simple_html_preview(code)
+                self.editor_view.html_preview.set_html(simple_html)
+                self.editor_view.preview_status.configure(text="● Updated", fg='#3fb950')
+                
+                # Also open in browser for guaranteed rendering
+                formatted_html = self.editor_view.format_html_for_preview(code)
+                temp_file = open_html_in_browser(formatted_html, "Karbon Preview")
+                if temp_file:
+                    print("Preview opened in browser for full rendering")
+        except Exception as e:
+            print(f"Error updating embedded preview: {e}")
 
     def get_api_key(self):
         return self.api_key

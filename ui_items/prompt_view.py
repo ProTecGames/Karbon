@@ -422,7 +422,14 @@ class PromptView(tk.Frame):
 
                 code = generate_code_from_prompt(final_prompt, api_key, model_source)
 
-                update_preview(code)
+                # Update embedded preview if available
+                try:
+                    from ui_items.editor_view import HTML_AVAILABLE
+                    if HTML_AVAILABLE:
+                        # The preview will be updated when the editor view is shown
+                        pass
+                except ImportError:
+                    pass
                 prompt_history.pop_prompt()
                 prompt_history.push_prompt(final_prompt)
                 prompt_history.push_prompt(
