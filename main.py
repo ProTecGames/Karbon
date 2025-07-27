@@ -16,6 +16,15 @@ def resource_path(relative_path):
 
     return os.path.join(base_path, relative_path)
 
+import os
+
+# Step 1: Create autosave directory
+autosave_dir = "autosave"
+os.makedirs(autosave_dir, exist_ok=True)
+
+
+
+
 if __name__ == "__main__":
     def start_ui():
         root = tk.Tk()
