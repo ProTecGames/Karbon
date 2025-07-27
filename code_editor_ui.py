@@ -5,6 +5,9 @@ from tkcode import CodeEditor  # ✅ Syntax highlighting editor
 import zipfile
 import os
 
+
+
+
 def save_as_html():
     html_code = code_input.get("1.0", tk.END)
     file_path = filedialog.asksaveasfilename(defaultextension=".html", filetypes=[("HTML files", "*.html")])
@@ -52,10 +55,15 @@ def load_ai_code():
   </body>
 </html>"""
 
-
     code_input.delete("1.0", tk.END)
     code_input.insert("1.0", generated_code)
-    update_preview(None)  # Update live preview immediately
+    update_preview(None)
+
+    # Auto-save to autosave/index.html
+    autosave_path = os.path.join("autosave", "index.html")
+    with open(autosave_path, "w", encoding="utf-8") as f:
+        f.write(generated_code)
+
 
 load_ai_btn = tk.Button(button_frame, text="⚡ Load AI Code", command=load_ai_code)
 load_ai_btn.grid(row=0, column=2, padx=5)
@@ -76,7 +84,13 @@ code_input = CodeEditor(
     autofocus=True,
     insertbackground="white"  # Cursor color
 )
-default_code = """<!DOCTYPE html>
+autosave_path = os.path.join("autosave", "index.html")
+
+if os.path.exists(autosave_path):
+    with open(autosave_path, "r", encoding="utf-8") as f:
+        last_code = f.read()
+else:
+    last_code = """<!DOCTYPE html>
 <html>
   <head>
     <title>Karbon</title>
@@ -88,8 +102,8 @@ default_code = """<!DOCTYPE html>
   </body>
 </html>"""
 
+code_input.insert("1.0", last_code)
 
-code_input.insert("1.0", default_code)
 code_input.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 
 # ---------- Live Preview (right) ----------
