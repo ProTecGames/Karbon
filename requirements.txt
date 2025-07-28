@@ -1,9 +1,7 @@
 pywebview
-tk
 google-generativeai
 pyinstaller
 PyGithub
 GitPython
 meta-ai-api
 tkhtmlview
-webview
