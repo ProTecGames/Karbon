@@ -1,0 +1,8 @@
+{
+  "prompt": "Create a personal portfolio website.",
+  "html": "<!DOCTYPE html><html><head><title>My Portfolio</title></head><body><h1>Welcome</h1></body></html>",
+  "css": "body { font-family: Arial; }",
+  "js": "console.log('Welcome to my portfolio');",
+  "last_modified": "2025-07-28T15:30:00"
+}
+
