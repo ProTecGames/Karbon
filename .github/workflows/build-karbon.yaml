@@ -32,6 +32,18 @@ jobs:
         with:
           python-version: '3.11'
 
+      - name: Install system dependencies for Linux
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.0-dev python3-tk pkg-config
+
+      - name: Install system dependencies for macOS
+        if: matrix.os == 'macos-latest'
+        run: |
+          brew update
+          brew install gtk+3 webkit2gtk pkg-config
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
