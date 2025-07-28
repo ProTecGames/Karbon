@@ -11,12 +11,12 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [windows-latest, ubuntu-latest, macos-latest]
+        os: [windows-latest, ubuntu-22.04, macos-latest]  # 👈 FIXED THIS LINE
         include:
           - os: windows-latest
             extension: .exe
             pyinstaller-args: "--onefile --noconsole --name Karbon --icon=icon.ico"
-          - os: ubuntu-latest
+          - os: ubuntu-22.04  # 👈 MATCHED OS HERE
             extension: ''
             pyinstaller-args: "--onefile --name Karbon"
           - os: macos-latest
@@ -33,7 +33,7 @@ jobs:
           python-version: '3.11'
 
       - name: Install system dependencies for Linux
-        if: matrix.os == 'ubuntu-latest'
+        if: matrix.os == 'ubuntu-22.04'
         run: |
           sudo apt-get update
           sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.0-dev python3-tk pkg-config
