@@ -7,7 +7,6 @@ import os
 import json
 from datetime import datetime
 from project_io import create_project_data, save_project_to_file
-
 def save_as_html():
     html_code = code_input.get("1.0", tk.END)
     file_path = filedialog.asksaveasfilename(defaultextension=".html", filetypes=[("HTML files", "*.html")])
@@ -29,17 +28,11 @@ def save_as_zip():
 root = tk.Tk()
 root.title("Karbon Code Editor")
 root.geometry("1200x700")
-
 # ---------- Top Save Buttons ----------
 button_frame = tk.Frame(root)
 button_frame.pack(anchor="nw", padx=10, pady=10)
-
-
-
-
 save_zip_btn = tk.Button(button_frame, text="📦 Save as ZIP", command=save_as_zip)
 save_zip_btn.pack(side="left", padx=5)
-
 def load_ai_code():
     generated_code = """<!DOCTYPE html>
 <html>
@@ -63,18 +56,14 @@ def load_project():
     if file_path:
         with open(file_path, "r", encoding="utf-8") as f:
             project_data = json.load(f)
-
         full_code = project_data.get("full_code", "")
-
         code_input.delete("1.0", tk.END)
         code_input.insert("1.0", full_code)
         update_preview(None)
-
         # Auto-save to autosave/index.html
         autosave_path = os.path.join("autosave", "index.html")
         with open(autosave_path, "w", encoding="utf-8") as f:
             f.write(full_code)
-
 load_ai_btn = tk.Button(button_frame, text="⚡ Load AI Code", command=load_ai_code)
 load_ai_btn.pack(side="left", padx=5)
 load_project_btn = tk.Button(button_frame, text="📂 Load Project", command=load_project)
@@ -82,7 +71,6 @@ load_project_btn.pack(side="left", padx=5)
 # ---------- Main Editor Layout ----------
 main_frame = tk.Frame(root)
 main_frame.pack(fill=tk.BOTH, expand=True)
-
 # ---------- Code Editor (left) ----------
 code_input = CodeEditor(
     main_frame,
@@ -94,11 +82,7 @@ code_input = CodeEditor(
     autofocus=True,
     insertbackground="white"  # Cursor color
 )
-
-
-
 autosave_path = os.path.join("autosave", "index.html")
-
 if os.path.exists(autosave_path):
     with open(autosave_path, "r", encoding="utf-8") as f:
         last_code = f.read()
