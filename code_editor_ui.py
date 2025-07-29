@@ -1,20 +1,18 @@
 import tkinter as tk
 from tkinter import filedialog
 from tkhtmlview import HTMLLabel
-from tkcode import CodeEditor  # ✅ Syntax highlighting editor
+from tkcode import CodeEditor  
 import zipfile
 import os
-
-
-
-
+import json
+from datetime import datetime
+from project_io import create_project_data, save_project_to_file
 def save_as_html():
     html_code = code_input.get("1.0", tk.END)
     file_path = filedialog.asksaveasfilename(defaultextension=".html", filetypes=[("HTML files", "*.html")])
     if file_path:
         with open(file_path, "w", encoding="utf-8") as f:
             f.write(html_code)
-
 def save_as_zip():
     html_code = code_input.get("1.0", tk.END)
     zip_path = filedialog.asksaveasfilename(defaultextension=".zip", filetypes=[("ZIP files", "*.zip")])
@@ -26,22 +24,15 @@ def save_as_zip():
         with zipfile.ZipFile(zip_path, 'w') as zipf:
             zipf.write(temp_path, arcname=html_filename)
         os.remove(temp_path)
-
 # ---------------- UI Setup ----------------
 root = tk.Tk()
 root.title("Karbon Code Editor")
 root.geometry("1200x700")
-
 # ---------- Top Save Buttons ----------
 button_frame = tk.Frame(root)
 button_frame.pack(anchor="nw", padx=10, pady=10)
-
-save_html_btn = tk.Button(button_frame, text="💾 Save as HTML", command=save_as_html)
-save_html_btn.grid(row=0, column=0, padx=5)
-
 save_zip_btn = tk.Button(button_frame, text="📦 Save as ZIP", command=save_as_zip)
-save_zip_btn.grid(row=0, column=1, padx=5)
-
+save_zip_btn.pack(side="left", padx=5)
 def load_ai_code():
     generated_code = """<!DOCTYPE html>
 <html>
@@ -54,25 +45,32 @@ def load_ai_code():
     <h1>This HTML code was inserted by the AI</h1>
   </body>
 </html>"""
-
     code_input.delete("1.0", tk.END)
     code_input.insert("1.0", generated_code)
     update_preview(None)
-
-    # Auto-save to autosave/index.html
-    autosave_path = os.path.join("autosave", "index.html")
-    with open(autosave_path, "w", encoding="utf-8") as f:
-        f.write(generated_code)
-
-
+def load_project():
+    file_path = filedialog.askopenfilename(
+        defaultextension=".karbonproject",
+        filetypes=[("Karbon Project Files", "*.karbonproject"), ("All Files", "*.*")]
+    )
+    if file_path:
+        with open(file_path, "r", encoding="utf-8") as f:
+            project_data = json.load(f)
+        full_code = project_data.get("full_code", "")
+        code_input.delete("1.0", tk.END)
+        code_input.insert("1.0", full_code)
+        update_preview(None)
+        # Auto-save to autosave/index.html
+        autosave_path = os.path.join("autosave", "index.html")
+        with open(autosave_path, "w", encoding="utf-8") as f:
+            f.write(full_code)
 load_ai_btn = tk.Button(button_frame, text="⚡ Load AI Code", command=load_ai_code)
-load_ai_btn.grid(row=0, column=2, padx=5)
-
-
+load_ai_btn.pack(side="left", padx=5)
+load_project_btn = tk.Button(button_frame, text="📂 Load Project", command=load_project)
+load_project_btn.pack(side="left", padx=5)
 # ---------- Main Editor Layout ----------
 main_frame = tk.Frame(root)
 main_frame.pack(fill=tk.BOTH, expand=True)
-
 # ---------- Code Editor (left) ----------
 code_input = CodeEditor(
     main_frame,
@@ -85,7 +83,6 @@ code_input = CodeEditor(
     insertbackground="white"  # Cursor color
 )
 autosave_path = os.path.join("autosave", "index.html")
-
 if os.path.exists(autosave_path):
     with open(autosave_path, "r", encoding="utf-8") as f:
         last_code = f.read()
@@ -101,45 +98,45 @@ else:
     <h1>Hello! Welcome to Karbon's live code editor</h1>
   </body>
 </html>"""
-
 code_input.insert("1.0", last_code)
-
 code_input.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
-
 # ---------- Live Preview (right) ----------
 preview_frame = tk.Frame(main_frame, bg="white", width=600)
 preview_frame.pack(side=tk.RIGHT, fill=tk.BOTH)
-
-
-HTMLLabel._default_style = ""  # ⚠️ Removes the default injected CSS
-
-
+HTMLLabel._default_style = ""  
 def clean_html(raw_html):
     """Removes tkhtmlview's injected default styles if present."""
     unwanted_style = '<style>body { background-color: white; font-family: Courier; }</style>'
     return raw_html.replace(unwanted_style, "")
-
-
 html_content = HTMLLabel(
     preview_frame,
-    html=clean_html(code_input.get("1.0", tk.END)),  # ✅ cleaned HTML
+    html=clean_html(code_input.get("1.0", tk.END)),  
     background="white",
 )
-
-
 html_content.pack(fill=tk.BOTH, expand=True)
-
-
-
-
-
-
 def update_preview(event):
     html_content.set_html(clean_html(code_input.get("1.0", tk.END)))
-
-
-
 code_input.bind("<KeyRelease>", update_preview)
+
+
+
+def save_project(code_input):
+    html_code = code_input.get("1.0", tk.END)
+    file_path = filedialog.asksaveasfilename(
+        defaultextension=".karbonproject",
+        filetypes=[("Karbon Project Files", "*.karbonproject")]
+    )
+    if file_path:
+        project_data = {
+            "full_code": html_code
+        }
+        with open(file_path, "w", encoding="utf-8") as f:
+            json.dump(project_data, f, indent=2)
+
+
+
+save_project_btn = tk.Button(button_frame, text="💾 Save Project", command=lambda: save_project(code_input))
+save_project_btn.pack(side="left", padx=5)
 
 # ---------- Launch ----------
 root.mainloop()
