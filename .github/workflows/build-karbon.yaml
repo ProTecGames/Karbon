@@ -50,6 +50,17 @@ jobs:
           pip install -r requirements.txt
           pip install pyinstaller
 
+
+      - name: Install test dependencies
+        run: |
+          pip install pytest coverage
+
+      - name: Run tests with coverage and JUnit report
+        run: |
+          pytest --cov=karbon --cov-report=xml --junitxml=pytest-report.xml
+
+
+
       - name: Build executable with PyInstaller
         run: |
           python -m PyInstaller ui.py ${{ matrix.pyinstaller-args }}
