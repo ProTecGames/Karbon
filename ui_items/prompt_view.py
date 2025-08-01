@@ -1,11 +1,11 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
 import threading
-from ai_engine import generate_code_from_prompt
-from preview import update_preview
-import prompt_history
-from ai_engine import ai_status
-from ai_engine import optimize_prompt
+from core.ai_engine import generate_code_from_prompt
+from utils.preview import update_preview
+import core.prompt_history as prompt_history
+from core.ai_engine import ai_status
+from core.ai_engine import optimize_prompt
 
 MAX_PROMPT_LENGTH = 256
 
@@ -110,7 +110,7 @@ class PromptView(tk.Frame):
         self.text_input.bind('<KeyRelease>', self.update_char_count)
         self.text_input.bind('<Control-v>', self.update_char_count)
         self.text_input.bind('<FocusOut>', self.update_char_count)
-        self.placeholder_text = "Describe your dream website... \n\nExample: Create a modern portfolio website with dark theme, smooth animations, and minimilist Design"
+        self.placeholder_text = "Describe your dream website... \n\nExample: Create a modern portfolio website with dark theme, smooth animations, and minimalist design"
         self.setup_placeholder()
         button_frame = tk.Frame(input_card, bg='#161b22')
         button_frame.pack(fill="x", padx=25, pady=(0, 25))
@@ -309,6 +309,8 @@ class PromptView(tk.Frame):
         self.text_input.delete("1.0", "end")
         self.text_input.insert("1.0", self.placeholder_text)
         self.text_input.configure(fg='#6e7681')
+        self.placeholder_active = True
+        self.update_char_count()
 
     def random_idea(self):
         import random
@@ -330,6 +332,8 @@ class PromptView(tk.Frame):
         self.text_input.delete("1.0", "end")
         self.text_input.insert("1.0", random_idea)
         self.text_input.configure(fg='#f0f6fc')
+        self.placeholder_active = False
+        self.update_char_count()
 
     def handle_generate(self):
         if self.is_generating:
@@ -440,9 +444,35 @@ class PromptView(tk.Frame):
         error_window.resizable(False, False)
         error_window.transient(self.winfo_toplevel())
         error_window.grab_set()
-        x = self.winfo_toplevel().winfo_x() + (self.winfo_toplevel().winfo_width() // 2) - 225
-        y = self.winfo_toplevel().winfo_y() + (self.winfo_toplevel().winfo_height() // 2) - 100
-        error_window.geometry(f"450x200+{x}+{y}")
+        
+        # Center the error window properly with bounds checking
+        try:
+            root = self.winfo_toplevel()
+            root.update_idletasks()  # Ensure geometry is updated
+            
+            # Get screen dimensions
+            screen_width = root.winfo_screenwidth()
+            screen_height = root.winfo_screenheight()
+            
+            # Calculate center position relative to parent window
+            parent_x = root.winfo_x()
+            parent_y = root.winfo_y()
+            parent_width = root.winfo_width()
+            parent_height = root.winfo_height()
+            
+            # Calculate centered position
+            x = parent_x + (parent_width // 2) - 225
+            y = parent_y + (parent_height // 2) - 100
+            
+            # Ensure the window stays within screen bounds
+            x = max(0, min(x, screen_width - 450))
+            y = max(0, min(y, screen_height - 200))
+            
+            error_window.geometry(f"450x200+{x}+{y}")
+        except tk.TclError:
+            # Fallback to center of screen if positioning fails
+            error_window.geometry("450x200+300+200")
+        
         tk.Label(
             error_window,
             text="⚠️",
@@ -478,9 +508,33 @@ class PromptView(tk.Frame):
         success_window.configure(bg='#21262d')
         success_window.resizable(False, False)
         success_window.attributes('-topmost', True)
-        x = self.winfo_toplevel().winfo_x() + self.winfo_toplevel().winfo_width() - 420
-        y = self.winfo_toplevel().winfo_y() + 50
-        success_window.geometry(f"400x150+{x}+{y}")
+        
+        # Position the success window properly with bounds checking
+        try:
+            root = self.winfo_toplevel()
+            root.update_idletasks()  # Ensure geometry is updated
+            
+            # Get screen dimensions
+            screen_width = root.winfo_screenwidth()
+            screen_height = root.winfo_screenheight()
+            
+            # Position in top-right corner of parent window
+            parent_x = root.winfo_x()
+            parent_y = root.winfo_y()
+            parent_width = root.winfo_width()
+            
+            x = parent_x + parent_width - 420
+            y = parent_y + 50
+            
+            # Ensure the window stays within screen bounds
+            x = max(0, min(x, screen_width - 400))
+            y = max(0, min(y, screen_height - 150))
+            
+            success_window.geometry(f"400x150+{x}+{y}")
+        except tk.TclError:
+            # Fallback positioning
+            success_window.geometry("400x150+500+100")
+        
         tk.Label(
             success_window,
             text="🎉",

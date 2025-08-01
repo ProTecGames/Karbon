@@ -36,3 +36,9 @@ test_token*.py
 test_github_integration*.py
 test_karbon_export.py
 test_token_ui.py
+
+# Test and coverage artifacts
+.coverage
+coverage.xml
+pytest-report.xml
+.pytest_cache/

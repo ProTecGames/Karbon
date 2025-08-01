@@ -11,9 +11,9 @@ from ui_items.editor_view import EditorView, open_html_in_browser
 from ui_items.token_manager_view import TokenManagerView
 from contributors_page import ContributorsPage
 
-from ai_engine import ai_status, generate_code_from_prompt
-from exporter import export_code, export_to_github
-from repo_pusher import push_to_github
+from core.ai_engine import ai_status, generate_code_from_prompt
+from exporters.exporter import export_code, export_to_github
+from exporters.repo_pusher import push_to_github
 
 EXAMPLES = {
     "Login Page": "Create a login page using HTML and Tailwind CSS",
@@ -330,6 +330,18 @@ class KarbonUI:
     def get_model_source(self):
         return self.model_source
 
+    def insert_example_prompt(self, key):
+        """Insert example prompt into the prompt input field"""
+        if key and key in EXAMPLES:
+            example_prompt = EXAMPLES[key]
+            if hasattr(self, 'prompt_view') and hasattr(self.prompt_view, 'text_input'):
+                # Clear existing content
+                self.prompt_view.text_input.delete("1.0", "end")
+                # Insert the example prompt
+                self.prompt_view.text_input.insert("1.0", example_prompt)
+                # Update text color to indicate it's not placeholder
+                self.prompt_view.text_input.configure(fg='#f0f6fc')
+
     def toggle_prompt_view(self):
         is_present = self.prompt_view in self.paned_window.panes()
         if self.prompt_view_visible.get():
@@ -530,7 +542,7 @@ class KarbonUI:
 
     def export_code_basic(self):
         try:
-            from exporter import export_code
+            from exporters.exporter import export_code
             if not self.code:
                 self.show_notification("There is no code to export.", "warning")
                 return
@@ -574,8 +586,8 @@ class KarbonUI:
         self.update_status("GitHub Token Manager", "🔐")
 
     def handle_export(self):
-        from exporter import export_code, export_to_github, validate_github_token
-        from token_manager import decrypt_token
+        from exporters.exporter import export_code, export_to_github, validate_github_token
+        from core.token_manager import decrypt_token
 
         prompt = self.prompt_view.text_input.get("1.0", "end-1c").strip()
         if not prompt:
@@ -613,6 +625,7 @@ class KarbonUI:
         colors = {
             "info": "#58a6ff",
             "success": "#3fb950",
+                "error": "#f85149",
             "warning": "#d29922",
             "error": "#f85149"
         }
@@ -641,7 +654,8 @@ class KarbonUI:
                 "accent": "#58a6ff",
                 "subtitle": "#8b949e",
                 "warning": "#d29922",
-                "success": "#3fb950"
+                "success": "#3fb950",
+                "error": "#f85149"
             },
             "Light": {
                 "bg": "#f5f5f5",
@@ -651,7 +665,8 @@ class KarbonUI:
                 "accent": "#0071f3",
                 "subtitle": "#555555",
                 "warning": "#e6a23c",
-                "success": "#28a745"
+                "success": "#28a745",
+                "error": "#dc3545"
             },
             "High Contrast": {
                 "bg": "#000000",
@@ -661,7 +676,8 @@ class KarbonUI:
                 "accent": "#ffea00",
                 "subtitle": "#ffea00",
                 "warning": "#ffd700",
-                "success": "#39ff14"
+                "success": "#39ff14",
+                "error": "#ff0000"
             },
             "Pastel": {
                 "bg": "#fdf6f0",
@@ -671,7 +687,8 @@ class KarbonUI:
                 "accent": "#a3c9a8",
                 "subtitle": "#b8a1a1",
                 "warning": "#f0b400",
-                "success": "#6ab04c"
+                "success": "#6ab04c",
+                "error": "#e55353"
             },
             "Monokai": {
                 "bg": "#272822",
@@ -681,7 +698,8 @@ class KarbonUI:
                 "accent": "#f92672",
                 "subtitle": "#a6e22e",
                 "warning": "#fd971f",
-                "success": "#a6e22e"
+                "success": "#a6e22e",
+                "error": "#f92672"
             },
             "Solarized Dark": {
                 "bg": "#002b36",
@@ -691,7 +709,8 @@ class KarbonUI:
                 "accent": "#b58900",
                 "subtitle": "#268bd2",
                 "warning": "#cb4b16",
-                "success": "#859900"
+                "success": "#859900",
+                "error": "#dc322f"
             },
             "Solarized Light": {
                 "bg": "#fdf6e3",
@@ -701,7 +720,8 @@ class KarbonUI:
                 "accent": "#b58900",
                 "subtitle": "#268bd2",
                 "warning": "#dc322f",
-                "success": "#859900"
+                "success": "#859900",
+                "error": "#dc322f"
             }
         }
         return themes.get(theme_name, themes["Dark"])
@@ -816,8 +836,8 @@ class KarbonUI:
         self.update_status("GitHub Token Manager", "🔐")
 
     def handle_export(self):
-        from exporter import export_code, export_to_github, validate_github_token
-        from token_manager import decrypt_token
+        from exporters.exporter import export_code, export_to_github, validate_github_token
+        from core.token_manager import decrypt_token
 
         prompt = self.prompt_view.text_input.get("1.0", "end-1c").strip()
         if not prompt:
@@ -855,6 +875,7 @@ class KarbonUI:
         colors = {
             "info": "#58a6ff",
             "success": "#3fb950",
+                "error": "#f85149",
             "warning": "#d29922",
             "error": "#f85149"
         }
@@ -883,7 +904,8 @@ class KarbonUI:
                 "accent": "#58a6ff",
                 "subtitle": "#8b949e",
                 "warning": "#d29922",
-                "success": "#3fb950"
+                "success": "#3fb950",
+                "error": "#f85149"
             },
             "Light": {
                 "bg": "#f5f5f5",
@@ -893,7 +915,8 @@ class KarbonUI:
                 "accent": "#0071f3",
                 "subtitle": "#555555",
                 "warning": "#e6a23c",
-                "success": "#28a745"
+                "success": "#28a745",
+                "error": "#dc3545"
             },
             "High Contrast": {
                 "bg": "#000000",
@@ -903,7 +926,8 @@ class KarbonUI:
                 "accent": "#ffea00",
                 "subtitle": "#ffea00",
                 "warning": "#ffd700",
-                "success": "#39ff14"
+                "success": "#39ff14",
+                "error": "#ff0000"
             },
             "Pastel": {
                 "bg": "#fdf6f0",
@@ -913,7 +937,8 @@ class KarbonUI:
                 "accent": "#a3c9a8",
                 "subtitle": "#b8a1a1",
                 "warning": "#f0b400",
-                "success": "#6ab04c"
+                "success": "#6ab04c",
+                "error": "#e55353"
             },
             "Monokai": {
                 "bg": "#272822",
@@ -923,7 +948,8 @@ class KarbonUI:
                 "accent": "#f92672",
                 "subtitle": "#a6e22e",
                 "warning": "#fd971f",
-                "success": "#a6e22e"
+                "success": "#a6e22e",
+                "error": "#f92672"
             },
             "Solarized Dark": {
                 "bg": "#002b36",
@@ -933,7 +959,8 @@ class KarbonUI:
                 "accent": "#b58900",
                 "subtitle": "#268bd2",
                 "warning": "#cb4b16",
-                "success": "#859900"
+                "success": "#859900",
+                "error": "#dc322f"
             },
             "Solarized Light": {
                 "bg": "#fdf6e3",
@@ -943,7 +970,8 @@ class KarbonUI:
                 "accent": "#b58900",
                 "subtitle": "#268bd2",
                 "warning": "#dc322f",
-                "success": "#859900"
+                "success": "#859900",
+                "error": "#dc322f"
             }
         }
         return themes.get(theme_name, themes["Dark"])
@@ -1058,8 +1086,8 @@ class KarbonUI:
         self.update_status("GitHub Token Manager", "🔐")
 
     def handle_export(self):
-        from exporter import export_code, export_to_github, validate_github_token
-        from token_manager import decrypt_token
+        from exporters.exporter import export_code, export_to_github, validate_github_token
+        from core.token_manager import decrypt_token
 
         prompt = self.prompt_view.text_input.get("1.0", "end-1c").strip()
         if not prompt:
@@ -1097,6 +1125,7 @@ class KarbonUI:
         colors = {
             "info": "#58a6ff",
             "success": "#3fb950",
+                "error": "#f85149",
             "warning": "#d29922",
             "error": "#f85149"
         }
@@ -1125,7 +1154,8 @@ class KarbonUI:
                 "accent": "#58a6ff",
                 "subtitle": "#8b949e",
                 "warning": "#d29922",
-                "success": "#3fb950"
+                "success": "#3fb950",
+                "error": "#f85149"
             },
             "Light": {
                 "bg": "#f5f5f5",
@@ -1135,7 +1165,8 @@ class KarbonUI:
                 "accent": "#0071f3",
                 "subtitle": "#555555",
                 "warning": "#e6a23c",
-                "success": "#28a745"
+                "success": "#28a745",
+                "error": "#dc3545"
             },
             "High Contrast": {
                 "bg": "#000000",
@@ -1145,7 +1176,8 @@ class KarbonUI:
                 "accent": "#ffea00",
                 "subtitle": "#ffea00",
                 "warning": "#ffd700",
-                "success": "#39ff14"
+                "success": "#39ff14",
+                "error": "#ff0000"
             },
             "Pastel": {
                 "bg": "#fdf6f0",
@@ -1155,7 +1187,8 @@ class KarbonUI:
                 "accent": "#a3c9a8",
                 "subtitle": "#b8a1a1",
                 "warning": "#f0b400",
-                "success": "#6ab04c"
+                "success": "#6ab04c",
+                "error": "#e55353"
             },
             "Monokai": {
                 "bg": "#272822",
@@ -1165,7 +1198,8 @@ class KarbonUI:
                 "accent": "#f92672",
                 "subtitle": "#a6e22e",
                 "warning": "#fd971f",
-                "success": "#a6e22e"
+                "success": "#a6e22e",
+                "error": "#f92672"
             },
             "Solarized Dark": {
                 "bg": "#002b36",
@@ -1175,7 +1209,8 @@ class KarbonUI:
                 "accent": "#b58900",
                 "subtitle": "#268bd2",
                 "warning": "#cb4b16",
-                "success": "#859900"
+                "success": "#859900",
+                "error": "#dc322f"
             },
             "Solarized Light": {
                 "bg": "#fdf6e3",
@@ -1185,7 +1220,8 @@ class KarbonUI:
                 "accent": "#b58900",
                 "subtitle": "#268bd2",
                 "warning": "#dc322f",
-                "success": "#859900"
+                "success": "#859900",
+                "error": "#dc322f"
             }
         }
         return themes.get(theme_name, themes["Dark"])
@@ -1300,8 +1336,8 @@ class KarbonUI:
         self.update_status("GitHub Token Manager", "🔐")
 
     def handle_export(self):
-        from exporter import export_code, export_to_github, validate_github_token
-        from token_manager import decrypt_token
+        from exporters.exporter import export_code, export_to_github, validate_github_token
+        from core.token_manager import decrypt_token
 
         prompt = self.prompt_view.text_input.get("1.0", "end-1c").strip()
         if not prompt:
@@ -1339,6 +1375,7 @@ class KarbonUI:
         colors = {
             "info": "#58a6ff",
             "success": "#3fb950",
+                "error": "#f85149",
             "warning": "#d29922",
             "error": "#f85149"
         }
@@ -1367,7 +1404,8 @@ class KarbonUI:
                 "accent": "#58a6ff",
                 "subtitle": "#8b949e",
                 "warning": "#d29922",
-                "success": "#3fb950"
+                "success": "#3fb950",
+                "error": "#f85149"
             },
             "Light": {
                 "bg": "#f5f5f5",
@@ -1377,7 +1415,8 @@ class KarbonUI:
                 "accent": "#0071f3",
                 "subtitle": "#555555",
                 "warning": "#e6a23c",
-                "success": "#28a745"
+                "success": "#28a745",
+                "error": "#dc3545"
             },
             "High Contrast": {
                 "bg": "#000000",
@@ -1387,7 +1426,8 @@ class KarbonUI:
                 "accent": "#ffea00",
                 "subtitle": "#ffea00",
                 "warning": "#ffd700",
-                "success": "#39ff14"
+                "success": "#39ff14",
+                "error": "#ff0000"
             },
             "Pastel": {
                 "bg": "#fdf6f0",
@@ -1397,7 +1437,8 @@ class KarbonUI:
                 "accent": "#a3c9a8",
                 "subtitle": "#b8a1a1",
                 "warning": "#f0b400",
-                "success": "#6ab04c"
+                "success": "#6ab04c",
+                "error": "#e55353"
             },
             "Monokai": {
                 "bg": "#272822",
@@ -1407,7 +1448,8 @@ class KarbonUI:
                 "accent": "#f92672",
                 "subtitle": "#a6e22e",
                 "warning": "#fd971f",
-                "success": "#a6e22e"
+                "success": "#a6e22e",
+                "error": "#f92672"
             },
             "Solarized Dark": {
                 "bg": "#002b36",
@@ -1417,7 +1459,8 @@ class KarbonUI:
                 "accent": "#b58900",
                 "subtitle": "#268bd2",
                 "warning": "#cb4b16",
-                "success": "#859900"
+                "success": "#859900",
+                "error": "#dc322f"
             },
             "Solarized Light": {
                 "bg": "#fdf6e3",
@@ -1427,7 +1470,8 @@ class KarbonUI:
                 "accent": "#b58900",
                 "subtitle": "#268bd2",
                 "warning": "#dc322f",
-                "success": "#859900"
+                "success": "#859900",
+                "error": "#dc322f"
             }
         }
         return themes.get(theme_name, themes["Dark"])
@@ -1542,8 +1586,8 @@ class KarbonUI:
         self.update_status("GitHub Token Manager", "🔐")
 
     def handle_export(self):
-        from exporter import export_code, export_to_github, validate_github_token
-        from token_manager import decrypt_token
+        from exporters.exporter import export_code, export_to_github, validate_github_token
+        from core.token_manager import decrypt_token
 
         prompt = self.prompt_view.text_input.get("1.0", "end-1c").strip()
         if not prompt:
@@ -1581,6 +1625,7 @@ class KarbonUI:
         colors = {
             "info": "#58a6ff",
             "success": "#3fb950",
+                "error": "#f85149",
             "warning": "#d29922",
             "error": "#f85149"
         }
@@ -1609,7 +1654,8 @@ class KarbonUI:
                 "accent": "#58a6ff",
                 "subtitle": "#8b949e",
                 "warning": "#d29922",
-                "success": "#3fb950"
+                "success": "#3fb950",
+                "error": "#f85149"
             },
             "Light": {
                 "bg": "#f5f5f5",
@@ -1619,7 +1665,8 @@ class KarbonUI:
                 "accent": "#0071f3",
                 "subtitle": "#555555",
                 "warning": "#e6a23c",
-                "success": "#28a745"
+                "success": "#28a745",
+                "error": "#dc3545"
             },
             "High Contrast": {
                 "bg": "#000000",
@@ -1629,7 +1676,8 @@ class KarbonUI:
                 "accent": "#ffea00",
                 "subtitle": "#ffea00",
                 "warning": "#ffd700",
-                "success": "#39ff14"
+                "success": "#39ff14",
+                "error": "#ff0000"
             },
             "Pastel": {
                 "bg": "#fdf6f0",
@@ -1639,7 +1687,8 @@ class KarbonUI:
                 "accent": "#a3c9a8",
                 "subtitle": "#b8a1a1",
                 "warning": "#f0b400",
-                "success": "#6ab04c"
+                "success": "#6ab04c",
+                "error": "#e55353"
             },
             "Monokai": {
                 "bg": "#272822",
@@ -1649,7 +1698,8 @@ class KarbonUI:
                 "accent": "#f92672",
                 "subtitle": "#a6e22e",
                 "warning": "#fd971f",
-                "success": "#a6e22e"
+                "success": "#a6e22e",
+                "error": "#f92672"
             },
             "Solarized Dark": {
                 "bg": "#002b36",
@@ -1659,7 +1709,8 @@ class KarbonUI:
                 "accent": "#b58900",
                 "subtitle": "#268bd2",
                 "warning": "#cb4b16",
-                "success": "#859900"
+                "success": "#859900",
+                "error": "#dc322f"
             },
             "Solarized Light": {
                 "bg": "#fdf6e3",
@@ -1669,7 +1720,8 @@ class KarbonUI:
                 "accent": "#b58900",
                 "subtitle": "#268bd2",
                 "warning": "#dc322f",
-                "success": "#859900"
+                "success": "#859900",
+                "error": "#dc322f"
             }
         }
         return themes.get(theme_name, themes["Dark"])
@@ -1784,8 +1836,8 @@ class KarbonUI:
         self.update_status("GitHub Token Manager", "🔐")
 
     def handle_export(self):
-        from exporter import export_code, export_to_github, validate_github_token
-        from token_manager import decrypt_token
+        from exporters.exporter import export_code, export_to_github, validate_github_token
+        from core.token_manager import decrypt_token
 
         prompt = self.prompt_view.text_input.get("1.0", "end-1c").strip()
         if not prompt:
@@ -1823,6 +1875,7 @@ class KarbonUI:
         colors = {
             "info": "#58a6ff",
             "success": "#3fb950",
+                "error": "#f85149",
             "warning": "#d29922",
             "error": "#f85149"
         }

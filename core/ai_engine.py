@@ -80,17 +80,17 @@ def generate_code_from_prompt(prompt: str, api_key: str = None, retries=2) -> st
                 raise ValueError("AI response couldn't be parsed into JSON.")
 
             set_ai_status("online", "AI service is online.")
-            html = parsed.get("html", "")
-            css = parsed.get("css", "")
-            js = parsed.get("js", "")
+            html = str(parsed.get("html", ""))
+            css = str(parsed.get("css", ""))
+            js = str(parsed.get("js", ""))
 
             final_code = html.replace("</head>", f"<style>{css}</style></head>") \
                              .replace("</body>", f"<script>{js}</script></body>")
-            logging.info(f"Final inlined HTML code (first 500 chars): {final_code[:500]}...")
+            logging.info(f"Final inlined HTML code (first 500 chars): {str(final_code)[:500]}...")
             return final_code
         except Exception as e:
-            logging.error(f"[AI Error] Attempt {attempt + 1} failed: {e}")
-            set_ai_status("error", f"AI error: {e}")
+            logging.error(f"[AI Error] Attempt {attempt + 1} failed: {str(e)}")
+            set_ai_status("error", f"AI error: {str(e)}")
             import time
             time.sleep(2 ** attempt)
 
@@ -117,7 +117,7 @@ def optimize_prompt(prompt: str, api_key: str = None) -> str:
             if enriched:
                 return enriched
     except Exception as e:
-        logging.error(f"optimize_prompt failed with Gemini: {e}")
+        logging.error(f"optimize_prompt failed with Gemini: {str(e)}")
     return rule_based_enhancement(prompt)
 
 

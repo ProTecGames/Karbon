@@ -1,8 +1,8 @@
 import os
 from git import Repo
-from token_manager import decrypt_token
+from core.token_manager import decrypt_token
 from github import Github
-from exporter import validate_github_token
+from exporters.exporter import validate_github_token
 
 def push_to_github(repo_dir, repo_name):
     """Push code to GitHub repository

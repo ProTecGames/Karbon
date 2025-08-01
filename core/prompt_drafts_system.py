@@ -54,19 +54,22 @@ class PromptDraftsManager:
     def get_draft(self, name: str) -> Optional[str]:
         """Get a draft by name"""
         if name in self.drafts:
-            return self.drafts[name]['prompt']
+            # Ensure the returned value is always a string
+            return str(self.drafts[name].get('prompt', ''))
         return None
     
     def get_all_drafts(self) -> List[Dict]:
         """Get all drafts with metadata"""
         drafts_list = []
         for name, data in self.drafts.items():
+            # Ensure prompt is a string to prevent concatenation errors
+            prompt = str(data.get('prompt', ''))
             drafts_list.append({
                 'name': name,
-                'prompt': data['prompt'],
+                'prompt': prompt,
                 'created_at': data.get('created_at', ''),
                 'updated_at': data.get('updated_at', ''),
-                'preview': data['prompt'][:50] + '...' if len(data['prompt']) > 50 else data['prompt']
+                'preview': prompt[:50] + '...' if len(prompt) > 50 else prompt
             })
         
         # Sort by updated_at (most recent first)
