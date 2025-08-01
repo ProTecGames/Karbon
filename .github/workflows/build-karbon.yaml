@@ -11,17 +11,18 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [windows-latest, ubuntu-22.04, macos-latest]  # 👈 FIXED THIS LINE
+        # os: [windows-latest, ubuntu-22.04, macos-latest]  # original
+        os: [windows-latest]  # ✅ Only build on Windows
         include:
           - os: windows-latest
             extension: .exe
             pyinstaller-args: "--onefile --noconsole --name Karbon --icon=icon.ico"
-          - os: ubuntu-22.04  # 👈 MATCHED OS HERE
-            extension: ''
-            pyinstaller-args: "--onefile --name Karbon"
-          - os: macos-latest
-            extension: .app
-            pyinstaller-args: "--onefile --windowed --name Karbon"
+          # - os: ubuntu-22.04
+          #   extension: ''
+          #   pyinstaller-args: "--onefile --name Karbon"
+          # - os: macos-latest
+          #   extension: .app
+          #   pyinstaller-args: "--onefile --windowed --name Karbon"
 
     steps:
       - name: Checkout code
@@ -32,24 +33,23 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Install system dependencies for Linux
-        if: matrix.os == 'ubuntu-22.04'
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.0-dev python3-tk pkg-config
+      # - name: Install system dependencies for Linux
+      #   if: matrix.os == 'ubuntu-22.04'
+      #   run: |
+      #     sudo apt-get update
+      #     sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.0-dev python3-tk pkg-config
 
-      - name: Install system dependencies for macOS
-        if: matrix.os == 'macos-latest'
-        run: |
-          brew update
-          brew install gtk+3 webkitgtk pkg-config
+      # - name: Install system dependencies for macOS
+      #   if: matrix.os == 'macos-latest'
+      #   run: |
+      #     brew update
+      #     brew install gtk+3 webkitgtk pkg-config
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install pyinstaller
-
 
       - name: Install test dependencies
         run: |
@@ -59,8 +59,6 @@ jobs:
         run: |
           pytest --cov=. --cov-report=xml --junitxml=pytest-report.xml
 
-
-
       - name: Build executable with PyInstaller
         run: |
           python -m PyInstaller ui.py ${{ matrix.pyinstaller-args }}
@@ -69,17 +67,13 @@ jobs:
         shell: bash
         run: |
           mkdir -p upload
-          if [[ "${{ matrix.os }}" == "macos-latest" ]]; then
-            cp -r "dist/Karbon.app" "upload/Karbon-${{ runner.os }}.app"
-          else
-            cp "dist/Karbon${{ matrix.extension }}" "upload/Karbon-${{ runner.os }}${{ matrix.extension }}"
-          fi
+          cp "dist/Karbon${{ matrix.extension }}" "upload/Karbon-${{ runner.os }}${{ matrix.extension }}"
 
-      - name: Zip output for Linux/macOS
-        if: matrix.os != 'windows-latest'
-        run: |
-          cd upload
-          zip -r Karbon-${{ runner.os }}.zip ./*
+      # - name: Zip output for Linux/macOS
+      #   if: matrix.os != 'windows-latest'
+      #   run: |
+      #     cd upload
+      #     zip -r Karbon-${{ runner.os }}.zip ./*
 
       - name: Get short commit hash
         id: vars
@@ -103,4 +97,3 @@ jobs:
         with:
           name: karbon-${{ runner.os }}
           path: upload/*
-          
