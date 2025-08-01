@@ -6,7 +6,7 @@ import tempfile
 import os
 from core.ai_engine import generate_code_from_prompt, ai_status
 from exporters.exporter import export_code
-import prompt_history
+from core import prompt_history
 try:
     from tkhtmlview import HTMLLabel
     HTML_AVAILABLE = True
