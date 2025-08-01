@@ -3,8 +3,8 @@ from tkinter import ttk, messagebox
 import threading
 import webbrowser
 import os
-from token_manager import encrypt_token, decrypt_token, clear_token, token_exists, ERROR_NO_TOKEN, SUCCESS_TOKEN_SAVED
-from exporter import validate_github_token
+from core.token_manager import encrypt_token, decrypt_token, clear_token, token_exists, ERROR_NO_TOKEN, SUCCESS_TOKEN_SAVED
+from exporters.exporter import validate_github_token
 
 class TokenManagerView(ttk.Frame):
     def __init__(self, parent, back_callback):
@@ -300,7 +300,7 @@ class TokenManagerView(ttk.Frame):
     
     def _test_connection_thread(self):
         """Thread function to test GitHub connection"""
-        # Use the validate_github_token function from exporter.py
+        # Use the validate_github_token function from exporters/exporter.py
         is_valid, username, error = validate_github_token()
         
         if not is_valid:
@@ -329,7 +329,7 @@ class TokenManagerView(ttk.Frame):
         if not result:
             return
         
-        # Use the clear_token function from token_manager.py
+        # Use the clear_token function from core/token_manager.py
         success = clear_token()
         
         if success:

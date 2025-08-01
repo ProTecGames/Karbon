@@ -4,8 +4,8 @@ import threading
 import webbrowser
 import tempfile
 import os
-from ai_engine import generate_code_from_prompt, ai_status
-from exporter import export_code
+from core.ai_engine import generate_code_from_prompt, ai_status
+from exporters.exporter import export_code
 import prompt_history
 try:
     from tkhtmlview import HTMLLabel

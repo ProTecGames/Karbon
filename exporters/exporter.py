@@ -4,7 +4,7 @@ from datetime import datetime
 from tkinter import filedialog
 
 from github import Github
-from token_manager import decrypt_token
+from core.token_manager import decrypt_token
 
 
 def validate_github_token(token=None):

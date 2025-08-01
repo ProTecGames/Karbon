@@ -43,10 +43,51 @@ pip install -r requirements.txt
 ## ▶️ Running the App
 
 ```bash
-python ui.py
+python main.py
 ```
 
 > The app window will launch, allowing you to enter a prompt to generate your first website layout.
+
+---
+
+## 📁 Project Structure
+
+```
+karbon/
+├── main.py                    # Main application entry point
+├── ui.py                      # Legacy UI entry point (deprecated)
+├── contributors_page.py       # Contributors page UI
+├── code_editor_ui.py         # Code editor interface
+├── 
+├── core/                     # Core functionality
+│   ├── ai_engine.py          # AI generation engine
+│   ├── token_manager.py      # API token management
+│   ├── prompt_history.py     # Prompt history management
+│   └── prompt_drafts_system.py # Draft system
+│
+├── ui_items/                 # UI components
+│   ├── karbon_ui.py          # Main UI controller
+│   ├── prompt_view.py        # Prompt input interface
+│   ├── editor_view.py        # Code editor view
+│   ├── contributors_view.py  # Contributors display
+│   └── token_manager_view.py # Token management UI
+│
+├── exporters/                # Export functionality
+│   ├── exporter.py           # General export functions
+│   ├── github_exporter.py    # GitHub export
+│   └── repo_pusher.py        # Repository management
+│
+├── utils/                    # Utility functions
+│   ├── preview.py            # Preview functionality
+│   └── project_io.py         # Project I/O operations
+│
+├── tests/                    # Test suite
+│   └── test_dummy.py         # Basic tests
+│
+├── assets/                   # Static assets
+├── docs/                     # Documentation
+└── requirements.txt          # Python dependencies
+```
 
 ---
 

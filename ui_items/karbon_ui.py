@@ -11,9 +11,9 @@ from ui_items.editor_view import EditorView, open_html_in_browser
 from ui_items.token_manager_view import TokenManagerView
 from contributors_page import ContributorsPage
 
-from ai_engine import ai_status, generate_code_from_prompt
-from exporter import export_code, export_to_github
-from repo_pusher import push_to_github
+from core.ai_engine import ai_status, generate_code_from_prompt
+from exporters.exporter import export_code, export_to_github
+from exporters.repo_pusher import push_to_github
 
 EXAMPLES = {
     "Login Page": "Create a login page using HTML and Tailwind CSS",
@@ -530,7 +530,7 @@ class KarbonUI:
 
     def export_code_basic(self):
         try:
-            from exporter import export_code
+            from exporters.exporter import export_code
             if not self.code:
                 self.show_notification("There is no code to export.", "warning")
                 return
@@ -574,8 +574,8 @@ class KarbonUI:
         self.update_status("GitHub Token Manager", "🔐")
 
     def handle_export(self):
-        from exporter import export_code, export_to_github, validate_github_token
-        from token_manager import decrypt_token
+        from exporters.exporter import export_code, export_to_github, validate_github_token
+        from core.token_manager import decrypt_token
 
         prompt = self.prompt_view.text_input.get("1.0", "end-1c").strip()
         if not prompt:
@@ -816,8 +816,8 @@ class KarbonUI:
         self.update_status("GitHub Token Manager", "🔐")
 
     def handle_export(self):
-        from exporter import export_code, export_to_github, validate_github_token
-        from token_manager import decrypt_token
+        from exporters.exporter import export_code, export_to_github, validate_github_token
+        from core.token_manager import decrypt_token
 
         prompt = self.prompt_view.text_input.get("1.0", "end-1c").strip()
         if not prompt:
@@ -1058,8 +1058,8 @@ class KarbonUI:
         self.update_status("GitHub Token Manager", "🔐")
 
     def handle_export(self):
-        from exporter import export_code, export_to_github, validate_github_token
-        from token_manager import decrypt_token
+        from exporters.exporter import export_code, export_to_github, validate_github_token
+        from core.token_manager import decrypt_token
 
         prompt = self.prompt_view.text_input.get("1.0", "end-1c").strip()
         if not prompt:
@@ -1300,8 +1300,8 @@ class KarbonUI:
         self.update_status("GitHub Token Manager", "🔐")
 
     def handle_export(self):
-        from exporter import export_code, export_to_github, validate_github_token
-        from token_manager import decrypt_token
+        from exporters.exporter import export_code, export_to_github, validate_github_token
+        from core.token_manager import decrypt_token
 
         prompt = self.prompt_view.text_input.get("1.0", "end-1c").strip()
         if not prompt:
@@ -1542,8 +1542,8 @@ class KarbonUI:
         self.update_status("GitHub Token Manager", "🔐")
 
     def handle_export(self):
-        from exporter import export_code, export_to_github, validate_github_token
-        from token_manager import decrypt_token
+        from exporters.exporter import export_code, export_to_github, validate_github_token
+        from core.token_manager import decrypt_token
 
         prompt = self.prompt_view.text_input.get("1.0", "end-1c").strip()
         if not prompt:
@@ -1784,8 +1784,8 @@ class KarbonUI:
         self.update_status("GitHub Token Manager", "🔐")
 
     def handle_export(self):
-        from exporter import export_code, export_to_github, validate_github_token
-        from token_manager import decrypt_token
+        from exporters.exporter import export_code, export_to_github, validate_github_token
+        from core.token_manager import decrypt_token
 
         prompt = self.prompt_view.text_input.get("1.0", "end-1c").strip()
         if not prompt:

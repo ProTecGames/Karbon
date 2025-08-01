@@ -53,11 +53,11 @@ jobs:
 
       - name: Install test dependencies
         run: |
-          pip install pytest coverage
+          pip install pytest pytest-cov coverage
 
       - name: Run tests with coverage and JUnit report
         run: |
-          pytest --cov=karbon --cov-report=xml --junitxml=pytest-report.xml
+          pytest --cov=. --cov-report=xml --junitxml=pytest-report.xml
 
 
 
