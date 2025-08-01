@@ -330,6 +330,18 @@ class KarbonUI:
     def get_model_source(self):
         return self.model_source
 
+    def insert_example_prompt(self, key):
+        """Insert example prompt into the prompt input field"""
+        if key and key in EXAMPLES:
+            example_prompt = EXAMPLES[key]
+            if hasattr(self, 'prompt_view') and hasattr(self.prompt_view, 'text_input'):
+                # Clear existing content
+                self.prompt_view.text_input.delete("1.0", "end")
+                # Insert the example prompt
+                self.prompt_view.text_input.insert("1.0", example_prompt)
+                # Update text color to indicate it's not placeholder
+                self.prompt_view.text_input.configure(fg='#f0f6fc')
+
     def toggle_prompt_view(self):
         is_present = self.prompt_view in self.paned_window.panes()
         if self.prompt_view_visible.get():
