@@ -613,6 +613,7 @@ class KarbonUI:
         colors = {
             "info": "#58a6ff",
             "success": "#3fb950",
+                "error": "#f85149",
             "warning": "#d29922",
             "error": "#f85149"
         }
@@ -641,7 +642,8 @@ class KarbonUI:
                 "accent": "#58a6ff",
                 "subtitle": "#8b949e",
                 "warning": "#d29922",
-                "success": "#3fb950"
+                "success": "#3fb950",
+                "error": "#f85149"
             },
             "Light": {
                 "bg": "#f5f5f5",
@@ -651,7 +653,8 @@ class KarbonUI:
                 "accent": "#0071f3",
                 "subtitle": "#555555",
                 "warning": "#e6a23c",
-                "success": "#28a745"
+                "success": "#28a745",
+                "error": "#dc3545"
             },
             "High Contrast": {
                 "bg": "#000000",
@@ -661,7 +664,8 @@ class KarbonUI:
                 "accent": "#ffea00",
                 "subtitle": "#ffea00",
                 "warning": "#ffd700",
-                "success": "#39ff14"
+                "success": "#39ff14",
+                "error": "#ff0000"
             },
             "Pastel": {
                 "bg": "#fdf6f0",
@@ -671,7 +675,8 @@ class KarbonUI:
                 "accent": "#a3c9a8",
                 "subtitle": "#b8a1a1",
                 "warning": "#f0b400",
-                "success": "#6ab04c"
+                "success": "#6ab04c",
+                "error": "#e55353"
             },
             "Monokai": {
                 "bg": "#272822",
@@ -681,7 +686,8 @@ class KarbonUI:
                 "accent": "#f92672",
                 "subtitle": "#a6e22e",
                 "warning": "#fd971f",
-                "success": "#a6e22e"
+                "success": "#a6e22e",
+                "error": "#f92672"
             },
             "Solarized Dark": {
                 "bg": "#002b36",
@@ -691,7 +697,8 @@ class KarbonUI:
                 "accent": "#b58900",
                 "subtitle": "#268bd2",
                 "warning": "#cb4b16",
-                "success": "#859900"
+                "success": "#859900",
+                "error": "#dc322f"
             },
             "Solarized Light": {
                 "bg": "#fdf6e3",
@@ -701,7 +708,8 @@ class KarbonUI:
                 "accent": "#b58900",
                 "subtitle": "#268bd2",
                 "warning": "#dc322f",
-                "success": "#859900"
+                "success": "#859900",
+                "error": "#dc322f"
             }
         }
         return themes.get(theme_name, themes["Dark"])
@@ -855,6 +863,7 @@ class KarbonUI:
         colors = {
             "info": "#58a6ff",
             "success": "#3fb950",
+                "error": "#f85149",
             "warning": "#d29922",
             "error": "#f85149"
         }
@@ -883,7 +892,8 @@ class KarbonUI:
                 "accent": "#58a6ff",
                 "subtitle": "#8b949e",
                 "warning": "#d29922",
-                "success": "#3fb950"
+                "success": "#3fb950",
+                "error": "#f85149"
             },
             "Light": {
                 "bg": "#f5f5f5",
@@ -893,7 +903,8 @@ class KarbonUI:
                 "accent": "#0071f3",
                 "subtitle": "#555555",
                 "warning": "#e6a23c",
-                "success": "#28a745"
+                "success": "#28a745",
+                "error": "#dc3545"
             },
             "High Contrast": {
                 "bg": "#000000",
@@ -903,7 +914,8 @@ class KarbonUI:
                 "accent": "#ffea00",
                 "subtitle": "#ffea00",
                 "warning": "#ffd700",
-                "success": "#39ff14"
+                "success": "#39ff14",
+                "error": "#ff0000"
             },
             "Pastel": {
                 "bg": "#fdf6f0",
@@ -913,7 +925,8 @@ class KarbonUI:
                 "accent": "#a3c9a8",
                 "subtitle": "#b8a1a1",
                 "warning": "#f0b400",
-                "success": "#6ab04c"
+                "success": "#6ab04c",
+                "error": "#e55353"
             },
             "Monokai": {
                 "bg": "#272822",
@@ -923,7 +936,8 @@ class KarbonUI:
                 "accent": "#f92672",
                 "subtitle": "#a6e22e",
                 "warning": "#fd971f",
-                "success": "#a6e22e"
+                "success": "#a6e22e",
+                "error": "#f92672"
             },
             "Solarized Dark": {
                 "bg": "#002b36",
@@ -933,7 +947,8 @@ class KarbonUI:
                 "accent": "#b58900",
                 "subtitle": "#268bd2",
                 "warning": "#cb4b16",
-                "success": "#859900"
+                "success": "#859900",
+                "error": "#dc322f"
             },
             "Solarized Light": {
                 "bg": "#fdf6e3",
@@ -943,7 +958,8 @@ class KarbonUI:
                 "accent": "#b58900",
                 "subtitle": "#268bd2",
                 "warning": "#dc322f",
-                "success": "#859900"
+                "success": "#859900",
+                "error": "#dc322f"
             }
         }
         return themes.get(theme_name, themes["Dark"])
@@ -1097,6 +1113,7 @@ class KarbonUI:
         colors = {
             "info": "#58a6ff",
             "success": "#3fb950",
+                "error": "#f85149",
             "warning": "#d29922",
             "error": "#f85149"
         }
@@ -1125,7 +1142,8 @@ class KarbonUI:
                 "accent": "#58a6ff",
                 "subtitle": "#8b949e",
                 "warning": "#d29922",
-                "success": "#3fb950"
+                "success": "#3fb950",
+                "error": "#f85149"
             },
             "Light": {
                 "bg": "#f5f5f5",
@@ -1135,7 +1153,8 @@ class KarbonUI:
                 "accent": "#0071f3",
                 "subtitle": "#555555",
                 "warning": "#e6a23c",
-                "success": "#28a745"
+                "success": "#28a745",
+                "error": "#dc3545"
             },
             "High Contrast": {
                 "bg": "#000000",
@@ -1145,7 +1164,8 @@ class KarbonUI:
                 "accent": "#ffea00",
                 "subtitle": "#ffea00",
                 "warning": "#ffd700",
-                "success": "#39ff14"
+                "success": "#39ff14",
+                "error": "#ff0000"
             },
             "Pastel": {
                 "bg": "#fdf6f0",
@@ -1155,7 +1175,8 @@ class KarbonUI:
                 "accent": "#a3c9a8",
                 "subtitle": "#b8a1a1",
                 "warning": "#f0b400",
-                "success": "#6ab04c"
+                "success": "#6ab04c",
+                "error": "#e55353"
             },
             "Monokai": {
                 "bg": "#272822",
@@ -1165,7 +1186,8 @@ class KarbonUI:
                 "accent": "#f92672",
                 "subtitle": "#a6e22e",
                 "warning": "#fd971f",
-                "success": "#a6e22e"
+                "success": "#a6e22e",
+                "error": "#f92672"
             },
             "Solarized Dark": {
                 "bg": "#002b36",
@@ -1175,7 +1197,8 @@ class KarbonUI:
                 "accent": "#b58900",
                 "subtitle": "#268bd2",
                 "warning": "#cb4b16",
-                "success": "#859900"
+                "success": "#859900",
+                "error": "#dc322f"
             },
             "Solarized Light": {
                 "bg": "#fdf6e3",
@@ -1185,7 +1208,8 @@ class KarbonUI:
                 "accent": "#b58900",
                 "subtitle": "#268bd2",
                 "warning": "#dc322f",
-                "success": "#859900"
+                "success": "#859900",
+                "error": "#dc322f"
             }
         }
         return themes.get(theme_name, themes["Dark"])
@@ -1339,6 +1363,7 @@ class KarbonUI:
         colors = {
             "info": "#58a6ff",
             "success": "#3fb950",
+                "error": "#f85149",
             "warning": "#d29922",
             "error": "#f85149"
         }
@@ -1367,7 +1392,8 @@ class KarbonUI:
                 "accent": "#58a6ff",
                 "subtitle": "#8b949e",
                 "warning": "#d29922",
-                "success": "#3fb950"
+                "success": "#3fb950",
+                "error": "#f85149"
             },
             "Light": {
                 "bg": "#f5f5f5",
@@ -1377,7 +1403,8 @@ class KarbonUI:
                 "accent": "#0071f3",
                 "subtitle": "#555555",
                 "warning": "#e6a23c",
-                "success": "#28a745"
+                "success": "#28a745",
+                "error": "#dc3545"
             },
             "High Contrast": {
                 "bg": "#000000",
@@ -1387,7 +1414,8 @@ class KarbonUI:
                 "accent": "#ffea00",
                 "subtitle": "#ffea00",
                 "warning": "#ffd700",
-                "success": "#39ff14"
+                "success": "#39ff14",
+                "error": "#ff0000"
             },
             "Pastel": {
                 "bg": "#fdf6f0",
@@ -1397,7 +1425,8 @@ class KarbonUI:
                 "accent": "#a3c9a8",
                 "subtitle": "#b8a1a1",
                 "warning": "#f0b400",
-                "success": "#6ab04c"
+                "success": "#6ab04c",
+                "error": "#e55353"
             },
             "Monokai": {
                 "bg": "#272822",
@@ -1407,7 +1436,8 @@ class KarbonUI:
                 "accent": "#f92672",
                 "subtitle": "#a6e22e",
                 "warning": "#fd971f",
-                "success": "#a6e22e"
+                "success": "#a6e22e",
+                "error": "#f92672"
             },
             "Solarized Dark": {
                 "bg": "#002b36",
@@ -1417,7 +1447,8 @@ class KarbonUI:
                 "accent": "#b58900",
                 "subtitle": "#268bd2",
                 "warning": "#cb4b16",
-                "success": "#859900"
+                "success": "#859900",
+                "error": "#dc322f"
             },
             "Solarized Light": {
                 "bg": "#fdf6e3",
@@ -1427,7 +1458,8 @@ class KarbonUI:
                 "accent": "#b58900",
                 "subtitle": "#268bd2",
                 "warning": "#dc322f",
-                "success": "#859900"
+                "success": "#859900",
+                "error": "#dc322f"
             }
         }
         return themes.get(theme_name, themes["Dark"])
@@ -1581,6 +1613,7 @@ class KarbonUI:
         colors = {
             "info": "#58a6ff",
             "success": "#3fb950",
+                "error": "#f85149",
             "warning": "#d29922",
             "error": "#f85149"
         }
@@ -1609,7 +1642,8 @@ class KarbonUI:
                 "accent": "#58a6ff",
                 "subtitle": "#8b949e",
                 "warning": "#d29922",
-                "success": "#3fb950"
+                "success": "#3fb950",
+                "error": "#f85149"
             },
             "Light": {
                 "bg": "#f5f5f5",
@@ -1619,7 +1653,8 @@ class KarbonUI:
                 "accent": "#0071f3",
                 "subtitle": "#555555",
                 "warning": "#e6a23c",
-                "success": "#28a745"
+                "success": "#28a745",
+                "error": "#dc3545"
             },
             "High Contrast": {
                 "bg": "#000000",
@@ -1629,7 +1664,8 @@ class KarbonUI:
                 "accent": "#ffea00",
                 "subtitle": "#ffea00",
                 "warning": "#ffd700",
-                "success": "#39ff14"
+                "success": "#39ff14",
+                "error": "#ff0000"
             },
             "Pastel": {
                 "bg": "#fdf6f0",
@@ -1639,7 +1675,8 @@ class KarbonUI:
                 "accent": "#a3c9a8",
                 "subtitle": "#b8a1a1",
                 "warning": "#f0b400",
-                "success": "#6ab04c"
+                "success": "#6ab04c",
+                "error": "#e55353"
             },
             "Monokai": {
                 "bg": "#272822",
@@ -1649,7 +1686,8 @@ class KarbonUI:
                 "accent": "#f92672",
                 "subtitle": "#a6e22e",
                 "warning": "#fd971f",
-                "success": "#a6e22e"
+                "success": "#a6e22e",
+                "error": "#f92672"
             },
             "Solarized Dark": {
                 "bg": "#002b36",
@@ -1659,7 +1697,8 @@ class KarbonUI:
                 "accent": "#b58900",
                 "subtitle": "#268bd2",
                 "warning": "#cb4b16",
-                "success": "#859900"
+                "success": "#859900",
+                "error": "#dc322f"
             },
             "Solarized Light": {
                 "bg": "#fdf6e3",
@@ -1669,7 +1708,8 @@ class KarbonUI:
                 "accent": "#b58900",
                 "subtitle": "#268bd2",
                 "warning": "#dc322f",
-                "success": "#859900"
+                "success": "#859900",
+                "error": "#dc322f"
             }
         }
         return themes.get(theme_name, themes["Dark"])
@@ -1823,6 +1863,7 @@ class KarbonUI:
         colors = {
             "info": "#58a6ff",
             "success": "#3fb950",
+                "error": "#f85149",
             "warning": "#d29922",
             "error": "#f85149"
         }
