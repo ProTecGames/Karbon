@@ -238,28 +238,37 @@ class ContributorsPage(tk.Frame):
         # Sort by total commits (descending)
         self.contributors.sort(key=lambda x: x['total'], reverse=True)
 
-        total_commits = sum(c['total'] for c in self.contributors)
-        total_additions = sum(sum(week['a'] for week in c['weeks']) for c in self.contributors)
-        total_deletions = sum(sum(week['d'] for week in c['weeks']) for c in self.contributors)
+        # Filter out contributors with None authors for statistics
+        valid_contributors = [c for c in self.contributors if c['author'] is not None]
         
-        stats_text = f"📊 {len(self.contributors)} Contributors • {total_commits:,} Commits • +{total_additions:,} -{total_deletions:,} Lines"
+        total_commits = sum(c['total'] for c in valid_contributors)
+        total_additions = sum(sum(week['a'] for week in c['weeks']) for c in valid_contributors)
+        total_deletions = sum(sum(week['d'] for week in c['weeks']) for c in valid_contributors)
+        
+        stats_text = f"📊 {len(valid_contributors)} Contributors • {total_commits:,} Commits • +{total_additions:,} -{total_deletions:,} Lines"
         self.total_label.config(text=stats_text, fg=self.theme_colors['accent'])
 
         # Create contributor cards with improved layout
+        card_idx = 0  # Separate counter for grid positioning
         for idx, contributor in enumerate(self.contributors):
+            author = contributor['author']
+            
+            # Skip contributors with None author (e.g., deleted users)
+            if author is None:
+                continue
+                
             # Create enhanced card with border and hover effects
             card_container = tk.Frame(self.scrollable_frame, bg=self.theme_colors['bg'], padx=2, pady=2)
-            card_container.grid(row=idx//3, column=idx%3, padx=8, pady=8, sticky="nsew")
+            card_container.grid(row=card_idx//3, column=card_idx%3, padx=8, pady=8, sticky="nsew")
             
             # Configure grid weights for responsive design
-            self.scrollable_frame.grid_columnconfigure(idx%3, weight=1)
+            self.scrollable_frame.grid_columnconfigure(card_idx%3, weight=1)
             
             card = tk.Frame(card_container, bg=self.theme_colors['input_bg'], padx=15, pady=15, 
                            relief='solid', bd=1, highlightbackground=self.theme_colors['accent'], 
                            highlightthickness=0)
             card.pack(fill="both", expand=True)
 
-            author = contributor['author']
             username = author['login']
             avatar_url = author['avatar_url']
             profile_url = author['html_url']
@@ -275,7 +284,7 @@ class ContributorsPage(tk.Frame):
             
             rank_label = tk.Label(
                 header_frame,
-                text=f"#{idx + 1}",
+                text=f"#{card_idx + 1}",
                 font=(self.font_family, 10, "bold"),
                 bg=self.theme_colors['accent'],
                 fg='white',
@@ -394,7 +403,7 @@ class ContributorsPage(tk.Frame):
             card.bind("<Leave>", card_leave)
 
             # Badges
-            if idx == 0:
+            if card_idx == 0:
                 tk.Label(
                     card,
                     text="🏆 Top Contributor",
@@ -402,7 +411,7 @@ class ContributorsPage(tk.Frame):
                     bg=self.theme_colors['input_bg'],
                     fg=self.theme_colors['warning']
                 ).pack()
-            elif commits == self.contributors[-1]['total'] and idx == len(self.contributors)-1:
+            elif commits == valid_contributors[-1]['total'] and card_idx == len(valid_contributors)-1:
                 tk.Label(
                     card,
                     text="🌱 First Contributor",
@@ -410,6 +419,8 @@ class ContributorsPage(tk.Frame):
                     bg=self.theme_colors['input_bg'],
                     fg=self.theme_colors['success']
                 ).pack()
+            
+            card_idx += 1
 
         self.spinner_label.config(text="")
 
