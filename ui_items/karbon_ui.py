@@ -32,6 +32,8 @@ class KarbonUI:
         self.code = ""
         self.api_key = None
         self.model_source = None
+        self.history = []  # To store prompt-output history
+
 
         self.main_container = tk.Frame(root, bg='#0d1117')
         self.main_container.pack(fill="both", expand=True)
@@ -55,6 +57,12 @@ class KarbonUI:
             get_api_key_callback=self.get_api_key,
             get_model_source_callback=self.get_model_source
         )
+
+        # View History Button
+        self.history_button = tk.Button(
+              self.main_container, text="View History", command=self.show_history_panel)
+        self.history_button.pack(pady=(0, 10))
+
 
         self.load_settings()
 
@@ -99,6 +107,46 @@ class KarbonUI:
         self.animate_title()
         self.update_ai_status_indicator()
         self.apply_user_appearance()
+    def show_history_panel(self):
+        if not self.history:
+            messagebox.showinfo("History", "No history available.")
+            return
+
+        history_window = tk.Toplevel(self.root)
+        history_window.title("Prompt History")
+        history_window.geometry("600x400")
+        history_window.configure(bg="#0d1117")
+
+        listbox = tk.Listbox(history_window, bg="#161b22", fg="white", font=("Segoe UI", 10))
+        listbox.pack(fill="both", expand=True, padx=10, pady=10)
+
+        for i, (prompt, code) in enumerate(self.history):
+            entry = f"{i+1}. Prompt: {prompt[:60]}..."
+            listbox.insert(tk.END, entry)
+
+        def show_selected():
+            idx = listbox.curselection()
+            if idx:
+                prompt, code = self.history[idx[0]]
+                detail_window = tk.Toplevel(history_window)
+                detail_window.title("History Detail")
+                detail_window.geometry("600x400")
+                detail_window.configure(bg="#0d1117")
+
+                tk.Label(detail_window, text="Prompt:", bg="#0d1117", fg="white").pack(anchor="w", padx=10, pady=(10, 0))
+                prompt_text = tk.Text(detail_window, wrap="word", bg="#21262d", fg="white")
+                prompt_text.insert("1.0", prompt)
+                prompt_text.config(state="disabled")
+                prompt_text.pack(fill="both", expand=True, padx=10)
+
+                tk.Label(detail_window, text="Generated Code:", bg="#0d1117", fg="white").pack(anchor="w", padx=10, pady=(10, 0))
+                code_text = tk.Text(detail_window, wrap="word", bg="#21262d", fg="white")
+                code_text.insert("1.0", code)
+                code_text.config(state="disabled")
+                code_text.pack(fill="both", expand=True, padx=10, pady=(0, 10))
+
+        tk.Button(history_window, text="View Selected", command=show_selected, bg="#238636", fg="white").pack(pady=5)
+
 
     def setup_window(self):
         self.root.title("Karbon - AI Web Builder")
@@ -198,6 +246,15 @@ class KarbonUI:
             bd=0, padx=0, pady=0, cursor='hand2', command=self.swap_panels
         )
         swap_btn.pack(side="right", padx=(10, 0))
+        self.status_indicator = tk.Label(
+            self.title_frame,
+            text="●",
+            font=("Segoe UI", 20),
+            bg='#0d1117',
+            fg='#3fb950'
+        )
+
+        
 
         self.status_indicator = tk.Label(
             self.title_frame,
@@ -294,29 +351,28 @@ class KarbonUI:
         except Exception as e:
             print(f"Error updating embedded preview: {e}")
 
-    def handle_prompt_generated(self, code):
+    def handle_prompt_generated(self, prompt_text, code):
         self.code = code
+        self.history.append((prompt_text, code))  # ✅ Save to history
+
         self.update_status("Code generated successfully!", "🎉")
         self.layout_preview_focus()
-        
-        # Update embedded preview if available
+
+    # Update embedded preview if available
         try:
             if hasattr(self.editor_view, 'embedded_browser'):
-                # Use simple embedded preview that opens in browser
                 formatted_html = self.editor_view.format_html_for_preview(code)
                 if self.editor_view.embedded_browser.update_content(formatted_html):
                     self.editor_view.preview_status.configure(text="● Updated", fg='#3fb950')
                     print("Preview opened in browser with full CSS support")
                 else:
                     print("Failed to open preview in browser")
-                        
+
             elif hasattr(self.editor_view, 'html_preview') and hasattr(self.editor_view.html_preview, 'set_html'):
-                # Use tkhtmlview fallback
                 simple_html = self.editor_view.create_simple_html_preview(code)
                 self.editor_view.html_preview.set_html(simple_html)
                 self.editor_view.preview_status.configure(text="● Updated", fg='#3fb950')
-                
-                # Also open in browser for guaranteed rendering
+
                 formatted_html = self.editor_view.format_html_for_preview(code)
                 temp_file = open_html_in_browser(formatted_html, "Karbon Preview")
                 if temp_file:
