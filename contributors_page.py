@@ -9,7 +9,7 @@ import io
 import threading
 import time
 import webbrowser
-from ai_engine import set_ai_status
+from core.ai_engine import set_ai_status
 
 class ContributorsPage(tk.Frame):
     def __init__(self, parent, back_callback, root=None):
@@ -41,54 +41,65 @@ class ContributorsPage(tk.Frame):
         self.container = tk.Frame(self, bg=self.theme_colors['bg'])
         self.container.pack(fill="both", expand=True, padx=10, pady=10)
 
-        # Create header with back and refresh buttons
-        self.header_frame = tk.Frame(self.container, bg=self.theme_colors['bg'])
-        self.header_frame.pack(fill="x")
+        # Create enhanced header with better styling
+        self.header_frame = tk.Frame(self.container, bg=self.theme_colors['input_bg'], padx=20, pady=15)
+        self.header_frame.pack(fill="x", pady=(0, 20))
 
+        # Left side - Back button and title
+        left_frame = tk.Frame(self.header_frame, bg=self.theme_colors['input_bg'])
+        left_frame.pack(side="left", fill="y")
+        
         self.back_button = ttk.Button(
-            self.header_frame,
-            text="Back",
+            left_frame,
+            text="← Back",
             command=self.back_callback,
             style="Modern.TButton"
         )
         self.back_button.pack(side="left")
 
         self.title_label = tk.Label(
-            self.header_frame,
-            text="Karbon Contributors",
-            font=(self.font_family, 16, "bold"),
-            bg=self.theme_colors['bg'],
+            left_frame,
+            text="🌟 Karbon Contributors",
+            font=(self.font_family, 18, "bold"),
+            bg=self.theme_colors['input_bg'],
             fg=self.theme_colors['accent']
         )
-        self.title_label.pack(side="left", padx=(10, 0))
+        self.title_label.pack(side="left", padx=(15, 0))
 
+        # Right side - Refresh button
+        right_frame = tk.Frame(self.header_frame, bg=self.theme_colors['input_bg'])
+        right_frame.pack(side="right", fill="y")
+        
         self.refresh_button = ttk.Button(
-            self.header_frame,
-            text="Refresh",
+            right_frame,
+            text="🔄 Refresh",
             command=self.refresh_contributors,
             style="Modern.TButton"
         )
         self.refresh_button.pack(side="right")
 
-        # Total contributions label
+        # Enhanced total contributions section
+        stats_frame = tk.Frame(self.container, bg=self.theme_colors['input_bg'], padx=20, pady=10)
+        stats_frame.pack(fill="x", pady=(0, 10))
+        
         self.total_label = tk.Label(
-            self.container,
+            stats_frame,
             text="Loading contributors...",
-            font=(self.font_family, 12),
-            bg=self.theme_colors['bg'],
+            font=(self.font_family, 14),
+            bg=self.theme_colors['input_bg'],
             fg=self.theme_colors['subtitle']
         )
-        self.total_label.pack(pady=10)
+        self.total_label.pack()
 
-        # Loading spinner
+        # Loading spinner with better styling
         self.spinner_label = tk.Label(
-            self.container,
+            stats_frame,
             text="",
             font=(self.font_family, 12),
-            bg=self.theme_colors['bg'],
+            bg=self.theme_colors['input_bg'],
             fg=self.theme_colors['accent']
         )
-        self.spinner_label.pack()
+        self.spinner_label.pack(pady=(5, 0))
 
         # Contributors canvas with scrollbar
         self.canvas = tk.Canvas(self.container, bg=self.theme_colors['bg'], highlightthickness=0)
@@ -227,15 +238,37 @@ class ContributorsPage(tk.Frame):
         # Sort by total commits (descending)
         self.contributors.sort(key=lambda x: x['total'], reverse=True)
 
-        total_commits = sum(c['total'] for c in self.contributors)
-        self.total_label.config(text=f"Total Contributions: {total_commits} commits", fg=self.theme_colors['subtitle'])
+        # Filter out contributors with None authors for statistics
+        valid_contributors = [c for c in self.contributors if c['author'] is not None]
+        
+        total_commits = sum(c['total'] for c in valid_contributors)
+        total_additions = sum(sum(week['a'] for week in c['weeks']) for c in valid_contributors)
+        total_deletions = sum(sum(week['d'] for week in c['weeks']) for c in valid_contributors)
+        
+        stats_text = f"📊 {len(valid_contributors)} Contributors • {total_commits:,} Commits • +{total_additions:,} -{total_deletions:,} Lines"
+        self.total_label.config(text=stats_text, fg=self.theme_colors['accent'])
 
-        # Create contributor cards
+        # Create contributor cards with improved layout
+        card_idx = 0  # Separate counter for grid positioning
         for idx, contributor in enumerate(self.contributors):
-            card = tk.Frame(self.scrollable_frame, bg=self.theme_colors['input_bg'], padx=10, pady=10)
-            card.grid(row=idx//3, column=idx%3, padx=5, pady=5, sticky="nsew")
-
             author = contributor['author']
+            
+            # Skip contributors with None author (e.g., deleted users)
+            if author is None:
+                continue
+                
+            # Create enhanced card with border and hover effects
+            card_container = tk.Frame(self.scrollable_frame, bg=self.theme_colors['bg'], padx=2, pady=2)
+            card_container.grid(row=card_idx//3, column=card_idx%3, padx=8, pady=8, sticky="nsew")
+            
+            # Configure grid weights for responsive design
+            self.scrollable_frame.grid_columnconfigure(card_idx%3, weight=1)
+            
+            card = tk.Frame(card_container, bg=self.theme_colors['input_bg'], padx=15, pady=15, 
+                           relief='solid', bd=1, highlightbackground=self.theme_colors['accent'], 
+                           highlightthickness=0)
+            card.pack(fill="both", expand=True)
+
             username = author['login']
             avatar_url = author['avatar_url']
             profile_url = author['html_url']
@@ -245,61 +278,132 @@ class ContributorsPage(tk.Frame):
             additions = sum(week['a'] for week in contributor['weeks'])
             deletions = sum(week['d'] for week in contributor['weeks'])
 
-            # Load avatar
+            # Header with rank
+            header_frame = tk.Frame(card, bg=self.theme_colors['input_bg'])
+            header_frame.pack(fill="x", pady=(0, 10))
+            
+            rank_label = tk.Label(
+                header_frame,
+                text=f"#{card_idx + 1}",
+                font=(self.font_family, 10, "bold"),
+                bg=self.theme_colors['accent'],
+                fg='white',
+                padx=8,
+                pady=2
+            )
+            rank_label.pack(side="left")
+
+            # Load avatar with better error handling and styling
+            avatar_frame = tk.Frame(card, bg=self.theme_colors['input_bg'])
+            avatar_frame.pack(pady=(0, 10))
+            
             try:
                 with urllib.request.urlopen(avatar_url) as u:
                     raw_data = u.read()
                 image = Image.open(io.BytesIO(raw_data))
-                image = image.resize((50, 50), Image.LANCZOS)
+                # Create circular avatar
+                image = image.resize((60, 60), Image.LANCZOS)
                 photo = ImageTk.PhotoImage(image)
 
-                avatar_label = tk.Label(card, image=photo, bg=self.theme_colors['input_bg'])
+                avatar_label = tk.Label(avatar_frame, image=photo, bg=self.theme_colors['input_bg'])
                 avatar_label.image = photo  # Keep reference
                 avatar_label.pack()
             except:
-                avatar_label = tk.Label(card, text="No Avatar", bg=self.theme_colors['input_bg'], fg=self.theme_colors['subtitle'], font=(self.font_family, self.font_size))
+                # Improved fallback avatar
+                avatar_label = tk.Label(
+                    avatar_frame, 
+                    text="👤", 
+                    font=("Segoe UI", 32),
+                    bg=self.theme_colors['input_bg'], 
+                    fg=self.theme_colors['subtitle']
+                )
                 avatar_label.pack()
 
-            # Username (clickable link with tooltip)
+            # Username (clickable link with better styling)
             username_label = tk.Label(
                 card,
                 text=username,
-                font=(self.font_family, self.font_size, "bold"),
+                font=(self.font_family, 12, "bold"),
                 bg=self.theme_colors['input_bg'],
                 fg=self.theme_colors['accent'],
                 cursor="hand2"
             )
-            username_label.pack()
+            username_label.pack(pady=(0, 8))
             username_label.bind("<Button-1>", lambda e, url=profile_url: webbrowser.open(url))
-            # Tooltip
-            username_label.bind("<Enter>", lambda e, u=username: self.show_tooltip(e, f"Visit {u}'s GitHub profile"))
-            username_label.bind("<Leave>", self.hide_tooltip)
+            
+            # Add hover effects
+            def on_enter(event, widget=username_label):
+                widget.configure(fg='#79c0ff')
+            def on_leave(event, widget=username_label):
+                widget.configure(fg=self.theme_colors['accent'])
+            username_label.bind("<Enter>", on_enter)
+            username_label.bind("<Leave>", on_leave)
 
-            # Stats
+            # Stats with improved layout and icons
+            stats_frame = tk.Frame(card, bg=self.theme_colors['input_bg'])
+            stats_frame.pack(fill="x")
+            
+            # Commits stat
+            commit_frame = tk.Frame(stats_frame, bg=self.theme_colors['input_bg'])
+            commit_frame.pack(fill="x", pady=2)
             tk.Label(
-                card,
+                commit_frame,
+                text="📝",
+                font=(self.font_family, 12),
+                bg=self.theme_colors['input_bg']
+            ).pack(side="left")
+            tk.Label(
+                commit_frame,
                 text=f"Commits: {commits}",
-                font=(self.font_family, self.font_size),
+                font=(self.font_family, 10),
                 bg=self.theme_colors['input_bg'],
                 fg=self.theme_colors['label_fg']
-            ).pack()
+            ).pack(side="left", padx=(5, 0))
+            
+            # Additions stat  
+            add_frame = tk.Frame(stats_frame, bg=self.theme_colors['input_bg'])
+            add_frame.pack(fill="x", pady=2)
             tk.Label(
-                card,
-                text=f"Additions: {additions}",
-                font=(self.font_family, self.font_size),
-                bg=self.theme_colors['input_bg'],
-                fg=self.theme_colors['label_fg']
-            ).pack()
+                add_frame,
+                text="➕",
+                font=(self.font_family, 12),
+                bg=self.theme_colors['input_bg']
+            ).pack(side="left")
             tk.Label(
-                card,
-                text=f"Deletions: {deletions}",
-                font=(self.font_family, self.font_size),
+                add_frame,
+                text=f"Added: {additions:,}",
+                font=(self.font_family, 10),
                 bg=self.theme_colors['input_bg'],
-                fg=self.theme_colors['label_fg']
-            ).pack()
+                fg=self.theme_colors['success']
+            ).pack(side="left", padx=(5, 0))
+            
+            # Deletions stat
+            del_frame = tk.Frame(stats_frame, bg=self.theme_colors['input_bg'])
+            del_frame.pack(fill="x", pady=2)
+            tk.Label(
+                del_frame,
+                text="➖",
+                font=(self.font_family, 12),
+                bg=self.theme_colors['input_bg']
+            ).pack(side="left")
+            tk.Label(
+                del_frame,
+                text=f"Removed: {deletions:,}",
+                font=(self.font_family, 10),
+                bg=self.theme_colors['input_bg'],
+                fg=self.theme_colors['error']
+            ).pack(side="left", padx=(5, 0))
+            
+            # Add card hover effect
+            def card_enter(event, container=card_container):
+                card.configure(highlightthickness=1)
+            def card_leave(event, container=card_container):
+                card.configure(highlightthickness=0)
+            card.bind("<Enter>", card_enter)
+            card.bind("<Leave>", card_leave)
 
             # Badges
-            if idx == 0:
+            if card_idx == 0:
                 tk.Label(
                     card,
                     text="🏆 Top Contributor",
@@ -307,7 +411,7 @@ class ContributorsPage(tk.Frame):
                     bg=self.theme_colors['input_bg'],
                     fg=self.theme_colors['warning']
                 ).pack()
-            elif commits == self.contributors[-1]['total'] and idx == len(self.contributors)-1:
+            elif commits == valid_contributors[-1]['total'] and card_idx == len(valid_contributors)-1:
                 tk.Label(
                     card,
                     text="🌱 First Contributor",
@@ -315,6 +419,8 @@ class ContributorsPage(tk.Frame):
                     bg=self.theme_colors['input_bg'],
                     fg=self.theme_colors['success']
                 ).pack()
+            
+            card_idx += 1
 
         self.spinner_label.config(text="")
 

@@ -1,7 +1,7 @@
 import os
 from github import Github
-from token_manager import decrypt_token
-from exporter import validate_github_token
+from core.token_manager import decrypt_token
+from exporters.exporter import validate_github_token
 
 def create_repo(repo_name: str = "karbon-export-demo", description: str = "Created with Karbon AI Web Builder"):
     """Create a GitHub repository or return existing one
