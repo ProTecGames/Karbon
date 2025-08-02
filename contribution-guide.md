@@ -23,7 +23,7 @@ Thank you for your interest in contributing to Karbon – The AI Web Builder! We
     ```bash
     python main.py
     ```
-🌟 The Karbon window should now appear! 🌟
+The Karbon window should now appear! 
 
 ## How to Contribute:
 
