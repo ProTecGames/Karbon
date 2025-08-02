@@ -23,11 +23,6 @@ Thank you for your interest in contributing to Karbon – The AI Web Builder! We
         pip install Pillow
         ```
 
-    On Ubuntu/Debian:
-        ```bash
-        sudo apt-get install python3-tk
-        ```
-
 5. Run the App Locally
     ```bash
     python main.py
