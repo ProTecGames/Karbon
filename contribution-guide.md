@@ -24,11 +24,12 @@ Thank you for your interest in contributing to Karbon – The AI Web Builder! We
         ```
 
     On Ubuntu/Debian:
-        ```bash
+   
+        ```
         sudo apt-get install python3-tk
         ```
 
-4. Run the App Locally
+5. Run the App Locally
     ```bash
     python main.py
     ```
@@ -36,30 +37,30 @@ Thank you for your interest in contributing to Karbon – The AI Web Builder! We
 
 ## How to Contribute:
 
-1. Find or Open an Issue
-    Browse existing issues on the issues' tab. Use filters like good first issue for beginner-friendly tasks. If you spot a bug or want to suggest a feature not yet listed, open a new issue. Please provide: A descriptive title, Steps to reproduce or the feature you propose, Any relevant error logs or screenshots.
+1. Find or Open an Issue:
+   - Browse existing issues on the issues' tab.
+   - Use filters like good first issue for beginner-friendly tasks.
+   - If you spot a bug or want to suggest a feature not yet listed, open a new issue.
+   - Please provide: A descriptive title; steps to reproduce or the feature you propose; any relevant error logs or screenshots.
 
-2. Assigning Issues
-    To claim an unassigned issue, comment by tagging the repo-owner. Only the project owner/maintainers can assign issues.
-    
+2. Assigning Issues: To claim an unassigned issue, comment by tagging the repo-owner. Only the project owner/maintainers can assign issues.
+   
 3. Create a Feature Branch
     ```bash
     git checkout -b feature/your-feature-name
     ```
+    
     📌 Use informative branch names related to your work.
 
-4. Make & Test Your Changes
-    Update or add code, always following Karbon's coding style and existing structure (see files such as contributor_page.py, ui_items/, and core/). If you add dependencies, update requirements.txt. For UI work, run the app to verify everything appears and functions correctly. Add or update docstrings and comments as needed.
+7. Make & Test Your Changes: Update or add code, always following Karbon's coding style and existing structure (see files such as contributor_page.py, ui_items/, and core/). If you add dependencies, update requirements.txt. For UI work, run the app to verify everything appears and functions correctly. Add or update docstrings and comments as needed.
     
-5. Commit & Push
-    Write clear commit messages, referencing the related issue number in your message (e.g., Fix: #42 – Bug with export button).
-
-    Push your branch to your fork:
+8. Commit & Push: Write clear commit messages, referencing the related issue number in your message (e.g., Fix: #42 – Bug with export button).
+   Push your branch to your fork:
         ```bash
         git push origin feature/your-feature-name
         ```
     
-6. Open a Pull Request
+9. Open a Pull Request
     Go to your forked repo on GitHub and click Compare & pull request.
     
     In your PR description: 
@@ -67,7 +68,7 @@ Thank you for your interest in contributing to Karbon – The AI Web Builder! We
     - Include what your PR does, steps to test, and any screenshots/Demo gifs for UI changes.
     - Respond to any maintainer feedback and make updates as needed.
 
-7. Stay Updated
+11. Stay Updated
     Pull the latest changes from main often to avoid conflicts:
     ```bash
     git pull upstream main
