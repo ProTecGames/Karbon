@@ -24,7 +24,6 @@ Thank you for your interest in contributing to Karbon – The AI Web Builder! We
         ```
 
     On Ubuntu/Debian:
-   
         ```bash
         sudo apt-get install python3-tk
         ```
