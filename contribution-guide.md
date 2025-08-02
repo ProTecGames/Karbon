@@ -54,12 +54,14 @@ Thank you for your interest in contributing to Karbon – The AI Web Builder! We
 📌 Use informative branch names related to your work.
 
 4. Make & Test Your Changes:
+   
    - Update or add code, always following Karbon's coding style and existing structure (see files such as contributor_page.py, ui_items/, and core/).
    - If you add dependencies, update requirements.txt.
    - For UI work, run the app to verify everything appears and functions correctly.
    - Add or update docstrings and comments as needed.
     
-5. Commit & Push:
+5. Commit & Push
+   
     - Write clear commit messages, referencing the related issue number in your message (e.g., Fix: #42 – Bug with export button).
     - Push your branch to your fork:
         ```bash
@@ -67,15 +69,17 @@ Thank you for your interest in contributing to Karbon – The AI Web Builder! We
         ```
     
 6. Open a Pull Request:
+   
     Go to your forked repo on GitHub and click Compare & pull request.
-    
+   
     In your PR description: 
     - Reference the relevant issue(s) with Closes #issue_number or Fixes #issue_number. 
     - Include what your PR does, steps to test, and any screenshots/Demo gifs for UI changes.
     - Respond to any maintainer feedback and make updates as needed.
 
-7. Stay Updated
-    Pull the latest changes from main often to avoid conflicts:
+7. Stay Updated:
+    
+    Pull the latest changes from main often to avoid conflicts.
     ```bash
     git pull upstream main
     ```
