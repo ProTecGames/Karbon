@@ -17,11 +17,7 @@ Thank you for your interest in contributing to Karbon – The AI Web Builder! We
     ```bash
     pip install -r requirements.txt
     ```
-
-    For extra components (Tkinter, Pillow), you may need to run:
-        ```bash
-        pip install Pillow
-        ```
+    If you have Python3, use pip3 instead of pip. 
 
 5. Run the App Locally
     ```bash
