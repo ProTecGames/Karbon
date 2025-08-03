@@ -351,15 +351,12 @@ class EditorView(tk.Frame):
         content_area.pack(fill="both", expand=True, padx=20, pady=20)
 
         if WEBVIEW_AVAILABLE:
-            # Use simple embedded preview that opens in browser
             self.embedded_browser = SimpleEmbeddedPreview(content_area)
             self.html_preview = None
-            
-            # Create a frame for the preview info
+
             self.preview_info_frame = tk.Frame(content_area, bg='white')
             self.preview_info_frame.pack(fill="both", expand=True, pady=(0, 20))
-            
-            # Add preview information
+
             info_label = tk.Label(
                 self.preview_info_frame,
                 text="🌐 Live Website Preview",
@@ -368,7 +365,7 @@ class EditorView(tk.Frame):
                 fg='#58a6ff'
             )
             info_label.pack(pady=(50, 20))
-            
+
             desc_label = tk.Label(
                 self.preview_info_frame,
                 text="Your website will open in your default browser\nfor the best rendering experience with full CSS support",
@@ -378,8 +375,6 @@ class EditorView(tk.Frame):
                 justify='center'
             )
             desc_label.pack(pady=(0, 30))
-            
-            # Add a preview button
             preview_btn = tk.Button(
                 self.preview_info_frame,
                 text="👁️ Open Preview in Browser",
@@ -392,38 +387,47 @@ class EditorView(tk.Frame):
                 command=self.open_preview_in_browser
             )
             preview_btn.pack()
-            
-            # Add hover effects
-            def on_enter(e):
-                preview_btn.configure(bg='#2ea043')
-            
-            def on_leave(e):
-                preview_btn.configure(bg='#238636')
-            
+
+            def on_enter(e): preview_btn.configure(bg='#2ea043')
+            def on_leave(e): preview_btn.configure(bg='#238636')
+
             preview_btn.bind("<Enter>", on_enter)
             preview_btn.bind("<Leave>", on_leave)
-            
+
         elif HTML_AVAILABLE:
-            # Fallback to tkhtmlview
-            # Remove default styles that might interfere with CSS
             HTMLLabel._default_style = ""
-            
-            # Create embedded HTML preview
+
+            self.view_mode = tk.StringVar(value="desktop")
+
+            btn_frame = tk.Frame(content_area)
+            btn_frame.pack(pady=(0, 10))
+
+            tk.Label(btn_frame, text="Preview Mode:", font=("Segoe UI", 10, "bold")).pack(side="left", padx=(0, 10))
+
+            tk.Button(btn_frame, text="📱 Mobile", command=lambda: self.set_preview_size("mobile")).pack(side="left", padx=5)
+            tk.Button(btn_frame, text="📱 Tablet", command=lambda: self.set_preview_size("tablet")).pack(side="left", padx=5)
+            tk.Button(btn_frame, text="🖥️ Desktop", command=lambda: self.set_preview_size("desktop")).pack(side="left", padx=5)
+
             self.html_preview = HTMLLabel(
                 content_area,
-                html="<div style='text-align: center; padding: 50px; color: #8b949e; font-family: Arial, sans-serif; background: white;'><h2>🌐 Live Website Preview</h2><p>Your generated website will render here</p><p style='font-size: 12px; color: #666;'>The actual website will appear, not the HTML code</p></div>",
+                html="""
+                <div style='text-align: center; padding: 50px; color: #8b949e; font-family: Arial, sans-serif; background: white;'>
+                <h2>🌐 Live Website Preview</h2>
+                <p>Your generated website will render here</p>
+                <p style='font-size: 12px; color: #666;'>The actual website will appear, not the HTML code</p>
+                </div>
+                """,
                 background='white',
                 width=600,
                 height=400
             )
             self.html_preview.pack(fill="both", expand=True, pady=(0, 20))
-            
-            # Add refresh button
+
             preview_button = tk.Button(
                 content_area,
                 text="🔄 Refresh Preview",
                 font=("Segoe UI", 11, "bold"),
-                bg='#238636',
+                bg='#238636', 
                 fg='white',
                 relief='flat',
                 padx=20,
@@ -431,18 +435,13 @@ class EditorView(tk.Frame):
                 command=self.refresh_preview
             )
             preview_button.pack(pady=(0, 10))
-            
-            # Add hover effects for preview button
-            def on_enter(e):
-                preview_button.configure(bg='#2ea043')
-            
-            def on_leave(e):
-                preview_button.configure(bg='#238636')
-            
+
+            def on_enter(e): preview_button.configure(bg='#2ea043')
+            def on_leave(e): preview_button.configure(bg='#238636')
+
             preview_button.bind("<Enter>", on_enter)
             preview_button.bind("<Leave>", on_leave)
-            
-            # Add test preview button for debugging
+
             test_button = tk.Button(
                 content_area,
                 text="🧪 Test Preview",
@@ -455,8 +454,7 @@ class EditorView(tk.Frame):
                 command=self.test_preview
             )
             test_button.pack(pady=(5, 0))
-            
-            # Add browser preview button for better CSS support
+
             browser_button = tk.Button(
                 content_area,
                 text="🌐 Open in Browser",
@@ -465,12 +463,12 @@ class EditorView(tk.Frame):
                 fg='white',
                 relief='flat',
                 padx=15,
-                pady=5,
+                pady=5, 
                 command=self.open_in_browser
             )
             browser_button.pack(pady=(5, 0))
+
         else:
-            # Fallback if tkhtmlview is not available
             tk.Label(
                 content_area,
                 text="🌐",
@@ -478,7 +476,6 @@ class EditorView(tk.Frame):
                 bg='#161b22'
             ).pack(pady=(40, 20))
 
-            # Stored as instance variable
             self.preview_desc_label_1 = tk.Label(
                 content_area,
                 text="HTML Preview not available",
@@ -488,7 +485,6 @@ class EditorView(tk.Frame):
             )
             self.preview_desc_label_1.pack()
 
-            # Stored as instance variable
             self.preview_desc_label_2 = tk.Label(
                 content_area,
                 text="Install tkhtmlview to enable embedded preview",
@@ -498,7 +494,8 @@ class EditorView(tk.Frame):
             )
             self.preview_desc_label_2.pack(pady=(5, 20))
 
-        self.create_tips_section(content_area)
+            self.create_tips_section(content_area)
+
 
     def create_tips_section(self, parent):
         tips_frame = tk.Frame(parent, bg='#0d1117', relief='solid', bd=1)

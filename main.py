@@ -6,36 +6,48 @@ import os
 
 # Function to get the correct path for bundled data files
 def resource_path(relative_path):
-    """ Get absolute path to resource, works for dev and for PyInstaller """
+    """Get absolute path to resource, works for dev and for PyInstaller"""
     try:
-        # PyInstaller creates a temp folder and stores path in _MEIPASS
         base_path = sys._MEIPASS
     except Exception:
         base_path = os.path.abspath(".")
-
     return os.path.join(base_path, relative_path)
 
-import os
-
-# Step 1: Create autosave directory
+# Create autosave directory
 autosave_dir = "autosave"
 os.makedirs(autosave_dir, exist_ok=True)
 
-
-
-
 if __name__ == "__main__":
     def start_ui():
-        root = tk.Tk()
-        app = KarbonUI(root)
-        # --- MODIFIED: Add protocol handler to save settings on close ---
-        def on_closing():
-            app.save_settings()
-            root.destroy()
-        
-        root.protocol("WM_DELETE_WINDOW", on_closing)
-        # --- END MODIFIED ---
-        root.mainloop()
+        try:
+            print("[INFO] Creating main window...")
+            root = tk.Tk()
+            print("[INFO] Main window created.")
 
-    # Run the UI
+            print("[INFO] Loading KarbonUI...")
+            try:
+                app = KarbonUI(root)
+                print("[INFO] KarbonUI loaded successfully.")
+            except Exception as ui_error:
+                print(f"[ERROR] Failed to load KarbonUI: {ui_error}")
+                root.destroy()
+                sys.exit(1)
+
+            app.autosave_dir = autosave_dir  # attach for access in save_settings()
+
+            def on_closing():
+                print("[INFO] Saving settings before exit...")
+                try:
+                    app.save_settings()
+                except Exception as save_error:
+                    print(f"[WARNING] Failed to save settings: {save_error}")
+                root.destroy()
+
+            root.protocol("WM_DELETE_WINDOW", on_closing)
+            print("[INFO] Karbon UI started. Window should be visible now.")
+            root.mainloop()
+
+        except Exception as e:
+            print(f"[ERROR] Unexpected crash: {e}")
+
     start_ui()

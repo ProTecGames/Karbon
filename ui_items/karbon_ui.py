@@ -40,6 +40,14 @@ class KarbonUI:
 
         self.create_title_bar()
 
+        #  Add View Toggle Buttons (Mobile / Tablet / Desktop)
+        self.view_toggle_frame = tk.Frame(self.main_container, bg='#0d1117')
+        self.view_toggle_frame.pack(pady=(10, 0))
+        tk.Button(self.view_toggle_frame, text="📱 Mobile", command=self.set_mobile_view).pack(side=tk.LEFT, padx=5)
+        tk.Button(self.view_toggle_frame, text="📱 Tablet", command=self.set_tablet_view).pack(side=tk.LEFT, padx=5)
+        tk.Button(self.view_toggle_frame, text="🖥️ Desktop", command=self.set_desktop_view).pack(side=tk.LEFT, padx=5)
+
+
         self.paned_window = ttk.PanedWindow(self.main_container, orient=tk.HORIZONTAL)
         self.paned_window.pack(fill="both", expand=True, padx=20, pady=(0, 20))
 
@@ -57,10 +65,26 @@ class KarbonUI:
             get_api_key_callback=self.get_api_key,
             get_model_source_callback=self.get_model_source
         )
+        # Define preview_view
+        try:
+            from tkhtmlview import HTMLLabel
+            self.preview_view = HTMLLabel(
+                self.paned_window,
+                html="<h2 style='color:white;'>Preview Loading...</h2>"
+            )
+            self.preview_view.config(bg='#161b22')
+        except ImportError:
+    # Fallback if tkhtmlview not installed
+            self.preview_view = tk.Frame(self.paned_window, bg='#161b22')
+            tk.Label(
+                self.preview_view,
+                text="🧩 Preview Unavailable (tkhtmlview not installed)",
+                fg="white", bg="#161b22"
+            ).pack(padx=20, pady=20)
 
         self.paned_window.add(self.prompt_view)
         self.paned_window.add(self.editor_view)
-
+        
         # View History Button
         self.history_button = tk.Button(
               self.main_container, text="View History", command=self.show_history_panel)
@@ -105,11 +129,100 @@ class KarbonUI:
         )
         self.contributors_button.pack(pady=10)
 
+        # Back to Editor Button
+        self.back_to_editor_button = tk.Button(
+            self.main_container,
+            text="⬅ Back to Editor",
+            command=self.layout_editor,
+            bg="#2ea043",
+            fg="white",
+            font=("Segoe UI", 10, "bold"),
+            relief="flat"
+        )
+        self.back_to_editor_button.pack(pady=5)
+
+
         self.create_status_bar()
 
         self.animate_title()
         self.update_ai_status_indicator()
         self.apply_user_appearance()
+
+        # Method to update the preview area
+    def update_preview(self, html_content):
+        if hasattr(self, "preview_view") and hasattr(self.preview_view, "set_html"):
+            self.preview_view.set_html(html_content)
+            self.preview_view.update()
+        elif hasattr(self, "preview_view"):
+            for widget in self.preview_view.winfo_children():
+                widget.destroy()
+            tk.Label(
+                self.preview_view,
+                text="Preview:\n\n" + html_content[:500],
+                fg="white",
+                bg="#161b22",
+                wraplength=600
+            ).pack(padx=20, pady=20)
+
+        # Update preview and switch layout after code generation
+    def handle_prompt_generated(self, code):
+        self.set_code(code)
+        self.history.append({"prompt": self.prompt_view.get_prompt(), "code": code})
+        self.update_preview(code)
+        self.layout_default()
+
+    #  Layout showing prompt + preview
+    def layout_editor(self):
+        # Clear all current panes
+        for pane_widget_id in list(self.paned_window.panes()):
+            self.paned_window.forget(pane_widget_id)
+
+        # Add prompt and editor views
+        self.paned_window.add(self.prompt_view, weight=1)
+        self.paned_window.add(self.editor_view, weight=1)
+
+        # Update visibility state (if applicable)
+        if hasattr(self, 'prompt_view_visible'):
+            self.prompt_view_visible.set(True)
+        if hasattr(self, 'editor_view_visible'):
+            self.editor_view_visible.set(True)
+        # Hide the back button if it exists
+        if hasattr(self, 'back_to_editor_button'):
+            self.back_to_editor_button.pack_forget()
+            # Layout showing preview only, with back button
+    def layout_default(self):
+        for pane_widget_id in list(self.paned_window.panes()):
+            self.paned_window.forget(pane_widget_id)
+
+        self.paned_window.add(self.preview_view, weight=1)
+
+        # Show back button
+        if hasattr(self, 'back_to_editor_button'):
+            self.back_to_editor_button.pack(pady=5)
+            # safe check before fading in
+        if hasattr(self, 'preview_view') and self.preview_view.winfo_children():
+            self.fade_in_preview()
+        # Trigger fade-in effect
+        self.fade_in_preview()
+
+    def fade_in_preview(self, steps=10, delay=30):
+        """
+        Simulates fade-in by gradually displaying the preview_view widget.
+        """
+        self.preview_view.update()
+        self.preview_view.tkraise()  # Bring to front if overlapping
+
+        try:
+            widget = self.preview_view.winfo_children()[0]  # e.g., Text or Label widget
+            for i in range(steps):
+                alpha = int(255 * (i + 1) / steps)
+                hex_color = f"#{alpha:02x}{alpha:02x}{alpha:02x}"
+                widget.configure(fg=hex_color)
+                self.preview_view.after(delay)
+                self.preview_view.update_idletasks()
+        except Exception as e:
+            print("Fade effect skipped:", e)
+
     def show_history_panel(self):
         if not self.history:
             messagebox.showinfo("History", "No history available.")
@@ -180,6 +293,36 @@ class KarbonUI:
                                   command=self.toggle_prompt_view)
         view_menu.add_checkbutton(label="Editor View", onvalue=True, offvalue=False, variable=self.editor_view_visible,
                                   command=self.toggle_editor_view)
+        
+        #  Add this block to insert theme toggle
+        view_menu.add_separator()
+        self.theme_mode = tk.StringVar(value="dark")  # default value
+        view_menu.add_command(label="Toggle Theme", command=self.toggle_theme)
+        view_menu.add_command(label="Toggle Dark/Light Theme", command=self.toggle_theme)
+
+    def apply_user_appearance(self):
+        if self.theme_mode == "dark":
+            bg_color = "#0d1117"
+            fg_color = "#ffffff"
+            secondary_bg = "#161b22"
+        else:
+            bg_color = "#ffffff"
+            fg_color = "#000000"
+            secondary_bg = "#f0f0f0"
+
+        self.root.config(bg=bg_color)
+        self.main_container.config(bg=bg_color)
+        self.prompt_view.config(bg=secondary_bg)
+        self.editor_view.config(bg=secondary_bg)
+        self.preview_view.config(bg=secondary_bg)
+
+        for btn in self.view_toggle_frame.winfo_children():
+            btn.config(bg=secondary_bg, fg=fg_color)
+
+        self.status_bar.config(bg=bg_color, fg=fg_color)
+        self.example_menu.config(bg=secondary_bg, fg=fg_color)
+        self.example_menu["menu"].config(bg=secondary_bg, fg=fg_color)
+
 
         layouts_menu = tk.Menu(self.menu_bar, tearoff=0, bg="#21262d", fg="#c9d1d9")
         self.menu_bar.add_cascade(label="Layouts", menu=layouts_menu)
@@ -191,7 +334,64 @@ class KarbonUI:
         self.menu_bar.add_cascade(label="Contributors", menu=contributors_menu)
         contributors_menu.add_command(label="View Contributors", command=self.show_contributors_page)
 
+        #  View Toggle Menu
+        device_view_menu = tk.Menu(self.menu_bar, tearoff=0, bg="#21262d", fg="#c9d1d9")
+        self.menu_bar.add_cascade(label="Device View", menu=device_view_menu)
+        device_view_menu.add_command(label="Mobile View", command=self.set_mobile_view)
+        device_view_menu.add_command(label="Tablet View", command=self.set_tablet_view)
+        device_view_menu.add_command(label="Desktop View", command=self.set_desktop_view)
+
+
         self.center_window()
+    def toggle_theme(self):
+        current = self.theme_mode.get()
+        self.theme_mode.set("light" if current == "dark" else "dark")
+        self.apply_user_appearance()
+        print(f"Switched to {self.theme_mode.get()} mode")
+
+    def apply_user_appearance(self):
+        mode = self.theme_mode.get()
+        if mode == "dark":
+            bg_color = "#0d1117"
+            fg_color = "#ffffff"
+            secondary_bg = "#161b22"
+        else:
+            bg_color = "#ffffff"
+            fg_color = "#000000"
+            secondary_bg = "#f0f0f0"
+
+        self.root.config(bg=bg_color)
+
+        # Apply changes to other widgets if they exist
+        if hasattr(self, 'main_container'):
+            self.main_container.config(bg=bg_color)
+        if hasattr(self, 'prompt_view'):
+            self.prompt_view.config(bg=secondary_bg)
+        if hasattr(self, 'editor_view'):
+            self.editor_view.config(bg=secondary_bg)
+        if hasattr(self, 'preview_view'):
+            self.preview_view.config(bg=secondary_bg)
+        if hasattr(self, 'view_toggle_frame'):
+            for btn in self.view_toggle_frame.winfo_children():
+                btn.config(bg=secondary_bg, fg=fg_color)
+        if hasattr(self, 'status_bar'):
+            self.status_bar.config(bg=bg_color, fg=fg_color)
+        if hasattr(self, 'example_menu'):
+            self.example_menu.config(bg=secondary_bg, fg=fg_color)
+            self.example_menu["menu"].config(bg=secondary_bg, fg=fg_color)
+        
+    def set_mobile_view(self):
+        self.root.geometry("375x667")  # iPhone-like size
+        print("Switched to Mobile View")
+
+    def set_tablet_view(self):
+        self.root.geometry("768x1024")  # iPad-like size
+        print("Switched to Tablet View")
+
+    def set_desktop_view(self):
+        self.root.geometry("1200x800")  # Default desktop size
+        print("Switched to Desktop View")
+
 
     def center_window(self):
         self.root.update_idletasks()
@@ -214,6 +414,36 @@ class KarbonUI:
         style.map("Modern.TButton", background=[('active', '#2ea043'), ('pressed', '#1a7f37')])
         style.configure("Modern.TEntry", fieldbackground='#21262d', borderwidth=1, relief='solid', insertcolor='white',
                         foreground='white')
+    def toggle_theme(self):
+        """Toggle between dark and light theme."""
+        self.theme_mode = "light" if self.theme_mode == "dark" else "dark"
+        self.apply_user_appearance()
+        self.save_settings()  # if you want to remember user preference
+
+    def apply_user_appearance(self):
+        if self.theme_mode == "dark":
+            bg_color = "#0d1117"
+            fg_color = "#ffffff"
+            secondary_bg = "#161b22"
+        else:
+            bg_color = "#ffffff"
+            fg_color = "#000000"
+            secondary_bg = "#f0f0f0"
+
+        self.root.config(bg=bg_color)
+        self.main_container.config(bg=bg_color)
+        self.prompt_view.config(bg=secondary_bg)
+        self.editor_view.config(bg=secondary_bg)
+        self.preview_view.config(bg=secondary_bg)
+
+        for btn in self.view_toggle_frame.winfo_children():
+            btn.config(bg=secondary_bg, fg=fg_color)
+
+        self.status_bar.config(bg=bg_color, fg=fg_color)
+        self.example_menu.config(bg=secondary_bg, fg=fg_color)
+        self.example_menu["menu"].config(bg=secondary_bg, fg=fg_color)
+
+
 
     def create_title_bar(self):
         self.title_frame = tk.Frame(self.main_container, bg='#0d1117', height=80)
@@ -328,40 +558,9 @@ class KarbonUI:
     def set_code(self, new_code):
         self.code = new_code
         self.update_status(f"Code updated - {len(new_code)} characters", "📝")
-        
-        # Update embedded preview if available
-        try:
-            if hasattr(self.editor_view, 'embedded_browser'):
-                # Use simple embedded preview that opens in browser
-                formatted_html = self.editor_view.format_html_for_preview(new_code)
-                if self.editor_view.embedded_browser.update_content(formatted_html):
-                    self.editor_view.preview_status.configure(text="● Updated", fg='#3fb950')
-                    print("Preview opened in browser with full CSS support")
-                else:
-                    print("Failed to open preview in browser")
-                        
-            elif hasattr(self.editor_view, 'html_preview') and hasattr(self.editor_view.html_preview, 'set_html'):
-                # Use tkhtmlview fallback
-                simple_html = self.editor_view.create_simple_html_preview(new_code)
-                self.editor_view.html_preview.set_html(simple_html)
-                self.editor_view.preview_status.configure(text="● Updated", fg='#3fb950')
-                
-                # Also open in browser for guaranteed rendering
-                formatted_html = self.editor_view.format_html_for_preview(new_code)
-                temp_file = open_html_in_browser(formatted_html, "Karbon Preview")
-                if temp_file:
-                    print("Preview opened in browser for full rendering")
-        except Exception as e:
-            print(f"Error updating embedded preview: {e}")
+        self.update_preview(new_code)  # 🔄 Reuse the common update logic
 
-    def handle_prompt_generated(self, prompt_text, code):
-        self.code = code
-        self.history.append((prompt_text, code))  # ✅ Save to history
-
-        self.update_status("Code generated successfully!", "🎉")
-        self.layout_preview_focus()
-
-    # Update embedded preview if available
+    def update_preview(self, code):
         try:
             if hasattr(self.editor_view, 'embedded_browser'):
                 formatted_html = self.editor_view.format_html_for_preview(code)
@@ -383,6 +582,18 @@ class KarbonUI:
         except Exception as e:
             print(f"Error updating embedded preview: {e}")
 
+    def start_autosave_loop(self, interval_ms=60000):  # 60 seconds
+        def autosave():
+            try:
+                self.save_settings()
+                print("[AUTOSAVE] Settings saved.")
+            except Exception as e:
+                print(f"[AUTOSAVE ERROR] {e}")
+            self.root.after(interval_ms, autosave)
+
+        self.root.after(interval_ms, autosave)
+
+    
     def get_api_key(self):
         return self.api_key
 
@@ -400,6 +611,9 @@ class KarbonUI:
                 self.prompt_view.text_input.insert("1.0", example_prompt)
                 # Update text color to indicate it's not placeholder
                 self.prompt_view.text_input.configure(fg='#f0f6fc')
+        else:
+            print("No prompt found")
+
 
     def toggle_prompt_view(self):
         panes = self.paned_window.panes()
@@ -445,13 +659,27 @@ class KarbonUI:
 
             self.paned_window.add(second_pane, weight=1)
             self.paned_window.add(first_pane, weight=1)
-
+    
+    def set_preview_size(self, width, height):
+        if hasattr(self, "preview_view"):
+            self.preview_view.config(width=width, height=height)
+            self.preview_view.update()
     def layout_default(self):
+        # Clear all panes
         for pane_widget_id in list(self.paned_window.panes()):
             self.paned_window.forget(pane_widget_id)
+
+        # Add prompt (left) and preview (right) to paned window
         self.paned_window.add(self.prompt_view, weight=1)
+        self.paned_window.add(self.preview_view, weight=1)
+
+        # Update visibility state
         self.prompt_view_visible.set(True)
         self.editor_view_visible.set(False)
+
+        # Optional: Set default preview size
+        self.set_preview_size(1280, 720)
+
 
     def layout_coding_focus(self):
         for pane_widget_id in list(self.paned_window.panes()):
