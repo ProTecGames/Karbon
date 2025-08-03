@@ -43,10 +43,26 @@ class KarbonUI:
         #  Add View Toggle Buttons (Mobile / Tablet / Desktop)
         self.view_toggle_frame = tk.Frame(self.main_container, bg='#0d1117')
         self.view_toggle_frame.pack(pady=(10, 0))
-        tk.Button(self.view_toggle_frame, text="📱 Mobile", command=self.set_mobile_view).pack(side=tk.LEFT, padx=5)
-        tk.Button(self.view_toggle_frame, text="📱 Tablet", command=self.set_tablet_view).pack(side=tk.LEFT, padx=5)
-        tk.Button(self.view_toggle_frame, text="🖥️ Desktop", command=self.set_desktop_view).pack(side=tk.LEFT, padx=5)
 
+        button_style = {
+            "bg": "#21262d",
+            "fg": "white",
+            "font": ("Segoe UI", 10, "bold"),
+            "relief": "flat",
+            "activebackground": "#2ea043",
+            "activeforeground": "white",
+            "padx": 12,
+            "pady": 6,
+            "borderwidth": 0,
+            "highlightthickness": 0,
+            "cursor": "hand2"
+        }
+
+        tk.Button(self.view_toggle_frame, text="📱 Mobile", command=self.set_mobile_view, **button_style).pack(side=tk.LEFT, padx=6)
+        tk.Button(self.view_toggle_frame, text="📱 Tablet", command=self.set_tablet_view, **button_style).pack(side=tk.LEFT, padx=6)
+        tk.Button(self.view_toggle_frame, text="🖥️ Desktop", command=self.set_desktop_view, **button_style).pack(side=tk.LEFT, padx=6)
+
+        
 
         self.paned_window = ttk.PanedWindow(self.main_container, orient=tk.HORIZONTAL)
         self.paned_window.pack(fill="both", expand=True, padx=20, pady=(0, 20))
@@ -66,14 +82,26 @@ class KarbonUI:
             get_model_source_callback=self.get_model_source
         )
         # Define preview_view
+        self.preview_frame = tk.Frame(self.paned_window, bg='#161b22', width=1024, height=600)
+        self.preview_frame.pack_propagate(False)
+
         try:
             from tkhtmlview import HTMLLabel
             self.preview_view = HTMLLabel(
-                self.paned_window,
+                self.preview_frame,
                 html="<h2 style='color:white;'>Preview Loading...</h2>"
             )
             self.preview_view.config(bg='#161b22')
         except ImportError:
+            self.preview_view = tk.Label(
+                self.preview_frame,
+                text="🧩 Preview Unavailable (tkhtmlview not installed)",
+                fg="white",
+                bg="#161b22"
+            )
+
+            self.preview_view.pack(fill="both", expand=True, padx=20, pady=20)
+            self.paned_window.add(self.preview_frame)
     # Fallback if tkhtmlview not installed
             self.preview_view = tk.Frame(self.paned_window, bg='#161b22')
             tk.Label(
@@ -262,6 +290,22 @@ class KarbonUI:
                 code_text.pack(fill="both", expand=True, padx=10, pady=(0, 10))
 
         tk.Button(history_window, text="View Selected", command=show_selected, bg="#238636", fg="white").pack(pady=5)
+
+    def set_mobile_view(self):
+        print("Resizing preview pane to mobile size 375x667")
+        self.preview_frame.config(width=375, height=667)
+        self.preview_frame.update_idletasks()
+
+    def set_tablet_view(self):
+        print("Resizing preview pane to tablet size 768x1024")
+        self.preview_frame.config(width=768, height=1024)
+        self.preview_frame.update_idletasks()
+
+
+    def set_desktop_view(self):
+        print("Resizing preview pane to desktop size 1024x768")
+        self.preview_frame.config(width=1024, height=768)
+        self.preview_frame.update_idletasks()
 
 
     def setup_window(self):
