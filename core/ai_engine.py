@@ -1,11 +1,9 @@
-
 import json
 import re
 import logging
 import requests
 import google.generativeai as genai
 from meta_ai_api import MetaAI
-from fuzzy_json import loads as fuzzy_loads
 
 logging.basicConfig(
     filename="karbon_ai_errors.log",
@@ -23,15 +21,6 @@ def set_ai_status(state: str, message: str):
 def extract_json(response: str) -> dict:
     """
     Extract and parse JSON from the AI response, handling malformed input.
-    
-    Args:
-        response (str): Raw response from the AI service.
-    
-    Returns:
-        dict: Parsed JSON object with 'html', 'css', 'js', and 'name' keys.
-    
-    Raises:
-        ValueError: If JSON parsing fails or the structure is invalid.
     """
     if not response or response.isspace():
         logging.error("Empty AI response received")
@@ -49,6 +38,7 @@ def extract_json(response: str) -> dict:
     try:
         stack = []
         start_idx = None
+        json_block = None
         for i, char in enumerate(cleaned_response):
             if char == '{':
                 if not stack:
@@ -60,34 +50,23 @@ def extract_json(response: str) -> dict:
                     if not stack:
                         json_block = cleaned_response[start_idx:i + 1]
                         break
-        else:
+        if not json_block:
             raise ValueError("No valid JSON object found in response.")
 
         logging.info("Extracted JSON block: %s", json_block[:500])
 
         parsed = json.loads(json_block)
-
         expected_keys = {"html", "css", "js", "name"}
         if not isinstance(parsed, dict) or not expected_keys.issubset(parsed.keys()):
             raise ValueError(f"Parsed JSON does not contain expected keys: {expected_keys}")
         return parsed
-    except json.JSONDecodeError as e:
-        logging.warning(f"Initial JSON parse failed: {e}")
-    except Exception as general_e:
-        logging.error(f"JSON extraction logic failed: {general_e}")
 
-    # Try fuzzy JSON parser
-    try:
-        parsed = fuzzy_loads(cleaned_response)
-        expected_keys = {"html", "css", "js", "name"}
-        if not isinstance(parsed, dict) or not expected_keys.issubset(parsed.keys()):
-            raise ValueError(f"Fuzzy JSON parse does not contain expected keys: {expected_keys}")
-        logging.info("Successfully parsed JSON using fuzzy-json")
-        return parsed
-    except Exception as fuzzy_e:
-        logging.error(f"Fuzzy JSON parse failed: {fuzzy_e}")
-        logging.error(f"Cleaned response: {cleaned_response}")
-        raise ValueError("Failed to parse AI response as JSON.")
+    except json.JSONDecodeError as e:
+        logging.error(f"JSON decode failed: {e}")
+        raise ValueError("Failed to parse JSON.")
+    except Exception as general_e:
+        logging.error(f"JSON extraction failed: {general_e}")
+        raise ValueError("Failed to extract valid JSON.")
 
 def generate_code_from_prompt(prompt: str, api_key: str = None, retries=2) -> str:
     formatted = (
@@ -176,3 +155,4 @@ def is_generic(prompt: str) -> bool:
         "make a website", "build ui", "create page", "webpage", "dashboard", "login", "landing page"
     }
     return prompt.lower().strip() in generic_phrases
+
