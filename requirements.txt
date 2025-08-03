@@ -5,3 +5,4 @@ PyGithub
 GitPython
 meta-ai-api
 tkhtmlview
+requests>=2.31.0
