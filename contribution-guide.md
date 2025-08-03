@@ -21,7 +21,7 @@ Thank you for your interest in contributing to Karbon – The AI Web Builder! We
 
 5. Run the App Locally
     ```bash
-    python main.py
+    python ui.py
     ```
 The Karbon window should now appear! 
 
