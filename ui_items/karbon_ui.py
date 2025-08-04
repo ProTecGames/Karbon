@@ -59,6 +59,9 @@ class KarbonUI:
             get_model_source_callback=self.get_model_source
         )
 
+        self.paned_window.add(self.prompt_view)
+        self.paned_window.add(self.editor_view)
+
         # View History Button
         self.history_button = tk.Button(
               self.main_container, text="View History", command=self.show_history_panel)
@@ -403,19 +406,34 @@ class KarbonUI:
                 self.prompt_view.text_input.configure(fg='#f0f6fc')
 
     def toggle_prompt_view(self):
-        is_present = self.prompt_view in self.paned_window.panes()
+        panes = self.paned_window.panes()
+        prompt_present = str(self.prompt_view) in panes
+        editor_present = str(self.editor_view) in panes
+
         if self.prompt_view_visible.get():
-            if not is_present:
+            if not prompt_present:
                 self.paned_window.add(self.prompt_view, weight=1)
+            if not editor_present:
+                self.paned_window.add(self.editor_view, weight=1)
         else:
-            if is_present:
+            if prompt_present:
                 self.paned_window.forget(self.prompt_view)
+
+         # 🛡️ Enhancement: Ensure at least editor_view is always visible
+        panes = self.paned_window.panes()  # recheck updated state
+        prompt_present = str(self.prompt_view) in panes
+        editor_present = str(self.editor_view) in panes
+
+        if not prompt_present and not editor_present:
+            self.paned_window.add(self.editor_view, weight=1)
+
 
     def toggle_editor_view(self):
         is_present = self.editor_view in self.paned_window.panes()
         if self.editor_view_visible.get():
             if not is_present:
                 self.paned_window.add(self.editor_view, weight=1)
+
         else:
             if is_present:
                 self.paned_window.forget(self.editor_view)
@@ -499,7 +517,8 @@ class KarbonUI:
                     if layout_settings:
                         self.prompt_view_visible.set(layout_settings.get("prompt_view_visible", True))
                         self.editor_view_visible.set(layout_settings.get("editor_view_visible", False))
-                        sash_position = layout_settings.get("sash_position")
+                        sash_position = layout_settings.get("sash_position") or 600
+
 
                         self.toggle_prompt_view()
                         self.toggle_editor_view()
