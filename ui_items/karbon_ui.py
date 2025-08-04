@@ -5,11 +5,12 @@ import json
 import os
 import re
 from pathlib import Path
-
+from utils.preview import update_preview
 from ui_items.prompt_view import PromptView
 from ui_items.editor_view import EditorView, open_html_in_browser
 from ui_items.token_manager_view import TokenManagerView
 from contributors_page import ContributorsPage
+from utils.preview import update_preview
 
 from core.ai_engine import ai_status, generate_code_from_prompt
 from exporters.exporter import export_code, export_to_github
@@ -359,6 +360,9 @@ class KarbonUI:
         self.layout_preview_focus()
 
     # Update embedded preview if available
+    # --- For integration test ---
+        update_preview(code)
+
         try:
             if hasattr(self.editor_view, 'embedded_browser'):
                 formatted_html = self.editor_view.format_html_for_preview(code)
