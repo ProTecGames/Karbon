@@ -34,16 +34,12 @@ class KarbonUI:
         self.api_key = None
         self.model_source = None
         self.history = []  # To store prompt-output history
-
-
+        self.root.protocol("WM_DELETE_WINDOW", self.on_close)
         self.main_container = tk.Frame(root, bg='#0d1117')
         self.main_container.pack(fill="both", expand=True)
-
         self.create_title_bar()
-
         self.paned_window = ttk.PanedWindow(self.main_container, orient=tk.HORIZONTAL)
         self.paned_window.pack(fill="both", expand=True, padx=20, pady=(0, 20))
-
         self.prompt_view = PromptView(
             self.paned_window,
             on_generate=self.handle_prompt_generated,
@@ -108,9 +104,11 @@ class KarbonUI:
 
         self.create_status_bar()
 
-        self.animate_title()
+        
         self.update_ai_status_indicator()
         self.apply_user_appearance()
+
+
     def show_history_panel(self):
         if not self.history:
             messagebox.showinfo("History", "No history available.")
@@ -181,6 +179,12 @@ class KarbonUI:
                                   command=self.toggle_prompt_view)
         view_menu.add_checkbutton(label="Editor View", onvalue=True, offvalue=False, variable=self.editor_view_visible,
                                   command=self.toggle_editor_view)
+
+
+        view_menu.add_separator()
+        view_menu.add_command(label="📱 Mobile View", command=lambda: self.root.geometry("375x667"))
+        view_menu.add_command(label="📱 Tablet View", command=lambda: self.root.geometry("768x1024"))
+        view_menu.add_command(label="🖥️ Desktop View", command=lambda: self.root.geometry("1440x900"))
 
         layouts_menu = tk.Menu(self.menu_bar, tearoff=0, bg="#21262d", fg="#c9d1d9")
         self.menu_bar.add_cascade(label="Layouts", menu=layouts_menu)
@@ -300,28 +304,39 @@ class KarbonUI:
         self.progress_label.pack(side="right", padx=20, pady=5)
 
     def update_ai_status_indicator(self):
-        state = ai_status.get("state", "unknown")
-        color_map = {"online": "#3fb950", "offline": "#f85149", "connecting": "#58a6ff", "error": '#d29922',
-                     "unknown": "#6e7681"}
-        color = color_map.get(state, "#6e7681")
-        self.ai_status_label.config(text=f"AI: {state.capitalize()}", fg=color)
-        self.root.after(2000, self.update_ai_status_indicator)
+        if hasattr(self, 'ai_status_label') and self.ai_status_label.winfo_exists():
+            state = ai_status.get("state", "unknown")
+            color_map = {
+                "online": "#3fb950",
+                "offline": "#f85149",
+                "connecting": "#58a6ff",
+                "error": '#d29922',
+                "unknown": "#6e7681"
+            }
+            color = color_map.get(state, "#6e7681")
+            self.ai_status_label.config(text=f"AI: {state.capitalize()}", fg=color)
 
-    def animate_title(self):
-        colors = ['#58a6ff', '#79c0ff', '#a5d6ff', '#79c0ff', '#58a6ff']
-        self.color_index = 0
+        if self.root.winfo_exists():
+        # Only one timer scheduled here
+            self.ai_status_id = self.root.after(2000, self.update_ai_status_indicator)
 
-        def cycle_colors():
-            if hasattr(self, 'title_label') and self.title_label.winfo_exists():
-                self.title_label.configure(fg=colors[self.color_index])
-                self.color_index = (self.color_index + 1) % len(colors)
-                self.root.after(2000, cycle_colors)
 
-        cycle_colors()
+    def on_close(self):
+    # Cancel any running .after() loops to prevent crashes
+        if hasattr(self, 'ai_status_id'):
+            self.root.after_cancel(self.ai_status_id)
+        if hasattr(self, 'color_cycle_id'):
+            self.root.after_cancel(self.color_cycle_id)
+        self.root.destroy()
+    # Destroy the root window
+        self.root.destroy()
 
+        
     def update_status(self, message, progress=None):
-        self.status_label.configure(text=message)
-        self.progress_var.set(progress if progress else "")
+        if hasattr(self, 'status_label') and self.status_label.winfo_exists():
+            self.status_label.configure(text=message)
+        if hasattr(self, 'progress_var'):
+            self.progress_var.set(progress if progress else "")
 
     def get_code(self):
         return self.code
