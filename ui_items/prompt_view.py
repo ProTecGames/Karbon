@@ -2,7 +2,6 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 import threading
 from core.ai_engine import generate_code_from_prompt
-from utils.preview import update_preview
 import core.prompt_history as prompt_history
 from core.ai_engine import ai_status
 from core.ai_engine import optimize_prompt
@@ -359,12 +358,13 @@ class PromptView(tk.Frame):
         self.show_progress()
         def generate_in_background():
             try:
+                # Get value from UI BEFORE entering thread
                 api_key = self.get_api_key_callback()
                 model_source = self.get_model_source_callback()
                 final_prompt = prompt
-                if self.enhance_ui_var.get():
+                if self.enhance_ui_var:
                     final_prompt = optimize_prompt(prompt, api_key)
-                code = generate_code_from_prompt(final_prompt, api_key, model_source)
+                code = generate_code_from_prompt(final_prompt, api_key)
                 try:
                     from ui_items.editor_view import HTML_AVAILABLE
                     if HTML_AVAILABLE:
@@ -381,7 +381,7 @@ class PromptView(tk.Frame):
             except Exception as e:
                 self.after(0, lambda exc=e: self.generation_error(str(exc)))
         threading.Thread(target=generate_in_background, daemon=True).start()
-
+        
     def show_progress(self):
         progress_texts = [
             "🔄 Analyzing your idea...",
@@ -398,7 +398,7 @@ class PromptView(tk.Frame):
                 self.after(1500, update_progress)
         update_progress()
 
-    def generation_complete(self, code):
+    def generation_complete(self, code, prompt_text=None):
         self.is_generating = False
         self.generate_btn.configure(
             text="🚀 Generate My Website",
@@ -417,7 +417,7 @@ class PromptView(tk.Frame):
                 self.show_error(f"Website could not be generated due to an AI service issue")
             return
         self.show_success("Website generated successfully! 🎉")
-        self.on_generate(code)
+        self.on_generate(prompt_text,code)
 
     def generation_error(self, error_msg):
         self.is_generating = False
