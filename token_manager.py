@@ -1,24 +1,28 @@
-import keyring
+import json
+import os
 
-
-NETLIFY_SERVICE = "Karbon_Netlify"
-VERCEL_SERVICE = "Karbon_Vercel"
+CONFIG_FILE = ".tokens.json"
+VERCEL_SERVICE = "vercel"
+NETLIFY_SERVICE = "netlify"
 
 def save_token(service, token):
-    """Save the token securely in the OS keyring."""
-    keyring.set_password(service, "access_token", token)
-    print(f"✅ Token for {service} saved securely.")
+    tokens = {}
+    if os.path.exists(CONFIG_FILE):
+        with open(CONFIG_FILE, "r") as f:
+            tokens = json.load(f)
+    tokens[service] = token
+    with open(CONFIG_FILE, "w") as f:
+        json.dump(tokens, f)
+    print(f"✅ Token saved for {service}.")
 
 def get_token(service):
-    """Retrieve the token from the OS keyring."""
-    token = keyring.get_password(service, "access_token")
-    if not token:
-        print(f"⚠ No token found for {service}. Please set it first.")
-    return token
+    if os.path.exists(CONFIG_FILE):
+        with open(CONFIG_FILE, "r") as f:
+            tokens = json.load(f)
+            return tokens.get(service)
+    return None
 
 if __name__ == "__main__":
-    save_token(NETLIFY_SERVICE, input("Enter your Netlify token: ").strip())
-    save_token(VERCEL_SERVICE, input("Enter your Vercel token: ").strip())
-
-    print("Netlify token:", get_token(NETLIFY_SERVICE))
-    print("Vercel token:", get_token(VERCEL_SERVICE))
+    service = input("Enter service name (netlify/vercel): ").strip().lower()
+    token = input(f"Enter your {service} token: ").strip()
+    save_token(service, token)
