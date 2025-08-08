@@ -4,6 +4,7 @@ import threading
 import webbrowser
 import tempfile
 import os
+# from code_editor_ui import update_preview
 from core.ai_engine import generate_code_from_prompt, ai_status
 from exporters.exporter import export_code
 from core import prompt_history
@@ -703,19 +704,26 @@ class EditorView(tk.Frame):
         def update_in_background():
             try:
                 api_key = self.get_api_key()
-                model_source = self.get_model_source()
-                code = generate_code_from_prompt(prompt, api_key, model_source)
+                code = generate_code_from_prompt(prompt, api_key)
                 prompt_history.push_code(code)
                 prompt_history.push_prompt(
-                    "Describe what you'd like to change...\n\nExample: Make the header purple, add a contact form, or change the font to something more modern")
+                    "Describe what you'd like to change...\n\nExample: Make the header purple, add a contact form, or change the font to something more modern"
+                )
                 prompt_history.push_code(code)
-                self.set_code(code)
+
+                # This must be done in the main thread
+                self.after(0, lambda: self.set_code(code))
+                
+                from code_editor_ui import update_preview
                 update_preview(code)
 
-                self.after(0, lambda: self.update_complete())
+                self.after(0, self.update_complete)
 
+            # except Exception as e:
+            #     self.after(0, lambda: self.update_error(str(e)))
             except Exception as e:
-                self.after(0, lambda exc=e: self.update_error(str(exc)))
+                error_message = str(e)
+                self.after(0, lambda: self.update_error(error_message))
 
         threading.Thread(target=update_in_background, daemon=True).start()
 
@@ -727,7 +735,6 @@ class EditorView(tk.Frame):
             state='normal',
             bg='#1f6feb'
         )
-
         self.update_status("Changes applied successfully!", "✅")
         self.preview_status.configure(text="● Live", fg='#3fb950')
 
@@ -757,12 +764,13 @@ class EditorView(tk.Frame):
             state='normal',
             bg='#1f6feb'
         )
-
         self.update_status("Update failed", "❌")
         self.preview_status.configure(text="● Error", fg='#f85149')
-
+        
         status = ai_status.get("state", "unknown")
         message = ai_status.get("message", "")
+        # print(f"status is :{status}, msg: {message}")
+        
         if status == "offline":
             self.show_error(
                 "AI service is currently unavailable. Please check your internet connection or try again later.")
