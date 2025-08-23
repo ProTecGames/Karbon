@@ -1,0 +1,218 @@
+[33mb5d65cd[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m Fix user dialog UI and center window on screen
+[33mde19db8[m removed temp users
+[33m3e7b2c9[m Merge pull request #89 from tanii1125/feature/new-feature
+[33m50ef0b8[m Add feature
+[33m19d7c08[m Merge pull request #85 from Rachel602144/feature
+[33m71d69fb[m Added pytest to requirements.txt
+[33m3d4c0c9[m Added integration test for prompt to preview file
+[33m2dcf825[m Added integration test for prompt to preview file
+[33m4548460[m Merge pull request #78 from Rachel602144/feature
+[33m277e50c[m Redesigned input box to match the UI of application
+[33m39a3512[m Merge pull request #81 from jyothi-samberpu/main
+[33mc663a99[m Fix UI blank screen issue (#74): added sash_position fallback, improved view toggling, enhanced settings handling
+[33mba5cec0[m Merge pull request #79 from muskansngh07/contribution-guide
+[33mb6254c7[m Updated contribution-guide.md
+[33m972ac2e[m Added a contribution guide.
+[33mfb98bd9[m Merge branch 'feature' of https://github.com/Rachel602144/Karbon into feature
+[33m986e9d2[m Implemented Multi-User Session Management
+[33m43e1295[m Update contribution-guide.md
+[33m4b68fd3[m Update contribution-guide.md
+[33mfb799c9[m Update contribution-guide.md
+[33m86017c6[m Update contribution-guide.md
+[33m1e32ef6[m Update contribution-guide.md
+[33m5e81741[m Update contribution-guide.md
+[33m9f0becd[m Added a contribution guide
+[33meab2e91[m Added a Contribution Guide
+[33mf8eec82[m Merge pull request #71 from jyothi-samberpu/main
+[33mfe7a66d[m feat(ui): add History Panel to track and restore past prompts and code outputs
+[33m7b06a20[m Merge pull request #69 from ProTecGames/copilot/fix-6b2c71d0-30d6-4cb6-868c-921c14027756
+[33mbf6af62[m Fix TypeError when contributor author is None in contributors_page.py
+[33mc512432[m Initial plan
+[33m47ba759[m removed mac and linux build
+[33m462c179[m Merge pull request #68 from ProTecGames/copilot/fix-a1e335c7-315e-428d-8dce-5218d6e2b0dc
+[33mc64f7a5[m Fix GitHub Action: Replace webkit2gtk with webkitgtk for macOS builds
+[33mb41e188[m Initial plan
+[33m4917bc6[m Merge pull request #67 from ProTecGames/copilot/fix-052a012e-08c5-4951-a290-da0fa296639b
+[33mf7d3928[m Fix AttributeError and string concatenation issues - add missing insert_example_prompt method and enhance type safety in AI engine
+[33mba62e43[m Fix string concatenation error in website generation
+[33m9848573[m Fix KeyError: 'error' in contributors page theme colors
+[33m8b2c653[m Fix import error in editor_view.py for prompt_history module
+[33m2ba52af[m Add test artifacts to gitignore and complete project organization
+[33m975d62d[m Fix UI/UX issues, GitHub Actions, and reorganize project structure
+[33mdfb48cf[m Initial plan
+[33mded6e47[m initial launch
+[33md35136b[m added meta ai
+[33mad5eb97[m Merge pull request #66 from Rachel602144/feature
+[33m148665e[m Integrated pytest and coverage into CI/CD pipeline
+[33m8abd464[m Integrated pytest and coverage into CI/CD pipeline
+[33m29bf3a8[m Merge pull request #65 from AnushkaChanda/main
+[33m820514b[m Created CODE_OF_CONDUCT.md
+[33mc1de81b[m Merge pull request #63 from Rachel602144/feature
+[33mf37c11c[m added save and load project functionality with .karbonproject file support
+[33m921e037[m added save and load project functionality with .karbonproject file support
+[33m46f9f27[m Ubuntu Build Fix
+[33m7b1b740[m Packages Fix
+[33m10621f8[m Ubuntu Build Fix
+[33mdc2e3b1[m Merge pull request #62 from Raaaghavagrawal/fix/LIVE-PREVIEW
+[33m824a0cc[m Fixed livepreview
+[33md784575[m Fixed livepreview
+[33m39b9bb9[m Merge pull request #60 from Rachel602144/feature
+[33m1bcea21[m Created autosave feature
+[33m636cb06[m Merge pull request #59 from Amitk003/feature/prompt-feature
+[33mf7d8605[m Fix: settings.json
+[33m472d70a[m ✨ Added Prompt Drafts feature (save/load/delete prompts/modern ui/)
+[33m937942a[m ✨ Added Prompt Drafts feature (save/load/delete prompts/modern ui/)
+[33m245ac37[m Added meta-ai-api
+[33md4a83a6[m chore: add Karbon as upstream remote for syncing updates
+[33m4daef45[m fixing all errors
+[33m90c295f[m Fix: requirements.txt
+[33m033bedd[m Merge pull request #55 from shreyakaushal180/github-export-token-integration
+[33m16a1828[m Merge pull request #57 from Rachel602144/feature
+[33m0ed36be[m Added syntax-highlighted code editor UI with live preview
+[33me4eed85[m Merge branch 'main' into github-export-token-integration
+[33m999c652[m Add GitHub integration with token management and export functionality
+[33m093b83f[m Fix: prompt_view.py
+[33ma86a86b[m Fix contributors_page.py
+[33m9022726[m Fix: karbon_ui.py
+[33m6abe13d[m Fix: prompt_view.py
+[33m8044730[m Fix: contributors_page.py
+[33m87c4515[m Fix: karbon_ui.py
+[33m194cc21[m Merge pull request #54 from Harith-Y/feature/font-and-theme-settings
+[33mec57791[m Merge branch 'main' into feature/font-and-theme-settings
+[33m7b60e8e[m Merge pull request #53 from SushritaSingh/feature/dark-mode-toggle
+[33mf4c94df[m Merge pull request #52 from ishita051/main
+[33ma3f6d4c[m Included accessibility checks for theme contrast ratios to ensure compliance with WCAG AA standards.
+[33m5f44d5c[m Implement user appearance settings: Added functionality to load and save font family, size, and theme preferences.
+[33m35f89d8[m Add dark mode toggle with persistent theme and accessibility support
+[33mb9c0ca0[m Enhance appearance customization: Added font family, size, and theme selection in settings. Implemented update_appearance method in editor and prompt views for dynamic UI updates based on user preferences.
+[33m53e30a9[m Merge branch 'main' into main
+[33ma0cd977[m Update karbon_ui.py
+[33m75cd94d[m Update karbon_ui.py
+[33m7d61d2a[m Update prompt_view.py
+[33m41338f3[m Update ai_engine.py
+[33md10c509[m Merge pull request #50 from 0xChaitanya/feature/bug-fix
+[33mdba25e8[m Corrected checkBox issue #49
+[33mefd1283[m Merge pull request #48 from 0xChaitanya/feature/new-feature
+[33m1cd3264[m Merge branch 'main' into feature/new-feature
+[33m9294725[m Merge pull request #47 from Liza-IITP/New
+[33m5a1fdea[m Merge pull request #46 from neoapps-dev/main
+[33m12cffb2[m Merge branch 'ProTecGames:main' into New
+[33me54f0be[m Fix: Ensure paned_window is initialized before toggle_prompt_view()
+[33m341cddd[m finally added fully functional undo/redo buttons
+[33mf12cdba[m updated requirements.txt , fixed missing )
+[33m7f1e76c[m fix: run issue due to missing )
+[33me66776c[m Merge pull request #45 from neoapps-dev/main
+[33mf92e366[m chore(cleanup): remove .url files created by windows by one of the contributors
+[33m6eaaf9e[m chore(cleanup): remove .url files created by windows by one of the contributors
+[33m346ef2d[m enhanced undo/redo buttons
+[33md1fefb2[m Merge pull request #43 from RohiniShankari/export_zip
+[33m0ce0154[m Merge branch 'main' into export_zip
+[33m88410e3[m Merge pull request #44 from ishita051/main
+[33m5fa344e[m Merge branch 'main' into main
+[33m0e4f628[m Merge pull request #42 from ishita051/new1
+[33mb7054a7[m Merge branch 'main' into main
+[33m110fd5b[m Update main.py
+[33m2400210[m Update karbon_ui.py
+[33m9149162[m Update main.py
+[33m3054699[m Update karbon_ui.py
+[33md8fa44d[m Update main.py
+[33m3751942[m Update exporter.py
+[33mf77b238[m Added Export as ZIP option in UI and export logic
+[33mdbfafca[m Merge branch 'main' into new1
+[33m9e46ce8[m Update editor_view.py
+[33m6b85b41[m Update prompt_view.py
+[33md01cd8b[m Update karbon_ui.py
+[33md749151[m Update ai_engine.py
+[33m174aa3f[m Merge pull request #41 from RohiniShankari/prompt_optimizer
+[33m28fd246[m enhancements
+[33mdf2ea50[m Merge branch 'main' into prompt_optimizer
+[33md359d14[m enhanced Undo/Redo buttons
+[33mab528f2[m added the prompt optimizer feature
+[33m138e78e[m Fix : Owner name issue fixed
+[33m9e534ac[m Merge pull request #40 from abhiramiramadas/contributors-page
+[33m7e3acf2[m Added Contributors page using GitHub API
+[33md08b1e3[m Fix: Auto to Manual Build
+[33m35670de[m Build CI Fix
+[33ma14aca5[m Merge pull request #39 from Rachel602144/main
+[33m5729a6d[m Fix build-karbon.yaml merge conflict
+[33m53170bd[m  update README with Architecture Diagram
+[33m5b32d6a[m Update README.md
+[33mfc29129[m Implement graceful degradation for external service failures
+[33mcabd689[m Update build-karbon.yaml
+[33md6c5992[m Update build-karbon.yaml
+[33m979d109[m Update build-karbon.yaml
+[33m43c3c44[m Fix PyInstaller not found error in workflow
+[33m9179f90[m fix: ensure pyinstaller is installed correctly for all OS
+[33m1cf6965[m fix: ensure PyInstaller is in PATH
+[33m9bcd2b1[m fix: ensure pyinstaller is installed properly
+[33mc4d0199[m fix: install pyinstaller without --user for GitHub runners
+[33mf4cc49a[m fix: ensure pyinstaller works across OS platforms
+[33m6fb76cc[m Test: Updated build workflow for cross-platform support
+[33m05b9da7[m Fix: Update workflow to ensure PyInstaller works on all OS
+[33m7ca2774[m Merge remote-tracking branch 'upstream/main'
+[33m2cd6106[m 📊 Added architecture diagram and updated README
+[33m5f2f6d9[m Update README.md
+[33m1e04261[m Add files via upload
+[33m7ec8953[m Merge pull request #35 from atharvakinage/feature/graceful-degradation
+[33m6a7255f[m Implement graceful degradation for external service failures
+[33meeb37fc[m Merge pull request #34 from Pravalika-Batchu/main
+[33m566d3fa[m Merge branch 'main' into main
+[33m0963bd3[m Update build-karbon.yaml
+[33m740c531[m Update build-karbon.yaml
+[33m1979c3c[m Update build-karbon.yaml
+[33me20f060[m Merge pull request #8 from Pravalika-Batchu/fix/cross-platform-upload
+[33m8a64879[m Fix PyInstaller not found error in workflow
+[33m50e255b[m Merge pull request #7 from Pravalika-Batchu/fix/cross-platform-upload
+[33mc2dce0e[m fix: ensure pyinstaller is installed correctly for all OS
+[33m6aaf72a[m Merge pull request #6 from Pravalika-Batchu/fix/cross-platform-upload
+[33m774fcc3[m fix: ensure PyInstaller is in PATH
+[33m994d460[m Merge pull request #5 from Pravalika-Batchu/fix/cross-platform-upload
+[33m77869a6[m fix: ensure pyinstaller is installed properly
+[33mcd97fbc[m Merge pull request #4 from Pravalika-Batchu/fix/cross-platform-upload
+[33m7424013[m fix: install pyinstaller without --user for GitHub runners
+[33m35447c2[m Merge pull request #3 from Pravalika-Batchu/fix/cross-platform-upload
+[33m5da87fd[m fix: ensure pyinstaller works across OS platforms
+[33mef66336[m Merge pull request #2 from Pravalika-Batchu/fix/cross-platform-upload
+[33mb111a03[m Test: Updated build workflow for cross-platform support
+[33m5be305f[m Merge pull request #1 from Pravalika-Batchu/fix/cross-platform-upload
+[33m1e8da9a[m Fix: Update workflow to ensure PyInstaller works on all OS
+[33m6678953[m Merge pull request #32 from ProTecGames/revert-30-feature/cross-platform-build
+[33mff85c39[m Revert "Fix cross-platform PyInstaller build and temporarily remove macOS icon"
+[33m72c0cd9[m Merge pull request #30 from Pravalika-Batchu/feature/cross-platform-build
+[33m55ec22e[m Merge branch 'main' into feature/cross-platform-build
+[33m7da4ad8[m Resolved merge conflict in build-karbon.yaml with cross-platform support
+[33m8515a2d[m Merge pull request #31 from Tanmayshah89/fix/char-update
+[33mffb4cea[m updated char count label and color of header
+[33m81addaa[m Fix: use python -m pyinstaller to avoid script not found error
+[33m5d85276[m Fix: use python -m pyinstaller to avoid script not found error
+[33me91096c[m Remove macOS icon temporarily to fix build
+[33mf4c6850[m Merge pull request #29 from ProTecGames/revert-28-feature/cross-platform-build
+[33mab9072e[m Revert "Cross-platform executable build with PyInstaller"
+[33m9d98f4d[m Resolved merge conflict in build-karbon.yaml and updated dependencies
+[33mee7fa1a[m Merge pull request #28 from Pravalika-Batchu/feature/cross-platform-build
+[33mcc03c57[m Resolved merge conflict in GitHub Actions workflow
+[33m2b20c02[m Added Undo/Redo buttons and prompt_history file
+[33m27eb18a[m Resolved merge conflict in build-karbon.yaml by combining upstream and feature changes
+[33me0f39a7[m Enable GitHub Actions for feature branch testing
+[33m07442c3[m Fix macOS copy error and test build on all platforms
+[33m7698362[m Merge pull request #27 from ProTecGames/revert-26-feature/cross-platform-build
+[33m09d9624[m Revert "Add cross-platform build workflow for Linux and macOS (GSSoC 2025)"
+[33mcfa1eb7[m Merge pull request #26 from Pravalika-Batchu/feature/cross-platform-build
+[33m184c350[m Add cross-platform build workflow for Linux and macOS (GSSoC 2025)
+[33m4076a08[m Added Example Prompts and Outputs to README and UI for User Guidance
+[33m24b767e[m Completed Tasks 1-3 for high quality example prompt and their results
+[33m4d2a16f[m Update .gitignore
+[33m647783c[m Keyboard Shortcuts for Generate, Export, and Clear
+[33m715ef39[m Add files via upload
+[33m633db87[m Add files via upload
+[33mc2d5a10[m Update README.md
+[33mf6e64a8[m Add Example Prompts and Outputs with screenshots
+[33m431d75d[m Add files via upload
+[33m4e6558f[m Create .keep
+[33m13f6105[m Added keyboard shortcuts
+[33mba79ac2[m Update README.md
+[33medcc1ba[m Merge pull request #1 from rishika-goyal/main
+[33m2fcb80e[m sample
+[33ma17617d[m pipeline build fix
+[33m72783e6[m typo fix
+[33m87a5fe7[m Karbon Win

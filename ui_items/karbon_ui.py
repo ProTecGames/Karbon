@@ -25,8 +25,9 @@ EXAMPLES = {
 
 
 class KarbonUI:
-    def __init__(self, root):
+    def __init__(self, root, user=None):
         self.root = root
+        self.user = user
         self.setup_window()
         self.setup_styles()
         self.code = ""
