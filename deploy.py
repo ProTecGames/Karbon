@@ -1,5 +1,5 @@
-from deploy_vercel import deploy_vercel
-from deploy_netlify import deploy_netlify
+from exporters.deploy_vercel import deploy_vercel
+from exporters.deploy_netlify import deploy_netlify
 
 
 if __name__ == "__main__":

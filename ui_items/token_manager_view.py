@@ -3,8 +3,9 @@ from tkinter import ttk, messagebox
 import threading
 import webbrowser
 import os
-from core.token_manager import encrypt_token, decrypt_token, clear_token, token_exists, ERROR_NO_TOKEN, SUCCESS_TOKEN_SAVED
-from exporters.exporter import validate_github_token
+
+from core.token_manager import save_token, get_token, clear_token, NETLIFY_SERVICE, VERCEL_SERVICE
+
 
 class TokenManagerView(ttk.Frame):
     def __init__(self, parent, back_callback):

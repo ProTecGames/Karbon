@@ -94,6 +94,19 @@ class EditorView(tk.Frame):
         self.activity_indicator_label = None
 
         self.setup_ui()
+    def deploy_to_netlify(self):
+        from exporters.deploy_netlify import deploy_netlify
+
+        code = self.code_editor.get("1.0", tk.END).strip()
+        if not code:
+            messagebox.showerror("Error", "⚠️ No code to deploy!")
+            return
+
+        success, message = deploy_netlify(code)
+        if success:
+            messagebox.showinfo("Netlify Deployment", message)
+        else:
+            messagebox.showerror("Netlify Deployment Failed", message)
 
     def setup_ui(self):
         self.create_header()
@@ -536,6 +549,44 @@ class EditorView(tk.Frame):
             self.tip_labels.append(label)
 
         tk.Label(tips_frame, text="", bg='#0d1117').pack(pady=8)
+
+            # Deployment Buttons
+        deploy_frame = tk.Frame(self, bg="#0d1117")
+        deploy_frame.pack(pady=10)
+
+        netlify_btn = tk.Button(
+            deploy_frame,
+            text="🚀 Deploy to Netlify",
+            bg="#2ea043", fg="white",
+            command=self.deploy_to_netlify
+        )
+        netlify_btn.pack(side=tk.LEFT, padx=5)
+
+        vercel_btn = tk.Button(
+            deploy_frame,
+            text="🚀 Deploy to Vercel",
+            bg="#0070f3", fg="white",
+            command=self.deploy_to_vercel
+        )
+        vercel_btn.pack(side=tk.LEFT, padx=5)
+        def deploy_to_netlify(self):
+            from exporters.deploy_netlify import deploy_netlify
+            code = self.get_code_callback()
+            success, msg = deploy_netlify(code)
+            self.show_deploy_status(success, msg)
+
+    def deploy_to_vercel(self):
+        from exporters.deploy_vercel import deploy_vercel
+        code = self.get_code_callback()
+        success, msg = deploy_vercel(code)
+        self.show_deploy_status(success, msg)
+
+    def show_deploy_status(self, success, message):
+        import tkinter.messagebox as mb
+        if success:
+            mb.showinfo("Deployment Success", message)
+        else:
+            mb.showerror("Deployment Failed", message)
 
     def create_status_bar(self):
         self.status_frame = tk.Frame(self, bg='#161b22', height=35)
