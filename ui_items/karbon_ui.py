@@ -5,7 +5,7 @@ import json
 import os
 import re
 from pathlib import Path
-from utils.preview import update_preview
+
 from ui_items.prompt_view import PromptView
 from ui_items.editor_view import EditorView, open_html_in_browser
 from ui_items.token_manager_view import TokenManagerView
@@ -422,9 +422,6 @@ class KarbonUI:
         self.layout_preview_focus()
 
     # Update embedded preview if available
-    # --- For integration test ---
-        update_preview(code)
-
         try:
             if hasattr(self.editor_view, 'embedded_browser'):
                 formatted_html = self.editor_view.format_html_for_preview(code)
@@ -488,11 +485,12 @@ class KarbonUI:
 
 
     def toggle_editor_view(self):
-        is_present = self.editor_view in self.paned_window.panes()
+        #self.editor_view shouls be checked as str
+        is_present = str(self.editor_view) in self.paned_window.panes()
+
         if self.editor_view_visible.get():
             if not is_present:
                 self.paned_window.add(self.editor_view, weight=1)
-
         else:
             if is_present:
                 self.paned_window.forget(self.editor_view)
