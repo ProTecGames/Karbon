@@ -1,11 +1,15 @@
 import tkinter as tk
 from ui_items.karbon_ui import KarbonUI
+from user_manager import select_or_create_user
 
 if __name__ == "__main__":
-    root = tk.Tk()
-    app = KarbonUI(root)
-    root.mainloop()
+    # Before launching Karbon UI
+    CURRENT_USER = select_or_create_user()
 
+    # Launch Tkinter UI
+    root = tk.Tk()
+    app = KarbonUI(root, user=CURRENT_USER)
+    root.mainloop()
 import tkinter as tk
 
 # Define theme dictionaries
