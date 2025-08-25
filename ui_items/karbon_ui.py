@@ -10,10 +10,15 @@ from ui_items.prompt_view import PromptView
 from ui_items.editor_view import EditorView, open_html_in_browser
 from ui_items.token_manager_view import TokenManagerView
 from contributors_page import ContributorsPage
-
+from utils.preview import update_preview
 from core.ai_engine import ai_status, generate_code_from_prompt
-from exporters.exporter import export_code, export_to_github
-from exporters.repo_pusher import push_to_github
+from exporters.exporter import export_code
+'''from exporters.repo_pusher import push_to_github'''
+from core.token_manager import get_token, save_token, NETLIFY_SERVICE, VERCEL_SERVICE
+from exporters.deploy_vercel import deploy_vercel
+from exporters.deploy_netlify import deploy_netlify
+from token_manager_ui import TokenManagerUI
+
 
 EXAMPLES = {
     "Login Page": "Create a login page using HTML and Tailwind CSS",
@@ -66,6 +71,27 @@ class KarbonUI:
         self.history_button = tk.Button(
               self.main_container, text="View History", command=self.show_history_panel)
         self.history_button.pack(pady=(0, 10))
+        # Manage Tokens Button
+        self.tokens_button = tk.Button(
+        self.main_container,
+        text="🔐 Manage Tokens",
+        command=lambda: TokenManagerUI(self.root)
+)
+        self.tokens_button.pack(pady=(0, 10))
+
+        # Deploy to Netlify Button
+        self.netlify_button = tk.Button(
+        self.main_container,
+        text="🚀 Deploy to Netlify",
+        command=self.deploy_to_netlify,
+        bg="#238636",
+        fg="white",
+        relief="flat",
+        width=20
+)
+        self.netlify_button.pack(pady=(0, 10))
+
+
 
 
         self.load_settings()
@@ -111,6 +137,40 @@ class KarbonUI:
         self.animate_title()
         self.update_ai_status_indicator()
         self.apply_user_appearance()
+
+
+
+
+
+
+                # ===== Menu Bar =====
+        self.menu_bar = tk.Menu(self.root, bg="#0d1117", fg="white", tearoff=0)
+        self.root.config(menu=self.menu_bar)
+
+        # File Menu
+        self.file_menu = tk.Menu(self.menu_bar, tearoff=0)
+        self.menu_bar.add_cascade(label="File", menu=self.file_menu)
+
+        # Settings Menu
+        self.settings_menu = tk.Menu(self.menu_bar, tearoff=0)
+        self.menu_bar.add_cascade(label="Settings", menu=self.settings_menu)
+
+        # Add Hosting Token Manager under Settings
+        self.settings_menu.add_command(
+            label="Manage Hosting Tokens",
+            command=self.show_hosting_token_manager
+        )
+    
+    def deploy_to_netlify(self):
+        from deployers.netlify_deployer import deploy_netlify
+        success, message = deploy_netlify(self.get_code())
+        tk.messagebox.showinfo("Netlify Deployment", message)
+
+
+    def show_hosting_token_manager(self):
+        from hosting_token_ui import HostingTokenManager
+        HostingTokenManager(self.root)
+
     def show_history_panel(self):
         if not self.history:
             messagebox.showinfo("History", "No history available.")
@@ -1912,6 +1972,40 @@ class KarbonUI:
 
         self.update_status("GitHub Token Manager", "🔐")
 
+        
+        def show_hosting_token_manager(self):
+            """UI for managing Netlify and Vercel tokens"""
+        self.clear_content()
+        token_window = tk.Frame(self.main_container, bg="#0d1117")
+        token_window.pack(fill="both", expand=True, padx=20, pady=(0, 20))
+
+        tk.Label(token_window, text="Netlify Token", fg="white", bg="#0d1117").pack(pady=5)
+        netlify_entry = tk.Entry(token_window, show="*", width=40)
+        netlify_entry.pack(pady=5)
+
+        def save_netlify():
+            token = netlify_entry.get().strip()
+            if token:
+                save_token(NETLIFY_SERVICE, token)
+                self.show_notification("✅ Netlify token saved", "success")
+
+        tk.Button(token_window, text="Save Netlify Token", command=save_netlify).pack(pady=5)
+
+        tk.Label(token_window, text="Vercel Token", fg="white", bg="#0d1117").pack(pady=5)
+        vercel_entry = tk.Entry(token_window, show="*", width=40)
+        vercel_entry.pack(pady=5)
+
+        def save_vercel():
+            token = vercel_entry.get().strip()
+            if token:
+                save_token(VERCEL_SERVICE, token)
+                self.show_notification("✅ Vercel token saved", "success")
+
+        tk.Button(token_window, text="Save Vercel Token", command=save_vercel).pack(pady=5)
+
+        self.status_frame.pack(fill="x", side="bottom")
+        self.update_status("Hosting Token Manager", "🔐")
+
     def handle_export(self):
         from exporters.exporter import export_code, export_to_github, validate_github_token
         from core.token_manager import decrypt_token
@@ -1947,6 +2041,21 @@ class KarbonUI:
             self.show_notification(f"Pushed to GitHub: {url}", "success")
         else:
             self.show_notification("Failed to push to GitHub. Check console for details.", "error")
+
+        def deploy_to_netlify(self):
+            result = deploy_netlify()
+            if result:
+                self.show_notification(f"Netlify: {result}", "success")
+            else:
+                self.show_notification("Netlify deployment failed", "error")
+
+    def deploy_to_vercel(self):
+        result = deploy_vercel()
+        if result:
+            self.show_notification(f"Vercel: {result}", "success")
+        else:
+            self.show_notification("Vercel deployment failed", "error")
+
 
     def show_notification(self, message, type="info"):
         colors = {
