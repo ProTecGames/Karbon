@@ -16,29 +16,43 @@ def select_or_create_user():
 
     # Create custom dark-themed dialog
     dialog = tk.Toplevel()
-    dialog.title("Select or Create User")
+    dialog.title("User Login")
     dialog.configure(bg="#161921")
     dialog.resizable(False, False)
 
-    # Prompt text
-    if existing_users:
-        prompt = f"Existing users: {', '.join(existing_users)}"
-    else:
-        prompt = "No users found. Please enter a new username:"
+    # --- Center dialog on screen ---
+    dialog.update_idletasks()
+    x = (dialog.winfo_screenwidth() - dialog.winfo_reqwidth()) // 2
+    y = (dialog.winfo_screenheight() - dialog.winfo_reqheight()) // 2
+    dialog.geometry(f"+{x}+{y}")
 
-    prompt_label = tk.Label(dialog, text=prompt, fg="white", bg="#161921", font=("Segoe UI", 10, "bold"))
-    prompt_label.pack(pady=(15, 5), padx=20)
+    # Prompt label
+    prompt_label = tk.Label(dialog, text="Enter username:",
+                            fg="white", bg="#161921",
+                            font=("Segoe UI", 10, "bold"))
+    prompt_label.pack(pady=(15, 5))
 
     # Entry field
-    username_entry = tk.Entry(dialog, font=("Segoe UI", 10), bg="#202329", fg="white", insertbackground="white", width=30, relief=tk.SOLID, highlightbackground="white", highlightthickness=3)
+    username_entry = tk.Entry(dialog, font=("Segoe UI", 10),
+                            bg="#202329", fg="white", insertbackground="white",
+                            width=30, relief=tk.SOLID,
+                            highlightbackground="white", highlightthickness=3,
+                            justify="center")
     username_entry.pack(pady=5, padx=20, ipady=4)
+
 
     result = {"username": None}
 
-    # Button functions
+
     def on_ok():
-        result["username"] = username_entry.get().strip()
+        username = username_entry.get().strip()
+        if not username:   # empty input
+            messagebox.showerror("Invalid Username", "Username cannot be empty.")
+            return
+        result["username"] = username
+        root.quit()
         dialog.destroy()
+
 
     def on_cancel():
         dialog.destroy()
@@ -59,10 +73,6 @@ def select_or_create_user():
     root.wait_window(dialog)
 
     username = result["username"]
-
-    if not username:
-        messagebox.showerror("No Username", "Username is required to continue.")
-        exit()
 
     # Create user folders/files if needed
     user_path = os.path.join(USERS_DIR, username)
