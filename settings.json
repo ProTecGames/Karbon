@@ -3,8 +3,8 @@
     "model_source": "",
     "layout": {
         "prompt_view_visible": true,
-        "editor_view_visible": false,
-        "sash_position": 914
+        "editor_view_visible": true,
+        "sash_position": 768
     },
     "font_family": "Verdana",
     "font_size": 12,
