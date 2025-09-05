@@ -694,8 +694,9 @@ class EditorView(tk.Frame):
 
         self.update_btn.configure(
             text="🔄 Updating...",
-            state='disabled',
-            bg='#6e7681'
+            state='normal',
+            bg='#1f6feb',   
+            fg='white'          
         )
 
         self.update_status("Applying your changes...", "🔄")
@@ -733,7 +734,8 @@ class EditorView(tk.Frame):
         self.update_btn.configure(
             text="🔄 Update Code",
             state='normal',
-            bg='#1f6feb'
+            bg='#1f6feb', 
+            fg = 'white'
         )
         self.update_status("Changes applied successfully!", "✅")
         self.preview_status.configure(text="● Live", fg='#3fb950')
@@ -762,7 +764,8 @@ class EditorView(tk.Frame):
         self.update_btn.configure(
             text="🔄 Update Code",
             state='normal',
-            bg='#1f6feb'
+            bg='#1f6feb',
+            fg = 'white'
         )
         self.update_status("Update failed", "❌")
         self.preview_status.configure(text="● Error", fg='#f85149')

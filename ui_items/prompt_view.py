@@ -352,8 +352,10 @@ class PromptView(tk.Frame):
         self.is_generating = True
         self.generate_btn.configure(
             text="🔄 Creating Magic...",
-            state='disabled',
-            bg='#6e7681'
+            state='normal',            # keep it enabled
+            bg='#238636',              # green background
+            fg='white',                # readable text
+            font=("Segoe UI", 12, "bold")
         )
         self.show_progress()
         def generate_in_background():
